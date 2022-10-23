@@ -723,7 +723,7 @@ static int openUSDFile(wchar_t* destination, PORTAFILE& modelFile);
 static int writeCommentUSD(char* commentString);
 static int finishCommentsUSD(char* defaultPrim);
 static int createMeshesUSD(wchar_t* blockLibraryPath, char* materialLibrary, bool singleTerrainFile);
-static int outputUSDMesh(PORTAFILE file, int startingFace, int numFaces, int numVerts, char* prefixLook, char* mtlName, float resScale, int progressTick, int progressIncrement, bool singleTerrainFile);
+static int outputUSDMesh(PORTAFILE file, int startingFace, int numFaces, int numVerts, char* prefixLook, int  type, int dataVal, char* mtlName, float resScale, int progressTick, int progressIncrement, bool singleTerrainFile);
 static boolean allocOutData(int vertsize, int facesize);
 static void freeOutData();
 static int createMaterialsUSD(char *texturePath, char *mdlPath, wchar_t* mtlLibraryFile, bool singleTerrainFile);
@@ -1692,8 +1692,8 @@ static int modifyAndWriteTextures(int needDifferentTextures, int fileType)
                                     int clampLevel = 1; // used as a sign that this is an emitter of some sort - if black, it won't emit at that pixel anyway
                                     // For some textures we want a special emissive texture, not just a grayscale of the original RGB. We want to clamp:
                                     // if a value is lower than the clamp value, it is set to black so that no light emits from its texel.
-                                    switch (i) {    // TODOUSD need to add burning furnace, glowing redstone ore, jack o lantern, portal, brewing stand, dragon egg, redstone lamp,
-                                        // TODOUSD beacon, sea lantern, end rod, end gateway, magma?, conduit, sea pickle, crying obsidian, respawn anchor
+                                    switch (i) {    // TODO USD: need to add burning furnace, glowing redstone ore, jack o lantern, portal, brewing stand, dragon egg, redstone lamp,
+                                        // TODO USD: beacon, sea lantern, end rod, end gateway, magma?, conduit, sea pickle, crying obsidian, respawn anchor
                                     case 80: // torch
                                     case 99: // redstone torch on
                                     case 240: // torch top
@@ -23772,7 +23772,7 @@ static int createBaseMaterialTexture()
         int flagTest = gModel.print3D ? SBIT_CUTOUT_GEOMETRY : (SBIT_DECAL | SBIT_CUTOUT_GEOMETRY);
         // TODO we shouldn't do this for all tiles, but only those actually output when exporting to tiles.
         // And why do this before grabbing the mesh? This particular bleed process could all be done at the very end.
-        // TODOUSD - may also need to bleed the PBR textures?
+        // TODO USD - may also need to bleed the PBR textures?
         for (i = 0; i < TOTAL_TILES; i++)
         {
             // If leaves are to be made solid and so should have alphas all equal to 1.0.
@@ -25474,7 +25474,7 @@ static int createMeshesUSD(wchar_t* blockLibraryPath, char *materialLibrary, boo
 
             startRun = firstFaceNumber;
             while (findEndOfGroup(startRun, firstFaceNumber+numFaces, mtlName, nextStart, numVerts) && nextStart <= nextFaceNumber) {
-                outputUSDMesh(blockFile, startRun, nextStart - startRun, numVerts, "/Blocks", mtlName, resScale, progressTick, progressIncrement, singleTerrainFile);
+                outputUSDMesh(blockFile, startRun, nextStart - startRun, numVerts, "/Blocks", type, dataVal, mtlName, resScale, progressTick, progressIncrement, singleTerrainFile);
                 // go to next group
                 startRun = nextStart;
             }
@@ -25496,7 +25496,7 @@ static int createMeshesUSD(wchar_t* blockLibraryPath, char *materialLibrary, boo
         //SM char useMtlName[MAX_PATH_AND_FILE];
         while (findEndOfGroup(startRun, gModel.faceCount, mtlName, nextStart, numVerts)) {
 
-            outputUSDMesh(gModelFile, startRun, nextStart - startRun, numVerts, NULL, mtlName, resScale, progressTick, progressIncrement, singleTerrainFile);
+            outputUSDMesh(gModelFile, startRun, nextStart - startRun, numVerts, NULL, NULL, NULL, mtlName, resScale, progressTick, progressIncrement, singleTerrainFile);
             // go to next group
             startRun = nextStart;
         }
@@ -25508,7 +25508,7 @@ static int createMeshesUSD(wchar_t* blockLibraryPath, char *materialLibrary, boo
     return retCode;
 }
 
-static int outputUSDMesh(PORTAFILE file, int startingFace, int numFaces, int numVerts, char *prefixLook, char *mtlName, float resScale, int progressTick, int progressIncrement, bool singleTerrainFile)
+static int outputUSDMesh(PORTAFILE file, int startingFace, int numFaces, int numVerts, char *prefixLook, int  type, int dataVal, char *mtlName, float resScale, int progressTick, int progressIncrement, bool singleTerrainFile)
 {
     // Go through data and make arrays
 //SM if (firstName) {
@@ -25594,8 +25594,10 @@ static int outputUSDMesh(PORTAFILE file, int startingFace, int numFaces, int num
 
     // output mesh's arrays
     //SM sprintf_s(outputString, 256, "%s    def Mesh \"%s\"\n    {\n", startingFace ? "\n" : "", useMtlName);
-    //sprintf_s(outputString, 256, "%s    def Mesh \"%s\"\n    {\n", startingFace ? "\n" : "", mtlName);
-    sprintf_s(outputString, 256, "    def Mesh \"%s\"\n    {\n", mtlName);
+    //sprintf_s(outputString, 256, "%s    def Mesh \"%s\"\n    {\n", startingFace ? "\n" : "", mtlName); 
+    
+    //sprintf_s(outputString, 256, "    def Mesh \"%s\"\n    {\n", mtlName);
+    sprintf_s(outputString, 256, "    def Mesh \"Block_%d_%d\"\n{\n", type, dataVal);
     WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
 
     // is mesh two-sided? If it's interior to an opaque, it doesn't have to be, which can be a bit faster to render.
