@@ -359,7 +359,7 @@ static bool makeBiomeHash = true;
 // age and stage will eventually be ignored, hanging will not
 #define PROPAGULE_PROP      61
 
-#define NUM_TRANS 941
+#define NUM_TRANS 942
 
 BlockTranslator BlockTranslations[NUM_TRANS] = {
     //hash ID data name flags
@@ -1325,6 +1325,8 @@ BlockTranslator BlockTranslations[NUM_TRANS] = {
     { 0, 180,       HIGH_BIT, "ochre_froglight", AXIS_PROP },
     { 0, 180,   HIGH_BIT | 1, "verdant_froglight", AXIS_PROP },
     { 0, 180,   HIGH_BIT | 2, "pearlescent_froglight", AXIS_PROP },
+    //1.20
+    { 0, 182,       HIGH_BIT, "bamboo_planks", NO_PROP },
         //{ 0, 160,       HIGH_BIT, "light", NO_PROP },   // has just the level property, and waterlogged; normally invisible, https://minecraft.fandom.com/wiki/Light_Block
     // last used was 160 | HIGH_BIT
 

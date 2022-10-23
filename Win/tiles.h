@@ -59,7 +59,7 @@
 
 
 // If this number changes, also change warning #7 in gPopupInfo (see TerrainExt.png in that message) in Mineways.cpp
-#define VERTICAL_TILES 57
+#define VERTICAL_TILES 58
 #define TOTAL_TILES (VERTICAL_TILES*16)
 static struct {
     int txrX;   // column and row, from upper left, of 16x16+ tiles in terrain.png, for top view of block
@@ -995,6 +995,7 @@ static struct {
     { 13, 56, 388, 0, L"reinforced_deepslate_top", L"", SWATCH_REPEAT_ALL },
     { 14, 56, 388, 0, L"reinforced_deepslate_side", L"", SWATCH_REPEAT_ALL },
     { 15, 56, 388, 0, L"reinforced_deepslate_bottom", L"", SWATCH_REPEAT_ALL },
+    {  0, 57, 438, 0, L"bamboo_planks", L"", SWATCH_REPEAT_ALL },// 1.20
 };
 
 // There is more than one alternate name, so test more of them

@@ -18192,10 +18192,13 @@ static int getSwatch(int type, int dataVal, int faceDirection, int backgroundInd
                 break;
             }
             break;
+        case BLOCK_BAMBOO_PLANKS:
+            swatchLoc = SWATCH_INDEX(0, 57);
+            break;
         case BLOCK_MANGROVE_LEAVES:						// getSwatch
             // Not actually needed - rare! It's processed and composited earlier on, and
             // there is only one type of this leaf, so we don't do anything
-            //swatchLoc = SWATCH_INDEX(11, 54);
+            swatchLoc = SWATCH_INDEX(11, 54);
             break;
         case BLOCK_SAND:						// getSwatch
             switch (dataVal & 0x1)
@@ -20567,6 +20570,7 @@ static int getSwatch(int type, int dataVal, int faceDirection, int backgroundInd
             case 7: // mud brick
                 swatchLoc = SWATCH_INDEX(7, 55);
                 break;
+
             }
             break;
 
