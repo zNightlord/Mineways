@@ -996,6 +996,9 @@ static struct {
     { 14, 56, 388, 0, L"reinforced_deepslate_side", L"", SWATCH_REPEAT_ALL },
     { 15, 56, 388, 0, L"reinforced_deepslate_bottom", L"", SWATCH_REPEAT_ALL },
     {  0, 57, 438, 0, L"bamboo_planks", L"", SWATCH_REPEAT_ALL },// 1.20
+    {  1, 57, 439, 0, L"bamboo_door_bottom", L"", SWATCH_REPEAT_SIDES_ELSE_CLAMP | SBIT_DECAL },
+    {  2, 57, 439, 0, L"bamboo_door_top", L"", SWATCH_REPEAT_SIDES_ELSE_CLAMP | SBIT_DECAL },
+    {  3, 57, 440, 0, L"bamboo_trapdoor", L"", SWATCH_REPEAT_ALL | SBIT_DECAL },
 };
 
 // There is more than one alternate name, so test more of them

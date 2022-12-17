@@ -523,6 +523,14 @@ BlockDefinition gBlockDefinitions[NUM_BLOCKS_DEFINED] = {
     { /* 437 */ "Mangrove Leaves",				0x6fac2c, 1.000f, 0xff7711, 0xff7711, 0.12345f, 11, 54, 0x00, BLF_WHOLE | BLF_CUTOUTS | BLF_LEAF_PART | BLF_MAYWATERLOG },	//12
     // 1.20
     { /* 438 */ "Bamboo Planks",                0xd9c25e, 1.000f, 0xff7711, 0xff7711, 0.12345f, 0, 57, 0x00, BLF_WHOLE | BLF_FENCE_NEIGHBOR },
+    { /* 439 */ "Bamboo Door",            	    0xf8e7a2, 1.000f, 0xff7711, 0xff7711, 0.12345f, 2, 57, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT },
+    { /* 440 */ "Bamboo Trapdoor",      		0xb7ab49, 1.000f, 0xff7711, 0xff7711, 0.12345f, 3, 57, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_FLATTEN | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_MAYWATERLOG },   // tricky case: could be a flattop, or a flatside. For now, render it
+    { /* 441 */ "Bamboo Stairs",                0x907e3a, 1.000f, 0xff7711, 0xff7711, 0.12345f,  0, 55, 0x00, BLF_STAIRS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE | BLF_MAYWATERLOG },
+    { /* 442 */ "Bamboo Fence",           	    0xd9c25e, 1.000f, 0xff7711, 0xff7711, 0.12345f,  0, 55, 0x00, BLF_MIDDLER | BLF_FENCE | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE | BLF_MAYWATERLOG },
+    { /* 443 */ "Bamboo Fence Gate",      	    0xd9c25e, 1.000f, 0xff7711, 0xff7711, 0.12345f,  0, 55, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_FENCE_GATE | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE },
+    {/* 429 */ "Bamboo Pressure Plate",   	    0xd9c25e, 1.000f, 0xff7711, 0xff7711, 0.12345f,  0, 55, 0x00, BLF_FLATTEN | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_CONNECTS_REDSTONE },
+    { /* 430 */ "Bamboo Button",        		0xd9c25e, 1.000f, 0xff7711, 0xff7711, 0.12345f,  0, 55, 0x00, BLF_FLATTEN_SMALL | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_DNE_FLUID },
+    { /* 438 */ "Bamboo Mosaic",                0xb7ab49, 1.000f, 0xff7711, 0xff7711, 0.12345f,  4,  0, 0x07, BLF_WHOLE | BLF_FENCE_NEIGHBOR },
     // Important note: skip 396 if we get there, it's the BLOCK_FLOWER_POT, also skip 400, BLOCK_HEAD. Nicer still would be to redo the code for those two blocks (and redo IDBlock() method) so that we don't use up all 8 bits
 };
 
