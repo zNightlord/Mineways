@@ -3752,6 +3752,8 @@ static int computeFlatFlags(int boxIndex)
     case BLOCK_WARPED_BUTTON:
     case BLOCK_POLISHED_BLACKSTONE_BUTTON:
     case BLOCK_MANGROVE_BUTTON:
+    case BLOCK_MANGROVE_BUTTON:
+
         switch (gBoxData[boxIndex].data & 0x7)
         {
         case 0: // at top of block, +Y
@@ -3811,6 +3813,7 @@ static int computeFlatFlags(int boxIndex)
     case BLOCK_CRIMSON_TRAPDOOR:
     case BLOCK_WARPED_TRAPDOOR:
     case BLOCK_MANGROVE_TRAPDOOR:
+    case BLOCK_BAMBOO_TRAPDOOR:
         if (gBoxData[boxIndex].data & 0x4)
         {
             // trapdoor is open, so is against a wall
@@ -4931,6 +4934,7 @@ static int saveBillboardOrGeometry(int boxIndex, int type)
     case BLOCK_CRIMSON_FENCE:
     case BLOCK_WARPED_FENCE:
     case BLOCK_MANGROVE_FENCE:
+    case BLOCK_BAMBOO_FENCE:
         //groupByBlock = (gModel.options->exportFlags & EXPT_GROUP_BY_BLOCK);
         // if fence is to be fattened, instead make it like a brick wall - stronger
         if (fatten)
@@ -5508,6 +5512,7 @@ static int saveBillboardOrGeometry(int boxIndex, int type)
     case BLOCK_DEEPSLATE_TILES_STAIRS:
     case BLOCK_MANGROVE_STAIRS:
     case BLOCK_MUD_BRICK_STAIRS:
+    case BLOCK_BAMBOO_STAIRS:
         // set texture
         switch (type)
         {
@@ -5950,6 +5955,8 @@ static int saveBillboardOrGeometry(int boxIndex, int type)
             case 4: // polished_blackstone_brick_slab
                 topSwatchLoc = bottomSwatchLoc = sideSwatchLoc = SWATCH_INDEX(5, 46);
                 break;
+            case 5: // bamboo 
+                topSwatchLoc = bottomSwatchLoc = sideSwatchLoc = SWATCH_INDEX(0, 57);
             }
             break;
 
@@ -6276,6 +6283,7 @@ static int saveBillboardOrGeometry(int boxIndex, int type)
     case BLOCK_CRIMSON_TRAPDOOR:
     case BLOCK_WARPED_TRAPDOOR:
     case BLOCK_MANGROVE_TRAPDOOR:
+    case BLOCK_BAMBOO_TRAPDOOR:
         // On second thought, in testing it worked fine.
         //if ( gModel.print3D && !(dataVal & 0x4) )
         //{
@@ -6522,6 +6530,7 @@ static int saveBillboardOrGeometry(int boxIndex, int type)
     case BLOCK_CRIMSON_DOOR:
     case BLOCK_WARPED_DOOR:
     case BLOCK_MANGROVE_DOOR:
+    case BLOCK_BAMBOO_DOOR:
         swatchLoc = SWATCH_INDEX(gBlockDefinitions[type].txrX, gBlockDefinitions[type].txrY);
         // at top of door, so get bottom swatch loc, as we use this for the top and bottom faces
         if (type == BLOCK_WOODEN_DOOR || type == BLOCK_IRON_DOOR)
@@ -11757,6 +11766,7 @@ static int getFaceRect(int faceDirection, int boxIndex, int view3D, float faceRe
             case BLOCK_DEEPSLATE_TILES_STAIRS:
             case BLOCK_MANGROVE_STAIRS:
             case BLOCK_MUD_BRICK_STAIRS:
+            case BLOCK_BAMBOO_STAIRS:
                 // TODO: Right now stairs are dumb: only the large rectangle of the base is returned.
                 // Returning the little block, which can further be trimmed to a cube, is a PAIN.
                 // This does mean the little stair block sides won't be deleted. Ah well.
@@ -11852,6 +11862,7 @@ static int getFaceRect(int faceDirection, int boxIndex, int view3D, float faceRe
             case BLOCK_CRIMSON_TRAPDOOR:
             case BLOCK_WARPED_TRAPDOOR:
             case BLOCK_MANGROVE_TRAPDOOR:
+            case BLOCK_BAMBOO_TRAPDOOR:
                 if (!(dataVal & 0x4))
                 {
                     // trapdoor is flat on ground
@@ -16486,6 +16497,7 @@ static int lesserBlockCoversWholeFace(int faceDirection, int neighborBoxIndex, i
         case BLOCK_DEEPSLATE_TILES_STAIRS:
         case BLOCK_MANGROVE_STAIRS:
         case BLOCK_MUD_BRICK_STAIRS:
+        case BLOCK_BAMBOO_STAIRS:
             switch (neighborDataVal & 0x3)
             {
             default:    // make compiler happy
@@ -16567,6 +16579,7 @@ static int lesserBlockCoversWholeFace(int faceDirection, int neighborBoxIndex, i
         case BLOCK_CRIMSON_TRAPDOOR:
         case BLOCK_WARPED_TRAPDOOR:
         case BLOCK_MANGROVE_TRAPDOOR:
+        case BLOCK_BAMBOO_TRAPDOOR:
             if (!view3D)
             {
                 // rotate as needed
@@ -17447,6 +17460,7 @@ static int getSwatch(int type, int dataVal, int faceDirection, int backgroundInd
         case BLOCK_CRIMSON_TRAPDOOR:
         case BLOCK_WARPED_TRAPDOOR:
         case BLOCK_MANGROVE_TRAPDOOR:
+        case BLOCK_BAMBOO_TRAPDOOR:
         case BLOCK_DAYLIGHT_SENSOR:
         case BLOCK_INVERTED_DAYLIGHT_SENSOR:
         case BLOCK_LADDER:
@@ -18993,6 +19007,7 @@ static int getSwatch(int type, int dataVal, int faceDirection, int backgroundInd
         case BLOCK_CRIMSON_DOOR:
         case BLOCK_WARPED_DOOR:
         case BLOCK_MANGROVE_DOOR:
+        case BLOCK_BAMBOO_DOOR:
             // top half is default
             if ((faceDirection == DIRECTION_BLOCK_TOP) ||
                 (faceDirection == DIRECTION_BLOCK_BOTTOM))
@@ -19031,6 +19046,9 @@ static int getSwatch(int type, int dataVal, int faceDirection, int backgroundInd
                 case BLOCK_MANGROVE_DOOR:
                     swatchLoc = SWATCH_INDEX(10, 54);
                     break;
+                case BLOCK_BAMBOO_DOOR:
+                    swatchLoc = SWATCH_INDEX(2, 57);
+                    break;    
                 }
             }
             else if (!(dataVal & 0x8))
@@ -19051,6 +19069,7 @@ static int getSwatch(int type, int dataVal, int faceDirection, int backgroundInd
                 case BLOCK_CRIMSON_DOOR:
                 case BLOCK_WARPED_DOOR:
                 case BLOCK_MANGROVE_DOOR:
+                case BLOCK_BAMBOO_DOOR:
                     // door tiles are in order bottom, top
                     swatchLoc--;
                     break;
@@ -25512,7 +25531,7 @@ static int createMeshesUSD(wchar_t* blockLibraryPath, char *materialLibrary, boo
     return retCode;
 }
 
-static int outputUSDMesh(PORTAFILE file, int startingFace, int numFaces, int numVerts, char *prefixLook, int  type, int dataVal, char *mtlName, float resScale, int progressTick, int progressIncrement, bool singleTerrainFile)
+static int outputUSDMesh(PORTAFILE file, int startingFace, int numFaces, int numVerts, char *prefixLook, int  type, int dataVal, int hex, char *mtlName, float resScale, int progressTick, int progressIncrement, bool singleTerrainFile)
 {
     // Go through data and make arrays
 //SM if (firstName) {
@@ -25601,7 +25620,7 @@ static int outputUSDMesh(PORTAFILE file, int startingFace, int numFaces, int num
     //sprintf_s(outputString, 256, "%s    def Mesh \"%s\"\n    {\n", startingFace ? "\n" : "", mtlName); 
     
     //sprintf_s(outputString, 256, "    def Mesh \"%s\"\n    {\n", mtlName);
-    sprintf_s(outputString, 256, "    def Mesh \"Block_%d_%d\"\n{\n", type, dataVal);
+    sprintf_s(outputString, 256, "    def Mesh \"%s_%d_%d\"\n{\n", mtlName, type, dataVal);
     WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
 
     // is mesh two-sided? If it's interior to an opaque, it doesn't have to be, which can be a bit faster to render.
@@ -25654,6 +25673,8 @@ static int outputUSDMesh(PORTAFILE file, int startingFace, int numFaces, int num
         sprintf_s(outputString, 256, "(%g, %g)%s", gOutData.uvs[i][X], gOutData.uvs[i][Y], (i == numVerts - 1) ? "] (\n            interpolation = \"vertex\"\n        )\n" : ", ");
         WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
     }
+    strcpy_s(outputString, 256, "         color3f[] primvars:displayColor = [");
+    WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
 
     strcpy_s(outputString, 256, "    }\n");
     WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
