@@ -25,48 +25,6 @@ env:
   PLATFORM: x64
 
 jobs:
-  tilemaker:
-    name: "TileMaker build"
-    runs-on: windows-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
-
-    - name: Restore NuGet packages
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ${{env.TILEMAKER}}
-
-    - name: Build
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.TILEMAKER}} /p:Platform=${{env.PLATFORM}}
-
-  channelmixer:
-    name: "ChannelMixer build"
-    runs-on: windows-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
-
-    - name: Restore NuGet packages
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ${{env.CHANNELMIXER}}
-
-    - name: Build ChannelMixer
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.CHANNELMIXER}} /p:Platform=${{env.PLATFORM}}
-
   mineways:
     name: "Mineways build"
     runs-on: windows-latest
@@ -77,8 +35,31 @@ jobs:
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
+    
+    # Starts ChannelMixer
+    - name: Restore NuGet ChannelMixer
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.CHANNELMIXER}}
 
-    - name: Restore NuGet packages
+    - name: Build ChannelMixer
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.CHANNELMIXER}} /p:Platform=${{env.PLATFORM}}
+
+    # Starts TileMaker
+    - name: Restore NuGet Tilemaker
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.TILEMAKER}}
+
+    - name: Build TileMaker
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.TILEMAKER}} /p:Platform=${{env.PLATFORM}}
+
+    # Starts Mineways
+    - name: Restore NuGet Mineways
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: nuget restore ${{env.MINEWAYS}}
 
@@ -99,6 +80,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: release
-        path: .\x64\Release\
+        path: .
+        # path: .\x64\Release\
         if-no-files-found: error
         
