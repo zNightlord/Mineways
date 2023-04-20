@@ -56,6 +56,8 @@ jobs:
       with:
         name: release
         path: | 
+          *.exe
+          *.pdb
           .gitignore 
           file.lst 
           make_rar.bat 
