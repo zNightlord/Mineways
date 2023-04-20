@@ -23,7 +23,6 @@ env:
 
   # Platform to build
   PLATFORM: x64
-  PLATFORM32: x86
 
 jobs:
   mineways:
@@ -51,9 +50,6 @@ jobs:
     - name: Build Mineways
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.MINEWAYS}} /p:Platform=${{env.PLATFORM}}
-    - name: Build Mineways
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.MINEWAYS}} /p:Platform=${{env.PLATFORM32}}
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
