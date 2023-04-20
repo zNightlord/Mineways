@@ -56,36 +56,18 @@ jobs:
       with:
         name: release
         path: | 
-          *Mineways.exe
-          *Mineways.pdb
-          *ChannelMixer.exe
-          *ChannelMixer.pdb
-          *TileMaker.exe
-          *TileMaker.pdb
-          .gitignore 
-          file.lst 
-          make_rar.bat 
-          *.py 
-          *.c 
-          *.h 
-          *.sln 
-          *README.* 
-          .\Win\*.cpp
-          .\Win\*.h 
-          .\Win\*.rc 
-          .\Win\*.lib 
-          .\Win\*.vcxproj 
-          .\Win\teapot.ico 
-          .\Win\terrainExt.png
-          .\Win\sketchfab_banner.bmp 
-          .\dependencies\curl\include\* 
-          .\dependencies\curl\lib\win32\* 
-          .\dependencies\curl\lib\win64\* 
-          .\dependencies\openssl\lib\win32\* 
-          .\dependencies\openssl\lib\win64\*
-          .\dependencies\picojson\*
-          .\docs\* 
-          .\docs\images\*
+          !*.git* 
+          !*.obj* 
+          !*.iobj* 
+          !*.recipe* 
+          !*.ipdb* 
+          !*.pdb* 
+          !*.tlog* 
+          !*.res* 
+          !*.pch* 
+          !*.pl* 
+          !*.mdl*'
+ 
         # path: .\x64\Release\
         if-no-files-found: warn
 
