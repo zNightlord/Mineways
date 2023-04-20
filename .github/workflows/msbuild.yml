@@ -69,18 +69,14 @@ jobs:
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.MINEWAYS}} /p:Platform=${{env.PLATFORM}}
 
-    # - name: Zip Release
-    #   uses: TheDoctor0/zip-release@0.7.1
-    #   with:
-    #     type: 'zip'
-    #     filename: 'release.zip'
-    #     exclusions: '*.git*'
+    - name: Zip Release
+      uses: zip -r release.zip . -i ".gitignore" "file.lst" "make_rar.bat" "*.py" "*.c" "*.h" "*.sln" "README.*" "Win\*.cpp" "Win\*.h" "Win\*.rc" "Win\*.lib" "Win\*.vcxproj" "Win\teapot.ico" "Win\terrainExt.png" "Win\sketchfab_banner.bmp" "dependencies\curl\include\*" "dependencies\curl\lib\win32\*" "dependencies\curl\lib\win64\*" "dependencies\openssl\lib\win32\*" "dependencies\openssl\lib\win64\*" "dependencies\picojson\*" "docs\*" "docs\images\*"
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
         name: release
-        path: .
+        path: .\release.zip
         # path: .\x64\Release\
         if-no-files-found: error
         
