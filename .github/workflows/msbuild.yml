@@ -1,4 +1,4 @@
-Wname: "MSBuild"
+name: "MSBuild"
 
 on:
   pull_request:
@@ -24,6 +24,7 @@ env:
 
 jobs:
   build:
+    name: "Mineways build"
     runs-on: windows-latest
 
     steps:
@@ -54,6 +55,6 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: release
-        path: ./x64/Release/
+        path: .\x64\Release\
         if-no-files-found: error
         
