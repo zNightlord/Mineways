@@ -49,4 +49,11 @@ jobs:
         type: 'zip'
         filename: 'release.zip'
         exclusions: '*.git*'
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Zip file
+        path: .
+        if-no-files-found: error
         
