@@ -23,6 +23,7 @@ env:
 
   # Platform to build
   PLATFORM: x64
+  PLATFORM32: x86
 
 jobs:
   mineways:
@@ -50,14 +51,17 @@ jobs:
     - name: Build Mineways
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.MINEWAYS}} /p:Platform=${{env.PLATFORM}}
+    - name: Build Mineways
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.MINEWAYS}} /p:Platform=${{env.PLATFORM32}}
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
         name: release
         path: | 
-          *.exe
-          *.pdb
+          *Release\*.exe
+          *Release\*.pdb
           .gitignore 
           file.lst 
           make_rar.bat 
@@ -65,23 +69,23 @@ jobs:
           *.c 
           *.h 
           *.sln 
-          README.* 
-          Win\*.cpp
-          Win\*.h 
-          Win\*.rc 
-          Win\*.lib 
-          Win\*.vcxproj 
-          Win\teapot.ico 
-          Win\terrainExt.png
-          Win\sketchfab_banner.bmp 
-          dependencies\curl\include\* 
-          dependencies\curl\lib\win32\* 
-          dependencies\curl\lib\win64\* 
-          dependencies\openssl\lib\win32\* 
-          dependencies\openssl\lib\win64\*
-          dependencies\picojson\*
-          docs\* 
-          docs\images\*
+          .\README.* 
+          .\Win\*.cpp
+          .\Win\*.h 
+          .\Win\*.rc 
+          .\Win\*.lib 
+          .\Win\*.vcxproj 
+          .\Win\teapot.ico 
+          .\Win\terrainExt.png
+          .\Win\sketchfab_banner.bmp 
+          .\dependencies\curl\include\* 
+          .\dependencies\curl\lib\win32\* 
+          .\dependencies\curl\lib\win64\* 
+          .\dependencies\openssl\lib\win32\* 
+          .\dependencies\openssl\lib\win64\*
+          .\dependencies\picojson\*
+          .\docs\* 
+          .\docs\images\*
         # path: .\x64\Release\
         if-no-files-found: warn
 
