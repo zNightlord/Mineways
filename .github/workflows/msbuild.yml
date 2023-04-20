@@ -1,4 +1,4 @@
-name: MSBuild
+name: "MSBuild"
 
 on:
   pull_request:
@@ -28,7 +28,7 @@ jobs:
 
     steps:
     - name: Checkout code
-    - uses: actions/checkout@v3
+      uses: actions/checkout@v3
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
