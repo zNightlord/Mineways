@@ -56,8 +56,8 @@ jobs:
       with:
         name: release
         path: | 
-          *Release\*.exe
-          *Release\*.pdb
+          *\x64\Release\*.exe
+          *\x64\Release\*.pdb
           .gitignore 
           file.lst 
           make_rar.bat 
@@ -65,7 +65,7 @@ jobs:
           *.c 
           *.h 
           *.sln 
-          .\README.* 
+          *README.* 
           .\Win\*.cpp
           .\Win\*.h 
           .\Win\*.rc 
