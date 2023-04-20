@@ -56,8 +56,12 @@ jobs:
       with:
         name: release
         path: | 
-          *\x64\Release\*.exe
-          *\x64\Release\*.pdb
+          *\x64\Release\Mineways.exe
+          *\x64\Release\Mineways.pdb
+          *\x64\Release\ChannelMixer.exe
+          *\x64\Release\ChannelMixer.pdb
+          *\x64\Release\TileMaker.exe
+          *\x64\Release\TileMaker.pdb
           .gitignore 
           file.lst 
           make_rar.bat 
