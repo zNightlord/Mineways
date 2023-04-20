@@ -37,52 +37,51 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.2
     
     # Starts ChannelMixer
-    - name: Restore NuGet ChannelMixer
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ${{env.CHANNELMIXER}}
-
     - name: Build ChannelMixer
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.CHANNELMIXER}} /p:Platform=${{env.PLATFORM}}
 
     # Starts TileMaker
-    - name: Restore NuGet Tilemaker
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ${{env.TILEMAKER}}
-
     - name: Build TileMaker
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.TILEMAKER}} /p:Platform=${{env.PLATFORM}}
 
     # Starts Mineways
-    - name: Restore NuGet Mineways
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ${{env.MINEWAYS}}
-
     - name: Build Mineways
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.MINEWAYS}} /p:Platform=${{env.PLATFORM}}
-
-    - name: Zip Release
-      uses: TheDoctor0/zip-release@0.7.1
-      with:
-        type: 'zip'
-        filename: 'release.zip'
-        recursive_exclusions: '*.git* *.obj* *.iobj* *.recipe* *.ipdb* *.pdb* *.tlog* *.res* *.pch* *.pl* *.mdl*'
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
         name: release
-        path: .\release.zip
+        path: | 
+          .gitignore 
+          file.lst 
+          make_rar.bat 
+          *.py 
+          *.c 
+          *.h 
+          *.sln 
+          README.* 
+          Win\*.cpp
+          Win\*.h 
+          Win\*.rc 
+          Win\*.lib 
+          Win\*.vcxproj 
+          Win\teapot.ico 
+          Win\terrainExt.png
+          Win\sketchfab_banner.bmp 
+          dependencies\curl\include\* 
+          dependencies\curl\lib\win32\* 
+          dependencies\curl\lib\win64\* 
+          dependencies\openssl\lib\win32\* 
+          dependencies\openssl\lib\win64\*
+          dependencies\picojson\*
+          docs\* 
+          docs\images\*
         # path: .\x64\Release\
-        if-no-files-found: error
+        if-no-files-found: warn
 
     # For Release Upload
     # - name: Release
