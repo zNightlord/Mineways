@@ -56,17 +56,17 @@ jobs:
       with:
         name: release
         path: | 
-          !*.git* 
-          !*.obj* 
-          !*.iobj* 
-          !*.recipe* 
-          !*.ipdb* 
-          !*.pdb* 
-          !*.tlog* 
-          !*.res* 
-          !*.pch* 
-          !*.pl* 
-          !*.mdl*'
+          !*.git*
+          !*.obj
+          !*.iobj
+          !*.recipe
+          !*.ipdb
+          !*.pdb
+          !*.tlog
+          !*.res
+          !*.pch
+          !*.pl
+          !*.mdl
  
         # path: .\x64\Release\
         if-no-files-found: warn
