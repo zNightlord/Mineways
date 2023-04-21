@@ -549,15 +549,15 @@ typedef struct TouchRecord {
 
 // for USD
 // This #define means we want to minimize the number of vertices, removing duplicates, per mesh
-#define WELD_USD_VERTICES
-#ifdef WELD_USD_VERTICES
+//#define WELD_USD_VERTICES
+//#ifdef WELD_USD_VERTICES
 typedef struct VertexHash
 {
     int id; // the index ID this vertex has; matching vertices will use this ID
     Point* point;   // the point here
     VertexHash* pvh;    // the next unique vertex with the same hash, if any.
 } VertexHash;
-#endif
+//#endif
 
 typedef struct OutDataArrays
 {
@@ -567,13 +567,14 @@ typedef struct OutDataArrays
     Point2* uvs;
     int vertCount;  // actual number of vertices currently stored
     int* indices;   // indices to vertices
-#ifdef WELD_USD_VERTICES
+//#ifdef WELD_USD_VERTICES
+    int weldedHashSize;    // the number or hashes and locations allocated for hashing
     int vertCountWelded;  // number of vertices needed, in list below, i.e., unique vertices; list size is vertCount
-    int* indicesWelded; // indices to vertices, removing duplicates
+    int* indicesWelded; // indices to vertices, removing duplicates; size of this is different than the vhashes, it's the list of indices
     VertexHash** vhashLocation; // pointers to hashes for the vertex locations - indexed by hash location computed
-    VertexHash* vhashPool; // pool of hashes for the vertices. vertCountWelded gives the next one we can "allocate"
-    Point** pointsWelded; // list of pointers to unique vertices
-#endif
+    VertexHash* vhashPool; // pool of hashes for the vertices/normals/st's. vertCountWelded gives the next one we can "allocate"
+    Point** welded; // list of pointers to unique vertices, normals, or st's, dependeing
+//#endif
     int facesize; // size of array
     int* faceVertexCounts;
     int faceCount;  // actual number of faces currently stored
@@ -764,10 +765,14 @@ static void initializeBox(Box& b);
 static void increaseBoxByVertex(Box& b, Point& p);
 static int createMeshesUSD(wchar_t* blockLibraryPath, char* materialLibrary, bool singleTerrainFile);
 static int outputUSDMesh(PORTAFILE file, int startingFace, int numFaces, int numVerts, char* prefixLook, char* mtlName, int & progressTick, int progressIncrement, bool singleTerrainFile, int type, int dataVal);
-static void removeDuplicateVertices();
+static void removeDuplicateVertices(Box& box);
+static void removeDuplicateNormals();
+static void removeDuplicateTextureSTs();
 static unsigned int hashVertex(Point* point);
+static unsigned int hashTextureST(Point2* point);
+static boolean allocOutHashData();
 static boolean allocOutData(int vertsize, int facesize);
-static void freeOutData();
+static void freeOutAndHashData();
 static int createMaterialsUSD(char *texturePath, char *mdlPath, wchar_t* mtlLibraryFile, bool singleTerrainFile);
 static boolean tileIsAnEmitter(int type, int swatchLoc);
 static void setMetallicRoughnessByName(char* mtlName, float* metallic, float* roughness);
@@ -13195,7 +13200,7 @@ static int saveBillboardFacesExtraData(int boxIndex, int type, int billboardType
     }
     break;
     case BB_GRID:
-    // TODOTODO: there's a flaw in Omniverse and UsdPreviewSurface with fire: it's single sided.
+    // TODO: there's a flaw in Omniverse and UsdPreviewSurface with fire: it's single sided.
     // It would be nice to fix the output so that the sides are pointing out on all sides.
     case BB_FIRE:
     {
@@ -26305,6 +26310,10 @@ static int createMeshesUSD(wchar_t* blockLibraryPath, char *materialLibrary, boo
     int progressIncrement = 1 + (int)((float)gModel.faceCount / 25.0f);
     int progressTick = progressIncrement;
 
+    // allocate the number of hashes needed, etc.
+    // TODO here and allocOutHashData should be checked for out of memory
+    allocOutHashData();
+
     //if (gModel.instancing) {
     if (blockLibraryPath != NULL) {
         // output a series of meshes, grouped by block
@@ -26418,7 +26427,7 @@ static int createMeshesUSD(wchar_t* blockLibraryPath, char *materialLibrary, boo
     }
 
     Exit:
-    freeOutData();
+    freeOutAndHashData();
 
     return retCode;
 }
@@ -26442,6 +26451,7 @@ static int outputUSDMesh(PORTAFILE file, int startingFace, int numFaces, int num
         strcpy_s(mtlName, MAX_PATH_AND_FILE, gOutputFileRootCleanChar);
     }
 
+    // TODO here and allocOutHashData should be checked for out of memory
     allocOutData(numVerts, numFaces);
 
     // change spaces to _ to be valid USD
@@ -26543,12 +26553,11 @@ static int outputUSDMesh(PORTAFILE file, int startingFace, int numFaces, int num
         WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
     }
 
-    // extents for mesh - why not? TODOTODO could get the box while simplifying vertex list - should definitely do it then.
+    // extents for mesh - why not?
     Box box;
     initializeBox(box);
-    for (i = 0; i < numVerts; i++) {
-        increaseBoxByVertex(box, gOutData.points[i]);
-    }
+    removeDuplicateVertices(box);
+
     sprintf_s(outputString, 256, "        float3[] extent = [(%f, %f, %f), (%f, %f, %f)]\n",
         (float)box.min[X],
         (float)box.min[Y],
@@ -26565,23 +26574,19 @@ static int outputUSDMesh(PORTAFILE file, int startingFace, int numFaces, int num
         WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
     }
 
-#ifdef WELD_USD_VERTICES
-    removeDuplicateVertices();
-
     strcpy_s(outputString, 256, "        int[] faceVertexIndices = [");
     WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
     for (i = 0; i < numVerts; i++) {
         sprintf_s(outputString, 256, "%d%s", gOutData.indicesWelded[i], (i == numVerts - 1) ? "]\n" : ", ");
         WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
     }
-#else
-    strcpy_s(outputString, 256, "        int[] faceVertexIndices = [");
+
+    strcpy_s(outputString, 256, "        point3f[] points = [");
     WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
-    for (i = 0; i < numVerts; i++) {
-        sprintf_s(outputString, 256, "%d%s", gOutData.indices[i], (i == numVerts - 1) ? "]\n" : ", ");
+    for (i = 0; i < gOutData.vertCountWelded; i++) {
+        sprintf_s(outputString, 256, "(%g, %g, %g)%s", (gOutData.welded[i])[0][X], (gOutData.welded[i])[0][Y], (gOutData.welded[i])[0][Z], (i == gOutData.vertCountWelded - 1) ? "]\n" : ", ");
         WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
     }
-#endif
 
 // define SINGLE_MATERIAL to export a single white material
 // Alternately, define WHITE_MATERIAL to have each mesh have a separate material, each of which is white.
@@ -26595,45 +26600,39 @@ static int outputUSDMesh(PORTAFILE file, int startingFace, int numFaces, int num
     WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
 #endif
 
+    removeDuplicateNormals();
+
     strcpy_s(outputString, 256, "        normal3f[] normals = [");
     WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
+    for (i = 0; i < gOutData.vertCountWelded; i++) {
+        sprintf_s(outputString, 256, "(%g, %g, %g)%s", (gOutData.welded[i])[0][X], (gOutData.welded[i])[0][Y], (gOutData.welded[i])[0][Z], (i == gOutData.vertCountWelded - 1) ? "]  (\n            interpolation = \"faceVarying\"\n        )\n" : ", ");
+        WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
+    }
+    strcpy_s(outputString, 256, "        int[] primvars:normals:indices = [");
+    WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
     for (i = 0; i < numVerts; i++) {
-#ifdef WELD_USD_VERTICES
-        sprintf_s(outputString, 256, "(%g, %g, %g)%s", gOutData.normals[i][X], gOutData.normals[i][Y], gOutData.normals[i][Z], (i == numVerts - 1) ? "]  (\n            interpolation = \"faceVarying\"\n        )\n" : ", ");
-#else
-        sprintf_s(outputString, 256, "(%g, %g, %g)%s", gOutData.normals[i][X], gOutData.normals[i][Y], gOutData.normals[i][Z], (i == numVerts - 1) ? "]\n" : ", ");
-#endif
+        sprintf_s(outputString, 256, "%d%s", gOutData.indicesWelded[i], (i == numVerts - 1) ? "]\n" : ", ");
         WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
     }
 
     // if we're writing out a huge array, take a moment and update the progress
     if (numFaces > 10000)
-        UPDATE_PROGRESS(gProgress.start.output + gProgress.absolute.output * ((float)(startingFace +numFaces) / (float)gModel.faceCount));
+        UPDATE_PROGRESS(gProgress.start.output + gProgress.absolute.output * ((float)(startingFace + numFaces) / (float)gModel.faceCount));
 
-    strcpy_s(outputString, 256, "        point3f[] points = [");
-    WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
-#ifdef WELD_USD_VERTICES
-    for (i = 0; i < gOutData.vertCountWelded; i++) {
-        sprintf_s(outputString, 256, "(%g, %g, %g)%s", (gOutData.pointsWelded[i])[0][X], (gOutData.pointsWelded[i])[0][Y], (gOutData.pointsWelded[i])[0][Z], (i == gOutData.vertCountWelded - 1) ? "]\n" : ", ");
-        WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
-    }
-#else
-    for (i = 0; i < numVerts; i++) {
-        sprintf_s(outputString, 256, "(%g, %g, %g)%s", gOutData.points[i][X], gOutData.points[i][Y], gOutData.points[i][Z], (i == numVerts - 1) ? "]\n" : ", ");
-        WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
-    }
-#endif
+    removeDuplicateTextureSTs();
 
     strcpy_s(outputString, 256, "        texCoord2f[] primvars:st = [");
     WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
-    for (i = 0; i < numVerts; i++) {
+    for (i = 0; i < gOutData.vertCountWelded; i++) {
         // "interpolation = "vertex"" is the default, see https://www.openusd.org/release/api/class_usd_geom_point_based.html#ae0ac6f60f8135799ba42a16fe466f89b 
         //sprintf_s(outputString, 256, "(%g, %g)%s", gOutData.uvs[i][X], gOutData.uvs[i][Y], (i == numVerts - 1) ? "] (\n            interpolation = \"vertex\"\n        )\n" : ", ");
-#ifdef WELD_USD_VERTICES
-        sprintf_s(outputString, 256, "(%g, %g)%s", gOutData.uvs[i][X], gOutData.uvs[i][Y], (i == numVerts - 1) ? "] (\n            interpolation = \"faceVarying\"\n        )\n" : ", ");
-#else
-        sprintf_s(outputString, 256, "(%g, %g)%s", gOutData.uvs[i][X], gOutData.uvs[i][Y], (i == numVerts - 1) ? "]\n" : ", ");
-#endif
+        sprintf_s(outputString, 256, "(%g, %g)%s", (gOutData.welded[i])[0][X], (gOutData.welded[i])[0][Y], (i == gOutData.vertCountWelded - 1) ? "] (\n            interpolation = \"faceVarying\"\n        )\n" : ", ");
+        WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
+    }
+    strcpy_s(outputString, 256, "        int[] primvars:st:indices = [");
+    WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
+    for (i = 0; i < numVerts; i++) {
+        sprintf_s(outputString, 256, "%d%s", gOutData.indicesWelded[i], (i == numVerts - 1) ? "]\n" : ", ");
         WERROR_MODEL(PortaWrite(file, outputString, strlen(outputString)));
     }
 
@@ -26721,19 +26720,23 @@ static int outputUSDMesh(PORTAFILE file, int startingFace, int numFaces, int num
     return 0;
 }
 
-static void removeDuplicateVertices()
+static void removeDuplicateVertices(Box &box)
 {
     // input list is gOutData.indices. Output is gOutData.indicesWelded and vertCountWelded
     gOutData.vertCountWelded = 0;
     VertexHash* vhash;  // only used when a new hash is needed
+    // start at the absolute maximum needed
+    int vertCount = gOutData.vertCount;
+    vertCount = min(vertCount, gModel.vertexCount);
+    assert(vertCount <= gOutData.weldedHashSize);
     // zero out the hash location list
-    memset(gOutData.vhashLocation, 0, gOutData.vertCount * sizeof(VertexHash**));
+    memset(gOutData.vhashLocation, 0, vertCount * sizeof(VertexHash**));
 
     // Go through list, make a hash of the vertex. Does vertex match one already encountered? Use the index stored with the hash record. Else set the hash record.
     for (int i = 0; i < gOutData.vertCount; i++) {
         // find hash for vertex, compare vertex to previous vertices if any at that hash position
         int vertexIndex = gOutData.indices[i];
-        int hashLoc = hashVertex(&gOutData.points[vertexIndex]) % gOutData.vertCount;
+        int hashLoc = hashVertex(&gOutData.points[vertexIndex]) % vertCount;
         if (gOutData.vhashLocation[hashLoc]) {
             // previous hash exists, test if it's the same location for this hash or any others
             vhash = gOutData.vhashLocation[hashLoc];
@@ -26766,15 +26769,147 @@ static void removeDuplicateVertices()
         // (I figure that, with locality, if a new vertex is found for the location, we should test it first in the linked list from now on)
         vhash = &gOutData.vhashPool[gOutData.vertCountWelded];
         vhash->id = gOutData.vertCountWelded;
-        gOutData.pointsWelded[gOutData.vertCountWelded++] = vhash->point = &gOutData.points[i]; // TODO I think we can remove vhash->point - get with ID
+        // TODOTODO get rid of vhash->point
+        gOutData.welded[gOutData.vertCountWelded] = vhash->point = &gOutData.points[i]; // TODO I think we can remove vhash->point - get with ID
         vhash->pvh = gOutData.vhashLocation[hashLoc];
         gOutData.vhashLocation[hashLoc] = vhash;
+
+        increaseBoxByVertex(box, (gOutData.welded[gOutData.vertCountWelded])[0]);
+
+        gOutData.vertCountWelded++;
 
         // whatever happens, the vhash will have the ID.
     Done:
         gOutData.indicesWelded[i] = vhash->id;
     }
 }
+
+// extremely similar to the above. *** marks differences
+static void removeDuplicateNormals()
+{
+    // input list is gOutData.indices. Output is gOutData.indicesWelded and vertCountWelded
+    gOutData.vertCountWelded = 0;
+    VertexHash* vhash;  // only used when a new hash is needed
+    // zero out the hash location list.
+    // For normals, we know that we can use the minimum between the number of vertices in the original mesh (gOutData.vertCount) divided by 4, or the number
+    // of total normals. 
+    int normalCount = gOutData.vertCount;
+    normalCount = min(normalCount, gModel.vertexCount);
+    assert(normalCount <= gOutData.weldedHashSize);
+    memset(gOutData.vhashLocation, 0, normalCount * sizeof(VertexHash**));  // *** instead of vertCount
+
+    // Go through list, make a hash of the normal. Does normal match one already encountered? Use the index stored with the hash record. Else set the hash record.
+    for (int i = 0; i < gOutData.vertCount; i++) {
+        // find hash for vertex, compare vertex to previous vertices if any at that hash position
+        int vertexIndex = gOutData.indices[i];
+        int hashLoc = hashVertex(&gOutData.normals[vertexIndex]) % normalCount;  // *** instead of vertCount
+        if (gOutData.vhashLocation[hashLoc]) {
+            // previous hash exists, test if it's the same location for this hash or any others
+            vhash = gOutData.vhashLocation[hashLoc];
+            while (vhash) {
+
+                //float x1 = (vhash->point)[0][X];
+                //float x2 = gOutData.normals[vertexIndex][X];
+                //float y1 = (vhash->point)[0][Y];
+                //float y2 = gOutData.normals[vertexIndex][Y];
+                //float z1 = (vhash->point)[0][Z];
+                //float z2 = gOutData.normals[vertexIndex][Z];
+                //if ((x1 == x2) &&
+                //    (y1 == y2) &&
+                //    (z1 == z2)) {
+                if (((vhash->point)[0][X] == gOutData.normals[vertexIndex][X]) &&
+                    ((vhash->point)[0][Y] == gOutData.normals[vertexIndex][Y]) &&
+                    ((vhash->point)[0][Z] == gOutData.normals[vertexIndex][Z])) {
+
+                    // match found, so note its matching index and move on
+                    gOutData.indicesWelded[i] = vhash->id;
+                    goto Done;
+                }
+                else {
+                    // normals don't match, so go to next hash, if any
+                    vhash = vhash->pvh;
+                }
+            }
+        }
+        // end of list and no match found, add the new hash at this location, to the front of the list
+        // (I figure that, with locality, if a new vertex is found for the location, we should test it first in the linked list from now on)
+        vhash = &gOutData.vhashPool[gOutData.vertCountWelded];
+        vhash->id = gOutData.vertCountWelded;
+        // TODOTODO get rid of vhash->point
+        gOutData.welded[gOutData.vertCountWelded] = vhash->point = &gOutData.normals[i]; // TODO I think we can remove vhash->point - get with ID
+        vhash->pvh = gOutData.vhashLocation[hashLoc];
+        gOutData.vhashLocation[hashLoc] = vhash;
+
+        gOutData.vertCountWelded++;
+
+        // whatever happens, the vhash will have the ID.
+    Done:
+        gOutData.indicesWelded[i] = vhash->id;
+    }
+}
+
+// extremely similar to the above. *** marks differences
+static void removeDuplicateTextureSTs()
+{
+    // input list is gOutData.indices. Output is gOutData.indicesWelded and vertCountWelded
+    gOutData.vertCountWelded = 0;
+    VertexHash* vhash;  // only used when a new hash is needed
+    // zero out the hash location list.
+    // For uvs, we know that we can use the minimum between the number of vertices in the original mesh (gOutData.vertCount), or the number
+    // of total uvs. 
+    int uvCount = gOutData.vertCount;
+    uvCount = min(uvCount, gModel.uvGridListCount + gModel.uvIndexCount);
+    assert(uvCount <= gOutData.weldedHashSize);
+    memset(gOutData.vhashLocation, 0, uvCount * sizeof(VertexHash**));  // *** instead of vertCount
+
+    // Go through list, make a hash of the normal. Does normal match one already encountered? Use the index stored with the hash record. Else set the hash record.
+    for (int i = 0; i < gOutData.vertCount; i++) {
+        // find hash for vertex, compare vertex to previous vertices if any at that hash position
+        int vertexIndex = gOutData.indices[i];
+        int hashLoc = hashTextureST(&gOutData.uvs[vertexIndex]) % uvCount;  // *** instead of vertCount
+        if (gOutData.vhashLocation[hashLoc]) {
+            // previous hash exists, test if it's the same location for this hash or any others
+            vhash = gOutData.vhashLocation[hashLoc];
+            while (vhash) {
+
+                //float x1 = (vhash->point)[0][X];
+                //float x2 = gOutData.uv[vertexIndex][X];
+                //float y1 = (vhash->point)[0][Y];
+                //float y2 = gOutData.uv[vertexIndex][Y];
+                //if ((x1 == x2) &&
+                //    (y1 == y2)) {
+                if (((vhash->point)[0][X] == gOutData.uvs[vertexIndex][X]) &&
+                    ((vhash->point)[0][Y] == gOutData.uvs[vertexIndex][Y])) {
+
+                    // match found, so note its matching index and move on
+                    gOutData.indicesWelded[i] = vhash->id;
+                    goto Done;
+                }
+                else {
+                    // uv don't match, so go to next hash, if any
+                    vhash = vhash->pvh;
+                }
+            }
+        }
+        // end of list and no match found, add the new hash at this location, to the front of the list
+        // (I figure that, with locality, if a new vertex is found for the location, we should test it first in the linked list from now on)
+        vhash = &gOutData.vhashPool[gOutData.vertCountWelded];
+        vhash->id = gOutData.vertCountWelded;
+        // TODOTODO get rid of vhash->point
+
+        // 
+        gOutData.welded[gOutData.vertCountWelded] = vhash->point = (Point *)&gOutData.uvs[i]; // TODO I think we can remove vhash->point - get with ID
+        vhash->pvh = gOutData.vhashLocation[hashLoc];
+        gOutData.vhashLocation[hashLoc] = vhash;
+
+        gOutData.vertCountWelded++;
+
+        // whatever happens, the vhash will have the ID.
+    Done:
+        gOutData.indicesWelded[i] = vhash->id;
+    }
+}
+
 
 static unsigned int hashVertex(Point* point)
 {
@@ -26834,6 +26969,45 @@ and these came close:
     return c;
 }
 
+// as above, but C set to a constant, since there are only two inputs
+static unsigned int hashTextureST(Point2* point)
+{
+    union {
+        float f;
+        uint32_t u;
+    } fu;
+
+    fu.f = point[0][X];
+    unsigned int a = fu.u;
+    fu.f = point[0][Y];
+    unsigned int b = fu.u;
+    //fu.f = point[0][Z];
+    //unsigned int c = fu.u;
+    unsigned int c = 0xdeadbeef;
+    JENKINS_FINAL(a, b, c);
+
+    return c;
+}
+
+static boolean allocOutHashData()
+{
+    // We need to figure out the absolute maximum number of unique hash entries possible for the whole scene.
+    int weldedCount = gModel.vertexCount;
+    weldedCount = max(weldedCount, gModel.normalListCount);
+    weldedCount = max(weldedCount, gModel.uvGridListCount + gModel.uvIndexCount);
+
+    gOutData.weldedHashSize = weldedCount;
+    // TODO: could make location list smaller, since we expect vertices to be shared, but then we need a
+    // different size number than vertsize.
+    gOutData.vhashLocation = (VertexHash**)malloc(weldedCount * sizeof(VertexHash*));
+    gOutData.vhashPool = (VertexHash*)malloc(weldedCount * sizeof(VertexHash));
+    gOutData.welded = (Point**)malloc(weldedCount * sizeof(Point*));
+
+    return ((gOutData.vhashLocation != NULL) &&
+        (gOutData.vhashPool != NULL) &&
+        (gOutData.welded != NULL));
+}
+
 // TODO: we return false when out of memory, but don't do anything about it (really, a problem throughout the code...)
 static boolean allocOutData(int numVerts, int numFaces)
 {
@@ -26843,36 +27017,20 @@ static boolean allocOutData(int numVerts, int numFaces)
             free(gOutData.normals);
             free(gOutData.uvs);
             free(gOutData.indices);
-#ifdef WELD_USD_VERTICES
             free(gOutData.indicesWelded);
-            free(gOutData.vhashLocation);
-            free(gOutData.vhashPool);
-            free(gOutData.pointsWelded);
-#endif
             gOutData.points = NULL;
             gOutData.normals = NULL;
             gOutData.uvs = NULL;
             gOutData.indices = NULL;
-#ifdef WELD_USD_VERTICES
             gOutData.indicesWelded = NULL;
-            gOutData.vhashLocation = NULL;
-            gOutData.vhashPool = NULL;
-            gOutData.pointsWelded = NULL;
-#endif
         }
         gOutData.vertsize = 2 * numVerts + 100;
         gOutData.points = (Point*)malloc(gOutData.vertsize * sizeof(Point));
         gOutData.normals = (Point*)malloc(gOutData.vertsize * sizeof(Point));
         gOutData.uvs = (Point2*)malloc(gOutData.vertsize * sizeof(Point2));
         gOutData.indices = (int*)malloc(gOutData.vertsize * sizeof(int));
-#ifdef WELD_USD_VERTICES
         gOutData.indicesWelded = (int*)malloc(gOutData.vertsize * sizeof(int));
-        // TODO: could make location list smaller, since we expect vertices to be shared, but then we need a
-        // different size number than vertsize.
-        gOutData.vhashLocation = (VertexHash**)malloc(gOutData.vertsize * sizeof(VertexHash*));
-        gOutData.vhashPool = (VertexHash*)malloc(gOutData.vertsize * sizeof(VertexHash));
-        gOutData.pointsWelded = (Point**)malloc(gOutData.vertsize * sizeof(Point*));
-#endif
+//#endif
     }
     if (gOutData.facesize < numFaces) {
         if (gOutData.facesize > 0) {
@@ -26891,38 +27049,29 @@ static boolean allocOutData(int numVerts, int numFaces)
         (gOutData.normals != NULL) &&
         (gOutData.uvs != NULL) &&
         (gOutData.indices != NULL) &&
-#ifdef WELD_USD_VERTICES
         (gOutData.indicesWelded != NULL) &&
-        (gOutData.vhashLocation != NULL) &&
-        (gOutData.vhashPool != NULL) &&
-        (gOutData.pointsWelded != NULL) &&
-#endif
         (gOutData.faceVertexCounts != NULL));
 }
 
-static void freeOutData()
+static void freeOutAndHashData()
 {
     if (gOutData.vertsize > 0) {
         free(gOutData.points);
         free(gOutData.normals);
         free(gOutData.uvs);
         free(gOutData.indices);
-#ifdef WELD_USD_VERTICES
         free(gOutData.indicesWelded);
         free(gOutData.vhashLocation);
         free(gOutData.vhashPool);
-        free(gOutData.pointsWelded);
-#endif
+        free(gOutData.welded);
         gOutData.points = NULL;
         gOutData.normals = NULL;
         gOutData.uvs = NULL;
         gOutData.indices = NULL;
-#ifdef WELD_USD_VERTICES
         gOutData.indicesWelded = NULL;
         gOutData.vhashLocation = NULL;
         gOutData.vhashPool = NULL;
-        gOutData.pointsWelded = NULL;
-#endif
+        gOutData.welded = NULL;
     }
     gOutData.vertsize = 0;
     if (gOutData.facesize > 0) {
