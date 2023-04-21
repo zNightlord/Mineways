@@ -55,19 +55,9 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: release
-        path: | 
-          !*.git*
-          !*.obj
-          !*.iobj
-          !*.recipe
-          !*.ipdb
-          !*.pdb
-          !*.tlog
-          !*.res
-          !*.pch
-          !*.pl
-          !*.mdl
- 
+        path: |
+          .
+          !*.obj*
         # path: .\x64\Release\
         if-no-files-found: warn
 
