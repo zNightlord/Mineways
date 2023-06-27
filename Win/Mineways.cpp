@@ -343,7 +343,7 @@ static struct {
     {_T("Warning: multiple separate parts found after processing.\n\nThis may not be what you want to print. Increase the value for 'Delete floating parts' to delete these. Try the 'Debug: show separate parts' export option to see if the model is what you expected."), _T("Warning"), MB_OK | MB_ICONWARNING},	// <<3
     {_T("Warning: at least one dimension of the model is too long.\n\nCheck the dimensions for this printer's material: look in the top of the model file itself, using a text editor."), _T("Warning"), MB_OK | MB_ICONWARNING},	// <<4
     {_T("Warning: Mineways encountered an unknown block type in your model. Such blocks are converted to bedrock or, for 1.13+ blocks, to grass. Mineways does not understand blocks added by mods, and uses the older (simpler) schematic format so does not support blocks added in 1.13 or newer versions. If you are not using mods nor exporting 1.13 or newer blocks, your version of Mineways may be out of date. Check http://mineways.com for a newer version."), _T("Warning"), MB_OK | MB_ICONWARNING},	// <<5
-    {_T("Warning: too few rows of block textures were found in your terrain\ntexture file. Newer block types will not export properly.\nPlease use the TileMaker program or other image editor\nto make a TerrainExt*.png with 57 rows."), _T("Warning"), MB_OK | MB_ICONWARNING },	// <<6 VERTICAL_TILES
+    {_T("Warning: too few rows of block textures were found in your terrain\ntexture file. Newer block types will not export properly.\nPlease use the TileMaker program or other image editor\nto make a TerrainExt*.png with 62 rows."), _T("Warning"), MB_OK | MB_ICONWARNING },	// <<6 VERTICAL_TILES
     {_T("Warning: one or more Change Block commands specified location(s) that were outside the selected volume."), _T("Warning"), MB_OK | MB_ICONWARNING },	// <<6
     {_T("Warning: with the large Terrain File you're using, the output texture is extremely large. Other programs make have problems using it. We recommend that you use the 'Export tiles' option instead, or reduce the size of your Terrain File by using the '-t 256' (or smaller) option in TileMaker.\n\nThis warning will not be repeated this session."), _T("Warning"), MB_OK | MB_ICONWARNING },	// <<6
 
@@ -5426,6 +5426,7 @@ static void initializePrintExportData(ExportFileData& printData)
 
     printData.chkShowParts = 0;
     printData.chkShowWelds = 0;
+    printData.chkDoubledBillboards = 0;
 
     // should normally just have one material and group
     printData.chkSeparateTypes = 0;
@@ -7113,6 +7114,19 @@ static int interpretImportLine(char* line, ImportedSet& is)
 
         if (is.processData)
             is.pEFD->chkDecimate = interpretBoolean(string1);
+        return INTERPRETER_FOUND_VALID_EXPORT_LINE;
+    }
+
+    strPtr = findLineDataNoCase(line, "Double all billboard faces:");
+    if (strPtr != NULL) {
+        if (1 != sscanf_s(strPtr, "%s", string1, (unsigned)_countof(string1)))
+        {
+            saveErrorMessage(is, L"could not find boolean value for 'Double all billboard faces' command."); return INTERPRETER_FOUND_ERROR;
+        }
+        if (!validBoolean(is, string1)) return INTERPRETER_FOUND_ERROR;
+
+        if (is.processData)
+            is.pEFD->chkDoubledBillboards = interpretBoolean(string1);
         return INTERPRETER_FOUND_VALID_EXPORT_LINE;
     }
 
@@ -9382,23 +9396,19 @@ static void showLoadWorldError(int loadErr)
     wsprintf(extrabuf, _T("Sub-error code %d. Please write me at erich@acm.org and, as best you can, tell me the error message, sub-error code, and what directories your world and mineways.exe is located in."), gSubError);
     switch (loadErr) {
     case 1:
-        if (gSubError > 0) {
-            wsprintf(fullbuf, _T("Error: cannot read or find your world for some reason. Path attempted: \"%s\". If yours is a Java (Classic) world, one idea: try copying your world save directory to some simple location such as C:\\temp and use File | Open...\n\n%s\n\nIf that doesn't work, the world may be in a different ('Bedrock') format, used by Minecraft for Windows 10. Click 'OK' to go to https://bit.ly/mcbedrock and follow the instructions there to convert this type of world to the 'Classic' Java format, which Mineways can read. If instead this world is from an early version of Classic Minecraft, load it into the latest Minecraft to convert it. A third possibility is that this is some modded world in a format that Mineways does not support. There's not a lot that can be done about that, but feel free to contact me on Discord or by email. See the http://mineways.com site for support information."), gFileOpened, extrabuf);
-        }
         // To be honest, I'm not sure how -3 could ever be set here, but it evidently can be...
-        else if (gSubError == ERROR_GET_FILE_VERSION_DATA || gSubError == ERROR_GET_FILE_VERSION_VERSION ) {
-            wsprintf(fullbuf, _T("Error: cannot read world's file version.\n\nThe world may be in a different ('Bedrock') format, used by Minecraft for Windows 10. Click 'OK' to go to https://bit.ly/mcbedrock and follow the instructions there to convert this type of world to the 'Classic' Java format, which Mineways can read. If instead this world is from an early version of Classic Minecraft, load it into the latest Minecraft to convert it. A third possibility is that this is some modded world in a format that Mineways does not support. There's not a lot that can be done about that, but feel free to contact me on Discord or by email. See the http://mineways.com site for support information."));
+        if (gSubError == ERROR_GET_FILE_VERSION_DATA || gSubError == ERROR_GET_FILE_VERSION_VERSION ) {
+            wsprintf(fullbuf, _T("Error: cannot read world's file version.\n\nThe world may be in a different ('Bedrock') format, used by Minecraft for Windows 10 and 11. Click 'OK' to go to https://bit.ly/mcbedrock and follow the instructions there to tell if you're using Bedrock and to convert this type of world to the 'Classic' Java format, which Mineways can read. If instead this world is from an early version of Classic Minecraft, load it into the latest Minecraft to convert it. A third possibility is that this is some modded world in a format that Mineways does not support. There's not a lot that can be done about that, but feel free to contact me on Discord or by email. See the http://mineways.com site for support information.\n\nPath attempted: \"%s\"\n\n%s"), gFileOpened, extrabuf);
         }
         else {
-            // prints the line in the code where the error was returned via (a negated) LINE_ERROR.
-            wsprintf(fullbuf, _T("Error: cannot load world for some reason. Path attempted: \"%s\".\n\n%s\n\nThe world may be in a different ('Bedrock') format, used by Minecraft for Windows 10. Click 'OK' to go to https://bit.ly/mcbedrock and follow the instructions there to convert this type of world to the 'Classic' Java format, which Mineways can read. If instead this world is from an early version of Classic Minecraft, load it into the latest Minecraft to convert it. A third possibility is that this is some modded world in a format that Mineways does not support. There's not a lot that can be done about that, but feel free to contact me on Discord or by email. See the http://mineways.com site for support information."), gFileOpened, extrabuf);
+            wsprintf(fullbuf, _T("Error: cannot find or read your world for some reason. The world may be in a different ('Bedrock') format, used by Minecraft for Windows 10 and 11. Click 'OK' to go to https://bit.ly/mcbedrock and follow the instructions there to tell if you're using Bedrock and to convert this type of world to the 'Classic' Java format, which Mineways can read. If instead this world is from an early version of Classic Minecraft, load it into the latest Minecraft to convert it. A third possibility is that this is some modded world in a format that Mineways does not support. There's not a lot that can be done about that, but feel free to contact me on Discord or by email. See the http://mineways.com site for support information. If yours is a Java (Classic) world, one idea: try copying your world save directory to some simple location such as C:\\temp and use File | Open...\n\nPath attempted: \"%s\"\n\n%s"), gFileOpened, extrabuf);
         }
         retcode = FilterMessageBox(NULL, fullbuf,
             _T("Read error"), MB_OKCANCEL | MB_ICONERROR | MB_TOPMOST);
         GoToBedrockHelpOnOK(retcode);
         break;
     case 2:
-        wsprintf(fullbuf, _T("Error: world has not been converted to the Anvil format.\n\nTo make a world readable by Mineways, install the latest Classic (Java) Minecraft you can, load the world in it, then quit. Doing so will convert your world to a format Mineways understands.\n\nIf this does not work, the world may be in a different ('Bedrock') format, used in Minecraft for Windows 10. Click 'OK' to go to https://bit.ly/mcbedrock and follow the instructions there to convert this type of world to the 'Classic' Java format, which Mineways can read. A third possibility is that this is some modded world in a format that Mineways does not support. There's not a lot that can be done about that, but feel free to contact me on Discord or by email. See the http://mineways.com site for support information."));
+        wsprintf(fullbuf, _T("Error: world has not been converted to the Anvil format.\n\nTo make a world readable by Mineways, install the latest Classic (Java) Minecraft you can, load the world in it, then quit. Doing so will convert your world to a format Mineways understands.\n\nIf this does not work, the world may be in a different ('Bedrock') format, used in Minecraft for Windows 10. Click 'OK' to go to https://bit.ly/mcbedrock and follow the instructions there to tell if you're using Bedrock and how to convert this type of world to the 'Classic' Java format, which Mineways can read. A third possibility is that this is some modded world in a format that Mineways does not support. There's not a lot that can be done about that, but feel free to contact me on Discord or by email. See the http://mineways.com site for support information."));
 
         retcode = FilterMessageBox(NULL, fullbuf,
             _T("Read error"), MB_OKCANCEL | MB_ICONERROR | MB_TOPMOST);

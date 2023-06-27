@@ -299,7 +299,7 @@ typedef struct Model {
     int exportTiles;
     bool customMaterial;
     bool exportMDL;
-    bool singleSided;
+    bool singleSided; // True means : "the single-sided polygon must be output twice, once reversed".
     bool emitterSingleSided;
     int blockCount;
     bool instancing; // true for USDA with instancing output enabled
@@ -331,7 +331,8 @@ extern Model gModel;
                                                      ((worldVersion) <= 2586) ? 16 : \
                                                      ((worldVersion) <= 2730) ? 17 : \
                                                      ((worldVersion) <= 2975) ? 18 : \
-                                                     19)
+                                                     ((worldVersion) <= 3442) ? 19 : \
+                                                     20)
 
 
 void SetSeparatorObj(const wchar_t* separator);

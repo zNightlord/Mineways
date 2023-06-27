@@ -51,6 +51,7 @@
 		<li class='has-sub'><a href="community.html"><span>Galleries</span></a>
 			<ul>
 				<li><a href="community.html"><span>Showcase</span></a></li>
+				<li><a href="https://www.youtube.com/playlist?list=PL3AE7AB94E9114715"><span>YouTube</span></a></li>
 				<li><a href='http://www.flickr.com/groups/mineways/pool/'><span>Flickr</span></a></li>
 				<li><a href='https://www.google.com/search?q=mineways&newwindow=1&source=lnms&tbm=isch'><span>Google Images</span></a></li>
 				<li><a href='https://www.shapeways.com/search?q=mineways'><span>Shapeways</span></a></li>
@@ -127,6 +128,7 @@ Read on if you want to understand how to make your models less expensive, use di
    <LI><a href="#z_up">Make Z the up direction instead of Y</a>
    <LI><a href="#opt_size">Model Size</a>
    <LI><a href="#opt_fill">Filling and Hollowing Options</a>
+   <LI><a href="#lesser">Detailed Blocks</a>
    <LI><a href="#opt_debug">Debugging Visualization</a>
  </UL>
  <LI><a href="#tilemaker">ChannelMixer and TileMaker</a> - how to make your own custom texture terrainExt.png files.
@@ -178,7 +180,7 @@ Double-click the mineways.exe to run the program.
 <H2 id="openworld">
 Opening Worlds and Schematics
 </H2>
-There are many ways to open a Minecraft world or schematic file in Mineways. If one doesn't work for you, try the next.
+There are many ways to open a Minecraft world or old-style schematic file in Mineways. If one doesn't work for you, try the next.
 <P>
 <b>File | Open World:</b> In the "File" menu header there is "Open World". Click (or hover) and move to the right to select your world. These are the worlds in your "%appdata%\.minecraft\saves" directory. You can see in <a href="https://youtu.be/lpFpj84eFgw"></a>this video</a> the process of downloading a Minecraft map and putting it in the right place. The worlds are listed by their (not necessarily unique) given names on the left, their folder on the right, and arranged alphabetically by these folders. If you want to specify a different directory for where your world saves are located, use the "-s" option on the <a href="http://www.computerhope.com/issues/chusedos.htm">command line</a> on startup; see the <a href="scripting.html#clo">command line options</a>.
 <P>
@@ -191,9 +193,9 @@ Here's a view of a small portion of [Block Test World] exported to OBJ and rende
 <P>
 If you can't find your world in the list, you can select "Find your world..." at the bottom, which is the same as doing...
 <P>
-<b>File | Open...:</b> This option is for opening schematic files and worlds. Navigate to wherever your schematic or world is stored and select the level.dat file. On Windows, the default folder for world save files is "%appdata%\.minecraft\saves"; for Mac it's "~/Library/Application Support/minecraft/saves/". Worth saying again: you can also load a world by dragging and dropping its level.dat file on to Mineways. Another pro tip: if you save or rename your schematic file to have the world "repeat" in it, e.g., rename "eiffel.schematic" to "eiffelRepeat.schematic", the schematic will load and be repeated across the map, with a minimum one block gap between each model. This can be useful if you want to create a single 3D print file that has multiple copies of the model. Also, for schematics, only, <B>Control-A</B> will select the whole schematic model.
+<b>File | Open...:</b> This option is for opening old-style schematic files and worlds. Navigate to wherever your schematic or world is stored and select the level.dat file. On Windows, the default folder for world save files is "%appdata%\.minecraft\saves"; for Mac it's "~/Library/Application Support/minecraft/saves/". Worth saying again: you can also load a world by dragging and dropping its level.dat file on to Mineways. Another pro tip: if you save or rename your schematic file to have the world "repeat" in it, e.g., rename "eiffel.schematic" to "eiffelRepeat.schematic", the schematic will load and be repeated across the map, with a minimum one block gap between each model. This can be useful if you want to create a single 3D print file that has multiple copies of the model. Also, for schematics, only, <B>Control-A</B> will select the whole schematic model.
 <P>
-NOTE: the new schematic file format <a href="https://github.com/erich666/Mineways/issues/40">introduced by FAWE</a> for 1.13 data is currently not supported in Mineways. See <a href="https://github.com/erich666/Mineways/issues/40">this issue report</a> for more information; short version: save the schematic to a world using WorldEdit, FAWE, or similar, since Mineways can read worlds.
+NOTE: the new schematic file format <a href="https://github.com/erich666/Mineways/issues/40">introduced by FAWE</a> for 1.13 data is currently not supported in Mineways. See <a href="https://github.com/erich666/Mineways/issues/40">this issue report</a> for more information; short version: save you schematic to a world using <a href="https://www.curseforge.com/minecraft/mc-mods/worldedit">WorldEdit</a>, <a href="https://www.curseforge.com/minecraft/mc-mods/litematica">Litematica</a>, <a href="https://intellectualsites.github.io/download/fawe.html">FAWE</a>, or similar, since Mineways can read worlds.
 <P>
 <b>File | <a id="importsettings">Import Settings:</a></b> If you've previously exported a model from your world or schematic, you can select this data file (.OBJ, .WRL, or for STL export, the .TXT file generated) with Import Settings. Doing so will not only open your world, but will also set all the previous export settings you used to make this export file, including the color scheme and the terrain file chosen. Alternately, you can simply drag and drop one of these files on to Mineways to load it.
 <P>
@@ -271,7 +273,7 @@ The big difference between rendering and printing is that 3D print models <i>mus
 To make your model immediately viewable on the web in 3D, choose the third option "Publish to Sketchfab." Mineways directly uploads your model to the Sketchfab site and makes it displayable to everyone. It's fun and easy, honestly. <a href="#sketchfab">Go here</a> for detailed instructions.
 <P>
 <a id="schematic">
-The next option is "Export Schematic",</a> which allows you to then import your model to another world by using <a href="https://www.amuletmc.com/">Amulet</a>, <a href="https://minecraft.curseforge.com/projects/worldedit">WorldEdit</a>, or <a href="https://intellectualsites.github.io/download/fawe.html">FAWE</a>. Note that Mineways can read any old-style schematic file by using <a href="#openworld">"File | Open..."</a>.
+The next option is "Export Schematic",</a> which allows you to then import your model to another world by using <a href="https://www.amuletmc.com/">Amulet</a>, <a href="https://minecraft.curseforge.com/projects/worldedit">WorldEdit</a>, <a href="https://www.curseforge.com/minecraft/mc-mods/litematica">Litematica</a>, or <a href="https://intellectualsites.github.io/download/fawe.html">FAWE</a>. Note that Mineways can read any old-style schematic file by using <a href="#openworld">"File | Open..."</a>.
 <P>
 Schematic files are commonly used to share constructions among builders. You can upload and share these files on sites such as <a href="http://planetminecraft.com">Planet Minecraft</a>. Signs will not have text, chests will lose their contents, objects such as <a href="http://minecraft.gamepedia.com/Paintings">paintings</a> are not exported, and <a href="http://minecraft.gamepedia.com/Head">heads</a> are turned into pumpkins. Currently no export options beyond the dimensions and the rotation angle affect schematic export in Mineways, and the rotation angle only partially works, mostly for full blocks that do not have any orientation. In other words, the orientation angle will rotate the model as a whole, but each individual block will not be rotated: stair steps and signs will still go the old direction, rails get "interesting," and so on. I'd avoid it... Also, 1.13 and newer elements will export as grass blocks and a warning is issued, since the standard schematic format does not support these. Mineways <a href="https://github.com/erich666/Mineways/issues/40">does not support the new schematic format</a>, sorry.
 <P>
@@ -850,7 +852,7 @@ Exporting to 3D print
 
 As background, view the <a href="http://www.youtube.com/watch?v=hHxp9Ail6MY&feature=player_embedded">Shapeways 3D color printing process video</a>. Layers of material are laid down and solidified at the appropriate spots. Unsolidified "sand" is vacuumed away. You pay by volume, not by complexity. What this means to you is: avoid making enclosed spaces with tiny entrances. Unfortunately, most buildings are just that: large rooms with small doors. Your job is to make sure your model has either no openings at all, in which case the Hollow option can clear out the inside, leaving just a shell. Alternately, make escape holes yourself using snow blocks, which you then melt after all processing of your model. I'll explain these options below.
 <P>
-There are other potential pitfalls with 3D printing, such as <a href="http://www.shapeways.com/tutorials/3dprintingminimumwallthicknesstutorial">thin wall problems</a> (more <a href="http://www.shapeways.com/tutorials/thin_walls_tutorial">here</a>), and <a href="https://support.shapeways.com/hc/en-us/sections/360004437873-Software-Tutorials">too many polygons</a> (rare for a Minecraft model), to name just two. Shapeways' <a href="https://support.shapeways.com/hc/en-us/categories/360001855814-Tutorials">tutorial pages</a> and <a href="https://support.shapeways.com/hc/en-us/sections/360003550794-Materials">materials pages</a> give you a lot to chew on, <a href="http://www.sculpteo.com/en/help/">Sculpteo</a> also has a help section. The Mineways program tries to guide you past the major pitfalls, but it's always possible to generate something that's essentially unprintable: too weak, holes too small to clear out the dust, or some other problem. Browsing the tutorials there should help you understand what is possible. Options follow.
+There are other potential pitfalls with 3D printing, such as <a href="http://www.shapeways.com/tutorials/3dprintingminimumwallthicknesstutorial">thin wall problems</a> (more <a href="http://www.shapeways.com/tutorials/thin_walls_tutorial">here</a>), and <a href="https://support.shapeways.com/hc/en-us/sections/360004437873-Software-Tutorials">too many polygons</a> (rare for a Minecraft model), to name just two. Shapeways' <a href="https://support.shapeways.com/hc/en-us/categories/360001855814-Tutorials">tutorial pages</a> and <a href="https://support.shapeways.com/hc/en-us/sections/360003550794-Materials">materials pages</a> give you a lot to chew on, <a href="http://www.sculpteo.com/en/help/">Sculpteo</a> also has a help section. The Mineways program tries to guide you past the major pitfalls, but it's always possible to generate something that's essentially unprintable: too weak, holes too small to clear out the dust, or some other problem. Browsing the tutorials there should help you understand what is possible. <a href="https://www.reddit.com/r/3Dprinting/comments/13u0boy/printing_my_mc_world_with_mineways/">This post</a> might help you with 3D printer settings. Options follow.
 <P>
 
 <a id="z_up">
@@ -1518,11 +1520,12 @@ Related Resources
 </H2>
 Here are some related (free) tools that are handy, collected in one spot:
 <UL>
-<LI><a href="http://meshlab.sourceforge.net/">MeshLab</a> for viewing exported models for 3D printing.
 <LI>The <a href="#g3d">G3D viewer</a> is excellent for previewing 3D OBJ files for rendering (sorry, not VRML or STL), as its support for cutouts is superior to the <a href="http://meshlab.sourceforge.net/">MeshLab</a> viewer. It also includes real-time shadows and reflection-mapped water, as well as built-in screen and movie capture (only the viewer32.exe version has video capture). Models also load faster. Downside: on weaker GPUs it can be slow, and it doesn't work when <a href="#fcst">exporting individual textures</a>. Some examples <a href="http://imgur.com/a/B8DuU">here</a>.
 <LI><a href="http://meshlab.sourceforge.net/">MeshLab</a> helps you convert, simplify, and smooth meshes, among a huge number of other operations. It's not the best for displaying textures.
 <LI><a href="https://www.amuletmc.com/">Amulet</a> lets you convert from and to Bedrock and Java worlds, and lets you edit them. Also, open source, and actively maintained. For example, you could trim away objects near your model to make a cleaner export. You can also read in model schematic files you've downloaded. To use a schematic with Mineways, import the schematic into an empty world and save the world, then use Mineways on that world. (Supercedes <a href="http://www.mcedit-unified.net/">MCEdit Unified</a>.)
-<LI><a href="https://minecraft.curseforge.com/projects/worldedit">WorldEdit</a> is another mod that lets you make large edits to your world. It can load and save .schematic files, allowing you to export a model from Mineways and move it to a separate world. It also allows a huge number of modeling operations, including <a href="http://www.reddit.com/r/Minecraft/comments/12lzmb/my_first_hour_with_worldedit/">procedurally-generated models</a>. It differs from Amulet in that it is a plug-in to Minecraft, while Amulet is standalone.
+<LI>Use the <a href="https://github.com/mircokroon/minecraft-world-downloader">Minecraft World Downloader</a> to download chunks from multiplayer worlds, which you can then use with Mineways.
+<LI><a href="https://minecraft.curseforge.com/projects/worldedit">WorldEdit</a> is another mod that lets you make large edits to your world. It can load and save (old style and new) .schematic/.schem files. It also allows a huge number of modeling operations, including <a href="http://www.reddit.com/r/Minecraft/comments/12lzmb/my_first_hour_with_worldedit/">procedurally-generated models</a>. It differs from Amulet in that it is a plug-in to Minecraft, while Amulet is standalone.
+<LI><a href="https://www.curseforge.com/minecraft/mc-mods/litematica">Litematica</a> is a tool for reading, examining, and writing new-style schematic (.schem) files and pasting them into your world.
 <LI><a href="https://intellectualsites.github.io/download/fawe.html">FAWE</a> is an alternate to WorldEdit, part of the Spigot system.
 <LI>There is also a browser-based utility to <a href="https://puregero.github.io/SchemToSchematic/">convert old schematic files to new ones</a>, if that's a help.
 <LI><a href="https://voxelsniper.fandom.com/wiki/VoxelSniper_Wiki">VoxelSniper</a> is another Bukkit addon for servers, providing a wide range of editing abilities.
@@ -1613,7 +1616,11 @@ Mostly defunct, but FYI and because I like to keep track.
 <HR>
 <h2 id="mcpe">Minecraft Bedrock Support</h2>
 
-Mineways works on only Minecraft <a href="https://minecraft.gamepedia.com/Java_Edition">Java (aka Classic) Edition</a> worlds. Minecraft for Windows 10, also known as the <a href="https://minecraft.gamepedia.com/Bedrock_Edition">Bedrock Edition</a>, uses an entirely different database format for its worlds, called <a href="https://github.com/Mojang/leveldb-mcpe">LevelDB</a>. If your level.dat files are located in a directory with the path ..."\AppData\Local\Packages\Microsoft.Minecraft"... in it, or have weird directory names like "ZAD1Xfl9AAA=", that's a Bedrock Edition save. This section describes how to convert a Minecraft Bedrock world to a Minecraft Java Edition one so that Mineways can read it. <B>NOTE:</B> No converter can convert Bedrock Marketplace worlds, see <a href="https://www.universalminecraftconverter.com/resources/articles/converting-marketplace-maps">this explanation</a>.
+Mineways works on only Minecraft <a href="https://minecraft.gamepedia.com/Java_Edition">Java (aka Classic) Edition</a> worlds. You can determine whether you're using this Classic Edition or the Bedrock Edition by <a href="https://funcaptains.com/blog/java-or-bedrock-what-minecraft-version-do-i-have">following these steps</a>.
+<P>
+This section describes how to convert a Minecraft Bedrock world to a Minecraft Java Edition one so that Mineways can read it. <B>NOTE:</B> No converter can convert Bedrock Marketplace worlds, see <a href="https://www.universalminecraftconverter.com/resources/articles/converting-marketplace-maps">this explanation</a>.
+<P>
+Minecraft for Windows 10, also known as the <a href="https://minecraft.gamepedia.com/Bedrock_Edition">Bedrock Edition</a>, uses an entirely different database format for its worlds, called <a href="https://github.com/Mojang/leveldb-mcpe">LevelDB</a>. If your level.dat files are located in a directory with the path ..."\AppData\Local\Packages\Microsoft.Minecraft"... in it, or have weird directory names like "ZAD1Xfl9AAA=", that's a Bedrock Edition save.
 <P>
 The options I know of are:
 <UL>
@@ -1972,7 +1979,7 @@ Doors (#64, #71)
 <center>Proper geometry</center>
 </td>
 <td>
-Door hinges on edges are not consistent with Minecraft (which are also inconsistent with their frames).
+Door hinges and tops and bottoms on edges are not consistent with Minecraft.
 </td>
 </tr>
 
@@ -2739,6 +2746,26 @@ No fire is exported on the wick for lit candles. "Split by block type" will give
 
 <tr>
 <td>
+Bamboo Fence and Bamboo Gate
+</td>
+<td>
+<center>Proper geometry</center>
+</td>
+<td>
+<center>Full wood block</center>
+</td>
+<td>
+<center>Proper geometry</center>
+</td>
+<td>
+Currently the bamboo_fence_particle.png and bamboo_fence_gate_particle.png textures are used for these, since the proper textures will take a lot of fussy texture mapping to use them properly.
+</td>
+</tr>
+
+
+
+<tr>
+<td>
 <a href="https://minecraft.fandom.com/wiki/Light_Block">Light</a>
 </td>
 <td colspan="3">
@@ -2774,13 +2801,29 @@ The textures and rules used in Minecraft for how blocks appear and connect have 
 From newest to oldest. The very newest is sometimes unreleased work in progress, with "*" meaning "to do" and "**" meaning "stretch goal."
 
 <UL>
+<LI><B>Version 11.00</B>, 7/3/2023 - <a href="https://erich.realtimerendering.com/minecraft/public/mineways/minewaysV1100.zip">exe</a>, <a href="https://github.com/erich666/Mineways/tags">source</a>.
+  <BR>
+  <UL>
+	<LI>Minecraft 1.20.1 support. New ChannelMixer version 1.14 and TileMaker 3.19. Added <a href="https://minecraft.fandom.com/wiki/Cherry_Grove">cherry grove biome</a>. 
+	<LI>Fixed leave and vines in mangrove swamp biomes to use the proper, lighter green. Fixed deep dark biome downfall (rainfall) from 0.5 to 0.4. Wooded badlands biome now affects plant colors, same as other badlands. Values are from <a href="https://minecraft.fandom.com/wiki/Custom_biome">biome JSON files</a>.
+	<LI>Made more cutout objects properly be one-sided when exported as such, such as sculk sensor tendrils. TODO - more?
+	<LI>Fix mangrove door top and bottom to use mangrove plank texture for full block 3D printing.
+	<LI>TODO - update all extra terrain packs.
+	<LI>TODO - document that decorated pot is only one type; list of blocks.
+</UL>
 
+ <LI>Version 10.15, 5/9/2023 - <a href="https://erich.realtimerendering.com/minecraft/public/mineways/minewaysV1015.zip">exe</a>, <a href="https://github.com/erich666/Mineways/tags">source</a>.
+    <BR>
+    <UL>
+	<LI>New export option: Billboard objects can now be exported as single-polygon or doubled-polygon for OBJ (USD has sidedness built in as an attribute). By default, just a single polygon is output per face, "Double all billboard faces" is unchecked. Most digital content creation apps I tested are fine with single polygons for cutouts such as saplings, flowers, etc. However, Unity (for one; there may be others) needs two polygons output back-to-back in order to display properly, as it (evidently) performs backface culling on these. Checking the box will double these. This option is available for all file formats except USD, which has its own flag for sidedness. (<i>Thanks to I C Y for this information.</i>)
+	</UL>
+	
  <LI>Version 10.14, 4/23/2023 - <a href="https://erich.realtimerendering.com/minecraft/public/mineways/minewaysV1014.zip">exe</a>, <a href="https://github.com/erich666/Mineways/tags">source</a>.
     <BR>
     <UL>
 	<LI>Make all billboards (thin objects) export as only one quadrilateral, instead of two back-to-back quads. This avoids z-fighting seen in Blender 3.5's Cycles renderer. Looking at a range of other renderers, these all appear to now display billboards as two-sided, so only one quad is needed.
 	<LI>Output USDA files in a format that shares vertices when possible (i.e., when not exporting individual blocks). This results in files that are about half the size of previous exports. When saved as USD (non-ASCII) format, the new USDs are less than a fourth of the size of the previous USD files. May also result in faster performance and less memory usage, depending on the renderer.
-	<LI>Add extended naming for the Mesh instances in the BlockLibrary.usda when exporting individual blocks. (<i>thanks to zNight for the suggestion.</i>)
+	<LI>Add extended naming for the Mesh instances in the BlockLibrary.usda when exporting individual blocks. (<i>Thanks to zNight for the suggestion.</i>)
 	<LI>Added extents to all USDA meshes in the main output file. This information can help speed loading on some systems.
 	<LI>Give a warning if the user types in a suffix for the export file and the file type selected does not match it.
 	<LI>Better statistics summary, differentiating between full voxels and smaller ones, instead of calling all smaller ones "billboards".
@@ -4010,7 +4053,7 @@ The Mineways program is <a href="https://github.com/erich666/Mineways">open sour
 	<div id="footer">
 		<hr>
 		<p>Webmaster: <a href="mailto:erich@acm.org">Eric Haines</a>, erich@acm.org - visit the <a href="contact.html">support page</a>
-		<br id="lastUpdate">Last updated 4/23/2023</p>
+		<br id="lastUpdate">Last updated 6/5/2023</p>
 	</div>
 </div>
 

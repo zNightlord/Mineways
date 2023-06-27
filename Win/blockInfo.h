@@ -252,7 +252,7 @@ extern UnitType gUnitTypeTable[];
 #define EXPT_OUTPUT_OBJ_MAKE_GROUPS_OBJECTS		0x04000000
 
 // export MDL or not for USD (affects custom material display, too)
-#define EXPT_EXPORT_MDL                     0x08000000
+#define EXPT_EXPORT_MDL                         0x08000000
 
 // string length for export dialog, etc.
 #define EP_FIELD_LENGTH 20
@@ -389,6 +389,7 @@ typedef struct ExportFileData
     UINT chkSplitByBlockType;	// "Split by block type"
     UINT chkCustomMaterial[FILE_TYPE_TOTAL];
     UINT chkExportMDL;  // applies only to USD files
+    UINT chkDoubledBillboards;  // "Doubled billboards" means two (single-sided) billboards are output, back to back
 
     char scaleLightsString[EP_FIELD_LENGTH];
     float scaleLightsVal;
@@ -425,7 +426,7 @@ typedef struct Options {
 } Options;
 
 // number of blocks with entries in block info table (max number at bottom + 1) - now that 255 is used, we need this
-#define NUM_BLOCKS_DEFINED 438
+#define NUM_BLOCKS_DEFINED 453
 // number of official Minecraft blocks (no longer needed - we used to have the block after everything be special)
 #define NUM_BLOCKS_STANDARD NUM_BLOCKS_DEFINED
 // number of blocks we want to show on the map (no longer needed - includes the unknown one)
@@ -961,7 +962,7 @@ enum block_types {
     //BLOCK_LIGHT = 416,
 
     BLOCK_MANGROVE_LOG = 416,
-    BLOCK_MANGROVE_PLANKS = 417,
+    BLOCK_DECORATED_POT = 417,    // goofy numbering, I know. Was MANGROVE_PLANKS, but that's not needed.
     BLOCK_MANGROVE_DOOR = 418,
     BLOCK_MANGROVE_TRAPDOOR = 419,
     BLOCK_MANGROVE_PROPAGULE = 420,
@@ -982,4 +983,20 @@ enum block_types {
     BLOCK_FROGSPAWN = 435,
     BLOCK_FROGLIGHT = 436,
     BLOCK_MANGROVE_LEAVES = 437,
+
+    BLOCK_CHERRY_BUTTON = 438,
+    BLOCK_CHERRY_DOOR = 439,
+    BLOCK_CHERRY_FENCE = 440,
+    BLOCK_CHERRY_FENCE_GATE = 441,
+    BLOCK_CHERRY_PRESSURE_PLATE = 442,
+    BLOCK_CHERRY_STAIRS = 443,
+    BLOCK_CHERRY_TRAPDOOR = 444,
+    BLOCK_BAMBOO_BUTTON = 445,
+    BLOCK_BAMBOO_DOOR = 446,
+    BLOCK_BAMBOO_FENCE = 447,
+    BLOCK_BAMBOO_FENCE_GATE = 448,
+    BLOCK_BAMBOO_PRESSURE_PLATE = 449,
+    BLOCK_BAMBOO_STAIRS = 450,
+    BLOCK_BAMBOO_TRAPDOOR = 451,
+    BLOCK_BAMBOO_MOSAIC_STAIRS = 452,
 };
