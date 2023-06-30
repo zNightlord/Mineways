@@ -426,7 +426,7 @@ typedef struct Options {
 } Options;
 
 // number of blocks with entries in block info table (max number at bottom + 1) - now that 255 is used, we need this
-#define NUM_BLOCKS_DEFINED 453
+#define NUM_BLOCKS_DEFINED 454
 // number of official Minecraft blocks (no longer needed - we used to have the block after everything be special)
 #define NUM_BLOCKS_STANDARD NUM_BLOCKS_DEFINED
 // number of blocks we want to show on the map (no longer needed - includes the unknown one)
@@ -488,7 +488,7 @@ typedef struct Options {
 #define BLF_EMITTER         0x10000
 // this object attaches to fences; note that fences do not have this property themselves, so that nether & regular fence won't attach
 #define BLF_FENCE_NEIGHBOR	0x20000
-// this object outputs its true geometry (not just a block) for rendering
+// this object outputs its true geometry (not just a block) for rendering. Look at the next bit BLF_3D_BIT for 3D printing if it can output geometry as-is for that.
 #define BLF_TRUE_GEOMETRY	0x40000
 // this object outputs its special non-full-block geometry for 3D printing, if the printer can glue together the bits.
 // Slightly different than TRUE_GEOMETRY in that things that are just too thin don't have this bit set.
@@ -999,4 +999,5 @@ enum block_types {
     BLOCK_BAMBOO_STAIRS = 450,
     BLOCK_BAMBOO_TRAPDOOR = 451,
     BLOCK_BAMBOO_MOSAIC_STAIRS = 452,
+    BLOCK_PINK_PETALS = 453,
 };

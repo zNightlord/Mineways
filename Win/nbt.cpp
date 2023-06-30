@@ -361,8 +361,11 @@ static bool makeBiomeHash = true;
 // facing: SWNE 0x3
 // sculk_sensor_phase: 0x10 (16 bit)
 #define CALIBRATED_SCULK_SENSOR_PROP    62
+// facing: SWNE 0x3
+// flower_amount: 0xc 1-4
+#define PINK_PETALS_PROP    63
 
-#define NUM_TRANS 975
+#define NUM_TRANS 979
 
 BlockTranslator BlockTranslations[NUM_TRANS] = {
     //hash ID data name flags
@@ -1330,6 +1333,7 @@ BlockTranslator BlockTranslations[NUM_TRANS] = {
     { 0, 180,   HIGH_BIT | 2, "pearlescent_froglight", AXIS_PROP },
 
     // 1.20 - starts at 182 + HIGH_BIT
+    { 0, 161,       HIGH_BIT, "decorated_pot", TRULY_NO_PROP }, // well, waterlogged
     { 0, 155, HIGH_BIT | 0x4, "calibrated_sculk_sensor", CALIBRATED_SCULK_SENSOR_PROP }, // also power and sculk_sensor_phase, but not needed so not saved
     { 0, 182,       HIGH_BIT, "cherry_button", BUTTON_PROP },
     { 0, 183,       HIGH_BIT, "cherry_door", DOOR_PROP },
@@ -1349,7 +1353,7 @@ BlockTranslator BlockTranslations[NUM_TRANS] = {
     { 0, 167,   HIGH_BIT | 1, "stripped_cherry_log", AXIS_PROP },
     { 0, 168,   HIGH_BIT | 1, "stripped_cherry_wood", AXIS_PROP },
     { 0, BLOCK_FLOWER_POT,        SAPLING_FIELD | 7, "potted_cherry_sapling", NO_PROP },
-    { 0,   1,             16, "bamboo_block", NO_PROP },
+    { 0, 170,              1, "bamboo_block", AXIS_PROP },
     { 0, 189,       HIGH_BIT, "bamboo_button", BUTTON_PROP },
     { 0, 190,       HIGH_BIT, "bamboo_door", DOOR_PROP },
     { 0, 191,       HIGH_BIT, "bamboo_fence", FENCE_AND_VINE_PROP },
@@ -1361,9 +1365,12 @@ BlockTranslator BlockTranslations[NUM_TRANS] = {
     { 0, 194,	    HIGH_BIT, "bamboo_stairs", STAIRS_PROP },
     { 0, 195,       HIGH_BIT, "bamboo_trapdoor", TRAPDOOR_PROP },
     { 0, 172, HIGH_BIT | BIT_16, "bamboo_wall_sign", WALL_SIGN_PROP },
-    { 0,   1,             17, "bamboo_mosaic", NO_PROP },
+    { 0,   5,             11, "bamboo_mosaic", NO_PROP },
     { 0, 105,   HIGH_BIT | 5, "bamboo_mosaic_slab", SLAB_PROP },
     { 0, 196,	    HIGH_BIT, "bamboo_mosaic_stairs", STAIRS_PROP },
+    { 0, 170,              2, "stripped_bamboo_block", AXIS_PROP },
+    { 0,  47,         BIT_16, "chiseled_bookshelf", NO_PROP },
+    { 0, 197,	    HIGH_BIT, "pink_petals", PINK_PETALS_PROP },
 
  // Note: 140, 144 are reserved for the extra bit needed for BLOCK_FLOWER_POT and BLOCK_HEAD, so don't use these HIGH_BIT values
 };
@@ -3453,41 +3460,41 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
                                 //stairs_facing = 2;
                                 //chest_facing = 3; - same as 5-stairs_facing
                                 dropper_facing = 3;
-                                dataVal = 3;
+                                dataVal |= 3;   // or'ed in so that 0x8 bit etc. can be used with it
                             }
                             else if (strcmp(value, "west") == 0) {
                                 door_facing = 2;
                                 //stairs_facing = 1;
                                 //chest_facing = 4;
                                 dropper_facing = 4;
-                                dataVal = 2;
+                                dataVal |= 2;
                             }
                             else if (strcmp(value, "north") == 0) {
                                 door_facing = 3;
                                 //stairs_facing = 3;
                                 //chest_facing = 2;
                                 dropper_facing = 2;
-                                dataVal = 4;
+                                dataVal |= 4;
                             }
                             else if (strcmp(value, "east") == 0) {
                                 door_facing = 0;
                                 //stairs_facing = 0;
                                 //chest_facing = 5;
                                 dropper_facing = 5;
-                                dataVal = 1;
+                                dataVal |= 1;
                             }
                             // dispenser, dropper, amethyst buds
                             else if (strcmp(value, "up") == 0) {
                                 door_facing = 0;
                                 //chest_facing = 5;
                                 dropper_facing = 1;
-                                dataVal = 0;
+                                //dataVal = 0;
                             }
                             else if (strcmp(value, "down") == 0) {
                                 door_facing = 0;
                                 //chest_facing = 5;
                                 dropper_facing = 0;
-                                dataVal = 1;
+                                dataVal |= 1;
                             }
                         }
                         else if (strcmp(token, "half") == 0) {
@@ -3832,6 +3839,22 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
                             dataVal |= atoi(value);
                         }
 
+                        // for the chiseled bookshelf, just mark the low bit with a 1 if there is any occupied book slot.
+                        // direction is in 0x7 field
+                        else if (strcmp(token, "slot_0_occupied") == 0 ||
+                            strcmp(token, "slot_1_occupied") == 0 ||
+                            strcmp(token, "slot_2_occupied") == 0 ||
+                            strcmp(token, "slot_3_occupied") == 0 ||
+                            strcmp(token, "slot_4_occupied") == 0 ||
+                            strcmp(token, "slot_5_occupied") == 0 ) {
+                            dataVal |= (strcmp(value, "true") == 0) ? 8 : 0;
+                        }
+                        
+                        // for pink petals
+                        else if (strcmp(token, "flower_amount") == 0) {
+                            dataVal |= atoi(value);
+                        }
+
 #ifdef _DEBUG
                         else {
                             // ignore, not used by Mineways for now, BlockTranslations[typeIndex]
@@ -3847,7 +3870,6 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
 
                             // TODOTODOTODO
                             else if (strcmp(token, "cracked") == 0) {}	// for sniffer egg
-                            else if (strcmp(token, "flower_amount") == 0) {}	// for pink flowers
                             else {
                                 // unknown property - look at token and value
                                 assert(0);
@@ -4142,8 +4164,16 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
         case CALIBRATED_SCULK_SENSOR_PROP:
             // south/west/north/east == 0/1/2/3
             // counts in the sculk_sensor_phase which has been put in BIT_16.
-            // We don't want power, but we do want to know if it's calibrated and if it's sculk_sensor_phase is active
-            dataVal = ((door_facing + 3) % 4) | (dataVal & (0x4|BIT_16));
+            // We don't want power, but we do want to know if it's calibrated and if it's sculk_sensor_phase is active.
+            // Actually, we could leave off calibrated, 0x4 bit, as that should transmit at bottom
+            dataVal = ((door_facing + 3) % 4) | (dataVal & BIT_16); // (0x4 & BIT_16)
+            break;
+        case PINK_PETALS_PROP:
+            // south/west/north/east == 0/1/2/3
+            // flower_amount folded into 0xc
+            // We don't want power, but we do want to know if it's calibrated and if it's sculk_sensor_phase is active.
+            // Actually, we could leave off calibrated, 0x4 bit, as that should transmit at bottom
+            dataVal = (door_facing % 4) | ((dataVal & 0x3) << 2); // the 0x3 is just to be safe
             break;
         case BED_PROP:
             // south/west/north/east == 0/1/2/3
