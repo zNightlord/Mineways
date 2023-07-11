@@ -108,7 +108,7 @@ BlockDefinition gBlockDefinitions[NUM_BLOCKS_DEFINED] = {
     { /*  34 */ "Piston Head",            		0x95774b, 1.000f, 0xff7711, 0xff7711, 0.12345f,  11, 6, 0x00, BLF_ALMOST_WHOLE | BLF_TRUE_GEOMETRY | BLF_3D_BIT},	//22/34
     { /*  35 */ "Wool",                   		0xEEEEEE, 1.000f, 0xff7711, 0xff7711, 0.12345f,   0, 4, 0x0f, BLF_WHOLE | BLF_FENCE_NEIGHBOR},	//23 - gets converted to colors at end
     { /*  36 */ "Block moved by Piston",  		0x000000, 1.000f, 0xff7711, 0xff7711, 0.12345f,  11, 6, 0x00, BLF_NONE},	//24 (36) - really, nothing...
-    { /*  37 */ "Dandelion",              		0xD3DD05, 1.000f, 0xff7711, 0xff7711, 0.12345f,  13, 0, 0x00, BLF_FLATTEN | BLF_SMALL_BILLBOARD | BLF_CUTOUTS | BLF_DNE_FLUID},	//25
+    { /*  37 */ "Dandelion",              		0xD3DD05, 1.000f, 0xff7711, 0xff7711, 0.12345f,  13, 0, 0x01, BLF_FLATTEN | BLF_SMALL_BILLBOARD | BLF_CUTOUTS | BLF_DNE_FLUID},	//25
     { /*  38 */ "Poppy",                  		0xCE1A05, 1.000f, 0xff7711, 0xff7711, 0.12345f,  12, 0, 0x0f, BLF_FLATTEN | BLF_SMALL_BILLBOARD | BLF_CUTOUTS | BLF_DNE_FLUID},	//26 - 38
     { /*  39 */ "Brown Mushroom",         		0xc19171, 1.000f, 0xff7711, 0xff7711, 0.12345f,  13, 1, 0x00, BLF_FLATTEN | BLF_SMALL_BILLBOARD | BLF_CUTOUTS | BLF_DNE_FLUID | BLF_EMITTER},	//27
     { /*  40 */ "Red Mushroom",           		0xfc5c5d, 1.000f, 0xff7711, 0xff7711, 0.12345f,  12, 1, 0x03, BLF_FLATTEN | BLF_SMALL_BILLBOARD | BLF_CUTOUTS | BLF_DNE_FLUID},	//28
@@ -145,7 +145,7 @@ BlockDefinition gBlockDefinitions[NUM_BLOCKS_DEFINED] = {
     { /*  71 */ "Iron Door",              		0xb2b2b2, 1.000f, 0xff7711, 0xff7711, 0.12345f,   2, 5, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT},	//47 (71) 2,6 bottom TODO BLF_FLATSIDE?
     { /*  72 */ "Oak Pressure Plate",     		0x9d7f4e, 1.000f, 0xff7711, 0xff7711, 0.12345f,   4, 0, 0x00, BLF_FLATTEN | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_CONNECTS_REDSTONE},	//48
     { /*  73 */ "Redstone Ore",           		0x8f0303, 1.000f, 0xff7711, 0xff7711, 0.12345f,   3, 3, 0x00, BLF_WHOLE | BLF_FENCE_NEIGHBOR},	//49
-    { /*  74 */ "Glowing Redstone Ore",   		0x900303, 1.000f, 0xff7711, 0xff7711, 0.12345f,   3, 3, 0x00, BLF_WHOLE | BLF_FENCE_NEIGHBOR | BLF_EMITTER},	//4a (74)
+    { /*  74 */ "Glowing Redstone Ore",   		0x900303, 1.000f, 0xff7711, 0xff7711, 0.12345f,   3, 3, 0x00, BLF_WHOLE | BLF_FENCE_NEIGHBOR | BLF_EMITTER},	// unobtainable normally! https://minecraft.fandom.com/wiki/Redstone_Ore#Lit_redstone_ore_%22item%22
     { /*  75 */ "Redstone Torch (inactive)",	0x560000, 1.000f, 0xff7711, 0xff7711, 0.12345f,   3, 7, 0x00, BLF_MIDDLER | BLF_FLATTEN | BLF_SMALL_BILLBOARD | BLF_CUTOUTS | BLF_DNE_FLUID | BLF_CONNECTS_REDSTONE},	//4b
     { /*  76 */ "Redstone Torch (active)",  	0xfd0000, 1.000f, 0xff7711, 0xff7711, 0.12345f,   3, 6, 0x00, BLF_MIDDLER | BLF_FLATTEN | BLF_SMALL_BILLBOARD | BLF_CUTOUTS | BLF_EMITTER | BLF_DNE_FLUID | BLF_CONNECTS_REDSTONE},	//4c should be BLF_EMITTER, 0x00FF, But it makes the whole block glow
     { /*  77 */ "Stone Button",           		0xacacac, 1.000f, 0xff7711, 0xff7711, 0.12345f,   1, 0, 0x00, BLF_FLATTEN_SMALL | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_DNE_FLUID},	//4d
@@ -426,7 +426,7 @@ BlockDefinition gBlockDefinitions[NUM_BLOCKS_DEFINED] = {
     { /* 342 */ "Honey Block",           		0xFBBB41, 0.750f, 0xff7711, 0xff7711, 0.12345f,  3, 42, 0x00, BLF_WHOLE | BLF_TRUE_GEOMETRY | BLF_TRANSPARENT }, // the semi-transparent one
     { /* 343 */ "Honeycomb Block",         		0xE69B35, 1.000f, 0xff7711, 0xff7711, 0.12345f,  4, 42, 0x00, BLF_WHOLE | BLF_FENCE_NEIGHBOR },
     // 1.16
-    { /* 344 */ "Crying Obsidian",         		0x32115C, 1.000f, 0xff7711, 0xff7711, 0.12345f,  2, 45, 0x00, BLF_WHOLE | BLF_FENCE_NEIGHBOR | BLF_EMITTER },
+    { /* 344 */ "Crying Obsidian",         		0x32115C, 1.000f, 0xff7711, 0xff7711, 0.12345f,  2, 45, 0x01, BLF_WHOLE | BLF_FENCE_NEIGHBOR | BLF_EMITTER },
     { /* 345 */ "Respawn Anchor",         		0x5F0EC4, 1.000f, 0xff7711, 0xff7711, 0.12345f,  3, 45, 0x07, BLF_WHOLE | BLF_FENCE_NEIGHBOR | BLF_EMITTER },
     { /* 346 */ "Crimson Trapdoor",      		0x6C344A, 1.000f, 0xff7711, 0xff7711, 0.12345f,  9, 43, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_FLATTEN | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_MAYWATERLOG },   // tricky case: could be a flattop, or a flatside. For now, render it
     { /* 347 */ "Warped Trapdoor",      		0x307B74, 1.000f, 0xff7711, 0xff7711, 0.12345f,  9, 44, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_FLATTEN | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_MAYWATERLOG },   // tricky case: could be a flattop, or a flatside. For now, render it
@@ -494,7 +494,7 @@ BlockDefinition gBlockDefinitions[NUM_BLOCKS_DEFINED] = {
     { /* 408 */ "Big Dripleaf",					0x739234, 1.000f, 0xff7711, 0xff7711, 0.12345f,  3, 52, 0x01, BLF_FLATTEN | BLF_BILLBOARD | BLF_CUTOUTS | BLF_DNE_FLUID | BLF_MAYWATERLOG },
     { /* 409 */ "Small Dripleaf",				0x617A2E, 1.000f, 0xff7711, 0xff7711, 0.12345f,  7, 52, 0x00, BLF_FLATTEN | BLF_BILLBOARD | BLF_CUTOUTS | BLF_DNE_FLUID | BLF_MAYWATERLOG },
     { /* 410 */ "Glow Lichen",           		0x72847A, 1.000f, 0xff7711, 0xff7711, 0.12345f, 14, 52, 0x00, BLF_BILLBOARD | BLF_FLATTEN_SMALL | BLF_PANE | BLF_CUTOUTS | BLF_DNE_FLUID | BLF_OFFSET | BLF_EMITTER | BLF_MAYWATERLOG },
-    { /* 411 */ "Sculk Sensor",            		0x144856, 1.000f, 0xff7711, 0xff7711, 0.12345f, 15, 52, 0x04, BLF_HALF | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_CONNECTS_REDSTONE | BLF_MAYWATERLOG },
+    { /* 411 */ "Sculk Sensor",            		0x144856, 1.000f, 0xff7711, 0xff7711, 0.12345f, 15, 52, 0x04, BLF_HALF | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_CONNECTS_REDSTONE | BLF_EMITTER | BLF_MAYWATERLOG },
     { /* 412 */ "Cobbled Deepslate Stairs",     0x515153, 1.000f, 0xff7711, 0xff7711, 0.12345f,  6, 53, 0x00, BLF_STAIRS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE | BLF_MAYWATERLOG },
     { /* 413 */ "Polished Deepslate Stairs",    0x4C4C4C, 1.000f, 0xff7711, 0xff7711, 0.12345f,  8, 53, 0x00, BLF_STAIRS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE | BLF_MAYWATERLOG },
     { /* 414 */ "Deepslate Brick Stairs",       0x4B4B4B, 1.000f, 0xff7711, 0xff7711, 0.12345f,  9, 53, 0x00, BLF_STAIRS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE | BLF_MAYWATERLOG },
@@ -520,7 +520,8 @@ BlockDefinition gBlockDefinitions[NUM_BLOCKS_DEFINED] = {
     { /* 434 */ "Sculk Vein",           		0x0B3C45, 1.000f, 0xff7711, 0xff7711, 0.12345f, 12, 56, 0x00, BLF_BILLBOARD | BLF_FLATTEN_SMALL | BLF_PANE | BLF_CUTOUTS | BLF_DNE_FLUID | BLF_OFFSET | BLF_MAYWATERLOG },
     { /* 435 */ "Frogspawn",               		0x4D5581, 1.000f, 0xff7711, 0xff7711, 0.12345f,  8, 54, 0x00, BLF_FLATTEN | BLF_CUTOUTS | BLF_DNE_FLUID | BLF_OFFSET },
     { /* 436 */ "Ochre Froglight",         		0xFBF6D2, 1.000f, 0xff7711, 0xff7711, 0.12345f, 11, 55, 0x03, BLF_WHOLE | BLF_FENCE_NEIGHBOR | BLF_EMITTER },
-    { /* 437 */ "Mangrove Leaves",				0x6fac2c, 1.000f, 0xff7711, 0xff7711, 0.12345f, 11, 54, 0x01, BLF_WHOLE | BLF_CUTOUTS | BLF_LEAF_PART | BLF_MAYWATERLOG },	//12
+    { /* 437 */ "Mangrove Leaves",				0x6fac2c, 1.000f, 0xff7711, 0xff7711, 0.12345f, 11, 54, 0x01, BLF_WHOLE | BLF_CUTOUTS | BLF_LEAF_PART | BLF_MAYWATERLOG },
+        // 1.20, though I snuck Decorated Pot in a slot above
     { /* 438 */ "Cherry Button",                0xE3B4AE, 1.000f, 0xff7711, 0xff7711, 0.12345f,  8, 57, 0x00, BLF_FLATTEN_SMALL | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_DNE_FLUID },
     { /* 439 */ "Cherry Door",                  0xE0ACA7, 1.000f, 0xff7711, 0xff7711, 0.12345f,  4, 57, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT },
     { /* 440 */ "Cherry Fence",                 0xE3B4AE, 1.000f, 0xff7711, 0xff7711, 0.12345f,  8, 57, 0x00, BLF_MIDDLER | BLF_FENCE | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE | BLF_MAYWATERLOG },
@@ -536,7 +537,18 @@ BlockDefinition gBlockDefinitions[NUM_BLOCKS_DEFINED] = {
     { /* 450 */ "Bamboo Stairs",                0xC4AF52, 1.000f, 0xff7711, 0xff7711, 0.12345f, 14, 60, 0x00, BLF_STAIRS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE | BLF_MAYWATERLOG },
     { /* 451 */ "Bamboo Trapdoor",              0xC9B560, 1.000f, 0xff7711, 0xff7711, 0.12345f, 15, 60, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_FLATTEN | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_MAYWATERLOG },   // tricky case: could be a flattop, or a flatside. For now, render it
     { /* 452 */ "Bamboo Mosaic Stairs",         0xC0AC4F, 1.000f, 0xff7711, 0xff7711, 0.12345f, 13, 60, 0x00, BLF_STAIRS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE | BLF_MAYWATERLOG },
-    { /* 453 */ "Pink Petals",              	0xF7B9DC, 1.000f, 0xff7711, 0xff7711, 0.12345f, 11, 57, 0x00, BLF_FLATTEN | BLF_CUTOUTS | BLF_DNE_FLUID },
+    { /* 453 */ "Pink Petals",              	0xF7B9DC, 1.000f, 0xff7711, 0xff7711, 0.12345f, 11, 57, 0x00, BLF_FLATTEN | BLF_BILLBOARD | BLF_CUTOUTS | BLF_DNE_FLUID },
+    { /* 454 */ "Pitcher Crop",					0x7D9BC2, 1.000f, 0xff7711, 0xff7711, 0.12345f,  5, 58, 0x00, BLF_FLATTEN | BLF_TRUE_GEOMETRY | BLF_BILLBOARD | BLF_3D_BIT | BLF_CUTOUTS | BLF_DNE_FLUID },
+    { /* 455 */ "Sniffer Egg",            		0xBC4E3A, 1.000f, 0xff7711, 0xff7711, 0.12345f, 10, 58, 0x00, BLF_ALMOST_WHOLE | BLF_TRUE_GEOMETRY | BLF_3D_BIT },
+    { /* 456 */ "Suspicious Gravel",            0x837F7E, 1.000f, 0xff7711, 0xff7711, 0.12345f, 10, 59, 0x04, BLF_WHOLE | BLF_FENCE_NEIGHBOR },
+    { /* 457 */ "Torchflower Crop",				0xDE8B25, 1.000f, 0xff7711, 0xff7711, 0.12345f,  3, 60, 0x00, BLF_FLATTEN | BLF_BILLBOARD | BLF_CUTOUTS | BLF_DNE_FLUID },
+    { /* 458 */ "Oak Wall Hanging Sign",        0xB29157, 1.000f, 0xff7711, 0xff7711, 0.12345f,  0, 34, 0x3c, BLF_SMALL_MIDDLER | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_DNE_FLUID | BLF_MAYWATERLOG },
+    { /* 459 */ "Oak Hanging Sign",             0xB29157, 1.000f, 0xff7711, 0xff7711, 0.12345f,  0, 34, 0x20, BLF_SMALL_MIDDLER | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_DNE_FLUID | BLF_MAYWATERLOG },
+    { /* 460 */ "Birch Hanging Sign",           0xC5B077, 1.000f, 0xff7711, 0xff7711, 0.12345f,  2, 34, 0x20, BLF_SMALL_MIDDLER | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_DNE_FLUID | BLF_MAYWATERLOG },
+    { /* 461 */ "Acacia Hanging Sign",          0xAF5D3C, 1.000f, 0xff7711, 0xff7711, 0.12345f,  4, 34, 0x20, BLF_SMALL_MIDDLER | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_DNE_FLUID | BLF_MAYWATERLOG },
+    { /* 462 */ "Crimson Hanging Sign",         0x8A3A5A, 1.000f, 0xff7711, 0xff7711, 0.12345f, 13, 43, 0x20, BLF_SMALL_MIDDLER | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_DNE_FLUID | BLF_MAYWATERLOG },
+    { /* 463 */ "Mangrove Hanging Sign",        0x783730, 1.000f, 0xff7711, 0xff7711, 0.12345f, 15, 54, 0x20, BLF_SMALL_MIDDLER | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_DNE_FLUID | BLF_MAYWATERLOG },
+    { /* 464 */ "Bamboo Hanging Sign",          0xC4AF52, 1.000f, 0xff7711, 0xff7711, 0.12345f, 11, 60, 0x00, BLF_SMALL_MIDDLER | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_DNE_FLUID | BLF_MAYWATERLOG },
 
     // Important note: 396 is skipped, it's the BLOCK_FLOWER_POT, also skip 400, BLOCK_HEAD. Nicer still would be to redo the code for those two blocks (and redo IDBlock() method) so that we don't use up all 8 bits
 };

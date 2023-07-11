@@ -239,7 +239,7 @@ static bool makeBiomeHash = true;
 // facing: down|up|north|south|west|east
 // extended: true|false - ignored, don't know what that is (block wouldn't exist otherwise, right?
 // type: sticky|normal
-// short: true|false - TODOTODO, piston arm is shorter by 4 pixels, https://minecraft.gamepedia.com/Piston#Block_state_2 - not sure how to get this state, so leaving it alone
+// short: true|false - TODO, piston arm is shorter by 4 pixels, https://minecraft.gamepedia.com/Piston#Block_state_2 - not sure how to generate this state, so leaving it alone
 #define PISTON_HEAD_PROP	 EXTENDED_FACING_PROP
 // south|west|north|east|down|up: true|false
 #define FENCE_AND_VINE_PROP	 34
@@ -297,6 +297,7 @@ static bool makeBiomeHash = true;
 // waterlogged: true|false
 #define PICKLE_PROP			 48
 // eggs: 1-4
+// hatch: 0-3?
 #define EGG_PROP			 49
 // for wall signs - basically a dropper, without the other stuff such as up, etc.
 #define WALL_SIGN_PROP		 EXTENDED_FACING_PROP
@@ -364,8 +365,14 @@ static bool makeBiomeHash = true;
 // facing: SWNE 0x3
 // flower_amount: 0xc 1-4
 #define PINK_PETALS_PROP    63
+// age: 0-4
+// half: upper/lower
+#define PITCHER_CROP_PROP   64
+// rotation: 0-15
+// attached: true/false
+#define ATTACHED_HANGING_SIGN   65
 
-#define NUM_TRANS 979
+#define NUM_TRANS 1009
 
 BlockTranslator BlockTranslations[NUM_TRANS] = {
     //hash ID data name flags
@@ -1324,7 +1331,7 @@ BlockTranslator BlockTranslations[NUM_TRANS] = {
     { 0, 139,             21, "mud_brick_wall", WALL_PROP },	// no data values used for walls, it's all implied in Mineways
     { 0,   3,              5, "reinforced_deepslate", NO_PROP },
     { 0, 132,  HIGH_BIT | 47, "sculk", NO_PROP },
-    { 0,   3,              6, "sculk_catalyst", NO_PROP },
+    { 0,  88,   HIGH_BIT | 1, "sculk_catalyst", NO_PROP },  // part of crying obsidian, as it emits
     { 0, 177,       HIGH_BIT, "sculk_shrieker", NO_PROP },
     { 0, 178,       HIGH_BIT, "sculk_vein", FENCE_AND_VINE_PROP },
     { 0, 179,       HIGH_BIT, "frogspawn", NO_PROP },
@@ -1371,6 +1378,36 @@ BlockTranslator BlockTranslations[NUM_TRANS] = {
     { 0, 170,              2, "stripped_bamboo_block", AXIS_PROP },
     { 0,  47,         BIT_16, "chiseled_bookshelf", NO_PROP },
     { 0, 197,	    HIGH_BIT, "pink_petals", PINK_PETALS_PROP },
+    { 0, 198,       HIGH_BIT, "pitcher_crop", PITCHER_CROP_PROP },
+    { 0, 175,              6, "pitcher_plant", TALL_FLOWER_PROP },
+    { 0, 199,       HIGH_BIT, "sniffer_egg", EGG_PROP }, // hatch property is only one used, 0xC
+    { 0, 200,       HIGH_BIT, "suspicious_gravel", NO_PROP },   // dusted property
+    { 0, 200,   HIGH_BIT | 4, "suspicious_sand", NO_PROP },   // dusted property
+    { 0, 201,       HIGH_BIT, "torchflower_crop", NO_PROP },    // just age
+    { 0,  37,              1, "torchflower", NO_PROP },
+    { 0, BLOCK_FLOWER_POT,  YELLOW_FLOWER_FIELD | 1, "potted_torchflower", NO_PROP },
+    { 0, 202,       HIGH_BIT, "oak_wall_hanging_sign", SWNE_FACING_PROP },
+    { 0, 202, HIGH_BIT | (1 << 2), "spruce_wall_hanging_sign", SWNE_FACING_PROP },
+    { 0, 202, HIGH_BIT | (2 << 2), "birch_wall_hanging_sign", SWNE_FACING_PROP },
+    { 0, 202, HIGH_BIT | (3 << 2), "jungle_wall_hanging_sign", SWNE_FACING_PROP },
+    { 0, 202, HIGH_BIT | (4 << 2), "acacia_wall_hanging_sign", SWNE_FACING_PROP },
+    { 0, 202, HIGH_BIT | (5 << 2), "dark_oak_wall_hanging_sign", SWNE_FACING_PROP },
+    { 0, 202, HIGH_BIT | (6 << 2), "crimson_wall_hanging_sign", SWNE_FACING_PROP },
+    { 0, 202, HIGH_BIT | (7 << 2), "warped_wall_hanging_sign", SWNE_FACING_PROP },
+    { 0, 202, HIGH_BIT | (8 << 2), "mangrove_wall_hanging_sign", SWNE_FACING_PROP },
+    { 0, 202, HIGH_BIT | (9 << 2), "cherry_wall_hanging_sign", SWNE_FACING_PROP },
+    { 0, 202, HIGH_BIT | (10 << 2), "bamboo_wall_hanging_sign", SWNE_FACING_PROP },
+    { 0, 203,       HIGH_BIT, "oak_hanging_sign", ATTACHED_HANGING_SIGN },
+    { 0, 203, HIGH_BIT | BIT_32, "spruce_hanging_sign", ATTACHED_HANGING_SIGN },
+    { 0, 204,       HIGH_BIT, "birch_hanging_sign", ATTACHED_HANGING_SIGN },
+    { 0, 204, HIGH_BIT | BIT_32, "jungle_hanging_sign", ATTACHED_HANGING_SIGN },
+    { 0, 205,       HIGH_BIT, "acacia_hanging_sign", ATTACHED_HANGING_SIGN },
+    { 0, 205, HIGH_BIT | BIT_32, "dark_oak_hanging_sign", ATTACHED_HANGING_SIGN },
+    { 0, 206,       HIGH_BIT, "crimson_hanging_sign", ATTACHED_HANGING_SIGN },
+    { 0, 206, HIGH_BIT | BIT_32, "warped_hanging_sign", ATTACHED_HANGING_SIGN },
+    { 0, 207,       HIGH_BIT, "mangrove_hanging_sign", ATTACHED_HANGING_SIGN },
+    { 0, 207, HIGH_BIT | BIT_32, "cherry_hanging_sign", ATTACHED_HANGING_SIGN },
+    { 0, 208,       HIGH_BIT, "bamboo_hanging_sign", ATTACHED_HANGING_SIGN },
 
  // Note: 140, 144 are reserved for the extra bit needed for BLOCK_FLOWER_POT and BLOCK_HEAD, so don't use these HIGH_BIT values
 };
@@ -3016,7 +3053,10 @@ SectionsCode:
                             white tulip		red_flower		6
                             pink tulip		red_flower		7
                             oxeye daisy		red_flower		8
+                            ...
+                            warped_roots    red_flower      15
                             dandelion		yellow_flower	0
+                            torchflower		yellow_flower	1
                             red mushroom	red_mushroom	0
                             brown mushroom	brown_mushroom	0
                             oak sapling		sapling			0
@@ -3173,14 +3213,14 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
         conditional, inverted, enabled, doubleSlab, mode, waterlogged, in_wall, signal_fire, has_book, up, hanging;
     int axis, door_facing, hinge, open, face, rails, occupied, part, dropper_facing, eye, age,
         delay, locked, sticky, hatch, leaves, single, attachment, honey_level, stairs, bites, tilt,
-        thickness, vertical_direction, berries;
+        thickness, vertical_direction, berries, flower_amount;
     // to avoid Release build warning, but should always be set by code in practice
     int typeIndex = 0;
     half = north = south = east = west = down = lit = powered = triggered = extended = attached = disarmed
         = conditional = inverted = enabled = doubleSlab = mode = in_wall = signal_fire = has_book = up = hanging = false; // waterlogged is always set false in loop
     axis = door_facing = hinge = open = face = rails = occupied = part = dropper_facing = eye = age =
         delay = locked = sticky = hatch = leaves = single = attachment = honey_level = stairs = bites = tilt =
-        thickness = vertical_direction = berries = 0;
+        thickness = vertical_direction = berries = flower_amount = 0;
 
     // IMPORTANT: if any PROP field uses any of these:
     // triggered, extended, sticky, enabled, conditional, open, powered, face, has_book, powered, attachment, lit, signal_fire, honey_level
@@ -3852,7 +3892,7 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
                         
                         // for pink petals
                         else if (strcmp(token, "flower_amount") == 0) {
-                            dataVal |= atoi(value);
+                            flower_amount = atoi(value);
                         }
 
 #ifdef _DEBUG
@@ -3867,9 +3907,7 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
                             else if (strcmp(token, "unstable") == 0) {}	// does TNT blow up when punched? I don't care
                             else if (strcmp(token, "shrieking") == 0) {}	// non-visual sculk shrieker prop
                             else if (strcmp(token, "bloom") == 0) {}	// for sculk catalyst
-
-                            // TODOTODOTODO
-                            else if (strcmp(token, "cracked") == 0) {}	// for sniffer egg
+                            else if (strcmp(token, "cracked") == 0) {}	// for decorated pot - ignored
                             else {
                                 // unknown property - look at token and value
                                 assert(0);
@@ -4168,13 +4206,6 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
             // Actually, we could leave off calibrated, 0x4 bit, as that should transmit at bottom
             dataVal = ((door_facing + 3) % 4) | (dataVal & BIT_16); // (0x4 & BIT_16)
             break;
-        case PINK_PETALS_PROP:
-            // south/west/north/east == 0/1/2/3
-            // flower_amount folded into 0xc
-            // We don't want power, but we do want to know if it's calibrated and if it's sculk_sensor_phase is active.
-            // Actually, we could leave off calibrated, 0x4 bit, as that should transmit at bottom
-            dataVal = (door_facing % 4) | ((dataVal & 0x3) << 2); // the 0x3 is just to be safe
-            break;
         case BED_PROP:
             // south/west/north/east == 0/1/2/3
             // note that "occupied" will not be set if GRAPHICAL_ONLY is defined
@@ -4386,6 +4417,21 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
         case PROPAGULE_PROP:
             // use the age only if hanging. Age otherwise appears irrelevant?
             dataVal = (hanging ? (0x8 | age) : 0);
+            break;
+        case PINK_PETALS_PROP:
+            // south/west/north/east == 0/1/2/3
+            // flower_amount reduced from 1-4 to 0-3, then *4 and folded into 0xc
+            // We don't want power, but we do want to know if it's calibrated and if it's sculk_sensor_phase is active.
+            // Actually, we could leave off calibrated, 0x4 bit, as that should transmit at bottom
+            dataVal = (door_facing % 4) | ((flower_amount - 1) << 2);
+            break;
+        case PITCHER_CROP_PROP:
+            // age and upper/lower
+            dataVal = age | (half ? 0x8 : 0);
+            break;
+        case ATTACHED_HANGING_SIGN:
+            // south/west/north/east == 0/1/2/3
+            dataVal |= (attached ? BIT_16 : 0x0);
             break;
         }
         // make sure upper bits are not set - they should not be! Well, except for heads. So, comment out this test

@@ -1767,6 +1767,7 @@ Bed (#26)
 <center>Area under bed is solid</center>
 </td>
 <td>
+Only the red colored bed is supported (supporting all beds results in an excessive number of textures dedicated to beds).
 </td>
 </tr>
 
@@ -1967,6 +1968,26 @@ Wetness level is ignored.
 
 <tr>
 <td>
+Sign (#63)<br>
+Wall Hanging Sign<br>
+Hanging Sign<br>
+</td>
+<td>
+<center>Proper geometry</center>
+</td>
+<td>
+<center>Removed</center>
+</td>
+<td>
+<center>Proper geometry, with objects enlarged and chains removed</center>
+</td>
+<td>
+Signs are cobbled together from block textures, not from assets/minecraft/textures/entity/signs. No lettering will appear.
+</td>
+</tr>
+
+<tr>
+<td>
 Doors (#64, #71)
 </td>
 <td>
@@ -2018,7 +2039,7 @@ Snow (#78)
 <center>Proper geometry</center>
 </td>
 <td>
-Wall signs are put next to wall for printing - no gap.
+Wall signs are put next to wall for printing - no gap. Signs are cobbled together from block textures, not from assets/minecraft/textures/entity/signs. No lettering will appear.
 </td>
 </tr>
 
@@ -2798,6 +2819,23 @@ Only the basic, uncracked pot is represented.
 </td>
 </tr>
 
+<tr>
+<td>
+Pink Petals
+</td>
+<td>
+<center>Billboards</center>
+</td>
+<td>
+<center>Flattened</center>
+</td>
+<td>
+<center>Flattened</center>
+</td>
+<td>
+When 3D printing, only the full, "all petals" texture is applied to surfaces.
+</td>
+</tr>
 
 
 <tr>
@@ -2837,7 +2875,7 @@ The textures and rules used in Minecraft for how blocks appear and connect have 
 From newest to oldest. The very newest is sometimes unreleased work in progress, with "*" meaning "to do" and "**" meaning "stretch goal."
 
 <UL>
-<LI><B>Version 11.00</B>, 7/3/2023 - <a href="https://erich.realtimerendering.com/minecraft/public/mineways/minewaysV1100.zip">exe</a>, <a href="https://github.com/erich666/Mineways/tags">source</a>.
+<LI><B>Version 11.00</B>, 7/11/2023 - <a href="https://erich.realtimerendering.com/minecraft/public/mineways/minewaysV1100.zip">exe</a>, <a href="https://github.com/erich666/Mineways/tags">source</a>.
   <BR>
   <UL>
 	<LI>Minecraft 1.20.1 support. New ChannelMixer version 1.14 and TileMaker 3.19. Added <a href="https://minecraft.fandom.com/wiki/Cherry_Grove">cherry grove biome</a>. 
@@ -2846,7 +2884,9 @@ From newest to oldest. The very newest is sometimes unreleased work in progress,
 	<LI>Fix mangrove door top and bottom to use mangrove plank texture for full block 3D printing.
 	<LI>Fix Block Test World for newer fence and fence gate representations.
 	<LI>A few fixes to "first face" flags for individual block export, so that individual blocks are always given names.
-	<LI>TODO - update all extra terrain packs.
+	<LI>Fixed mangrove roots so that they match between single and double sided output.
+	<LI>Sculk catalyst and sculk sensor now emit light.
+	<LI>TODO - update all extra terrain packs. Look for TODOTODO's
 </UL>
 
  <LI>Version 10.15, 5/9/2023 - <a href="https://erich.realtimerendering.com/minecraft/public/mineways/minewaysV1015.zip">exe</a>, <a href="https://github.com/erich666/Mineways/tags">source</a>.

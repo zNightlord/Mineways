@@ -784,6 +784,8 @@ const char* RetrieveBlockSubname(int type, int dataVal) // , WorldBlock* block),
         case 2:
         case YELLOW_FLOWER_FIELD | 0:
             return "Potted Dandelion";
+        case YELLOW_FLOWER_FIELD | 1:
+            return "Potted Torchflower";
         case 1:
         case RED_FLOWER_FIELD | 0:
             return "Potted Poppy";
@@ -920,6 +922,19 @@ const char* RetrieveBlockSubname(int type, int dataVal) // , WorldBlock* block),
         }
         break;
 
+    case BLOCK_DANDELION:
+        switch (dataVal & 0xf)
+        {
+        default:
+            assert(0);
+            break;
+        case 0: // damdelion
+            break;
+        case 1:	// torchflower
+            return "Torchflower";
+        }
+        break;
+
     case BLOCK_DOUBLE_FLOWER:
         // subtract 256, one Y level, as we need to look at the bottom of the plant to ID its type.
         // This is just a safety net now - we actually shove the data value into the upper part of the plant nowadays, in extractChunk
@@ -944,6 +959,8 @@ const char* RetrieveBlockSubname(int type, int dataVal) // , WorldBlock* block),
             return "Rose Bush";
         case 5:	// peony
             return "Peony";
+        case 6:
+            return "Pitcher Plant";
         }
         break;
 
@@ -1105,10 +1122,20 @@ const char* RetrieveBlockSubname(int type, int dataVal) // , WorldBlock* block),
             return "Warped Nylium";
         case 5:
             return "Reinforced Deepslate";
-        case 6:
-            return "Sculk Catalyst";
         }
         break;
+
+    case BLOCK_CRYING_OBSIDIAN:
+        switch (dataVal & 0xf)
+        {
+        default:
+            assert(0);
+            break;
+        case 0:
+            break;
+        case 1:
+            return "Sculk Catalyst";
+        }
 
     case BLOCK_SAPLING:
         // mask off the age_bit - specifies the sapling's growth stage.
@@ -2233,6 +2260,13 @@ const char* RetrieveBlockSubname(int type, int dataVal) // , WorldBlock* block),
         }
         break;
 
+    case BLOCK_SUSPICIOUS_GRAVEL:
+        if (dataVal & 0x4)
+        {
+            return "Suspicious Sand";
+        }
+        break;
+
     case BLOCK_HAY:
         switch (dataVal & 0x3)
         {
@@ -2248,10 +2282,65 @@ const char* RetrieveBlockSubname(int type, int dataVal) // , WorldBlock* block),
         }
         break;
 
+    case BLOCK_OAK_WALL_HANGING_SIGN:
+        switch (dataVal & (0xC | BIT_16 | BIT_32))
+        {
+        default:
+            assert(0);
+        case 0:
+            break;
+            // return "Oak Wall Hanging Sign";
+        case 1 << 2:	// spruce
+            return "Spruce Wall Hanging Sign";
+        case 2 << 2:	// birch
+            return "Birch Wall Hanging Sign";
+        case 3 << 2:	// jungle
+            return "Jungle Wall Hanging Sign";
+        case 4 << 2:	// acacia
+            return "Acacia Wall Hanging Sign";
+        case 5 << 2:	// dark oak
+            return "Dark Oak Wall Hanging Sign";
+        case 6 << 2:
+            return "Crimson Wall Hanging Sign";
+        case 7 << 2:
+            return "Warped Wall Hanging Sign";
+        case 8 << 2:
+            return "Mangrove Wall Hanging Sign";
+        case 9 << 2:
+            return "Cherry Wall Hanging Sign";
+        case 10 << 2:
+            return "Bamboo Wall Hanging Sign";
+        }
+        break;
+
+    case BLOCK_OAK_HANGING_SIGN:
+        if (dataVal & BIT_16)
+        {
+            return "Spruce Hanging Sign";
+        }
+        break;
+    case BLOCK_ACACIA_HANGING_SIGN:
+        if (dataVal & BIT_16)
+        {
+            return "Dark Oak Hanging Sign";
+        }
+        break;
+    case BLOCK_CRIMSON_HANGING_SIGN:
+        if (dataVal & BIT_16)
+        {
+            return "Warped Hanging Sign";
+        }
+        break;
+    case BLOCK_MANGROVE_HANGING_SIGN:
+        if (dataVal & BIT_16)
+        {
+            return "Cherry Hanging Sign";
+        }
+        break;
     }
 
     return gBlockDefinitions[type].name;
-}
+}   // endend
 
 //copy block to bits at px,py at zoom.  bits is wxh
 static void blit(unsigned char* block, unsigned char* bits, int px, int py,
@@ -2849,7 +2938,20 @@ static unsigned int checkSpecialBlockColor(WorldBlock* block, unsigned int voxel
         case 5: // reinforced deepslate
             color = 0x5B6057;
             break;
-        case 6: // Sculk Catalyst
+        }
+        break;
+
+    case BLOCK_CRYING_OBSIDIAN:
+        dataVal = block->data[voxel];
+        switch (dataVal & 0xf)
+        {
+        default:
+            assert(0);
+        case 0:
+            lightComputed = true;
+            color = gBlockColors[type * 16 + light];
+            break;
+        case 1: // Sculk Catalyst
             color = 0x143036;
             break;
         }
@@ -3049,7 +3151,7 @@ static unsigned int checkSpecialBlockColor(WorldBlock* block, unsigned int voxel
 
     case BLOCK_MANGROVE_LEAVES:
         dataVal = block->data[voxel];
-        if (dataVal)
+        if (dataVal & 0x3)
         {
             // cherry, not affected by biome
             color = 0xE9B1CC;
@@ -3344,6 +3446,34 @@ static unsigned int checkSpecialBlockColor(WorldBlock* block, unsigned int voxel
         case 11: // wither rose
             color = 0x2D3119;
             break;
+        case 12:    // crimson fungus
+            color = 0x9D3F2B;
+            break;
+        case 13:    // warped fungus
+            color = 0x777965;
+            break;
+        case 14:    // crimson root
+            color = 0x3092B;
+            break;
+        case 15:    // warped root
+            color = 0x148E7E;
+            break;
+        }
+        break;
+
+    case BLOCK_DANDELION:
+        dataVal = block->data[voxel];
+        switch (dataVal & 0xf)
+        {
+        default:
+            assert(0);
+        case 0: // dandelion
+            lightComputed = true;
+            color = gBlockColors[type * 16 + light];
+            break;
+        case 1:	// torchflower
+            color = 0xF6B927;   // picked from the flower, instead of an average solid color, which was boring brown 0x887354
+            break;
         }
         break;
 
@@ -3388,6 +3518,9 @@ static unsigned int checkSpecialBlockColor(WorldBlock* block, unsigned int voxel
             break;
         case 5:	// peony
             color = 0xE3BCF4;
+            break;
+        case 6: // pitcher plant
+            color = 0x7D9BC2;
             break;
         }
         break;
@@ -4210,6 +4343,105 @@ static unsigned int checkSpecialBlockColor(WorldBlock* block, unsigned int voxel
         }
         break;
 
+    case BLOCK_SUSPICIOUS_GRAVEL:
+        dataVal = block->data[voxel];
+        switch (dataVal & 0x4)
+        {
+        default:
+            assert(0);
+        case 0:
+            lightComputed = true;
+            color = gBlockColors[type * 16 + light];
+            break;
+        case 4:	// suspicious sand
+            color = 0xDACDA1;
+            break;
+        }
+        break;
+
+    case BLOCK_OAK_WALL_HANGING_SIGN:
+        dataVal = block->data[voxel];
+        switch (dataVal & (0xC | BIT_16 | BIT_32))
+        {
+        default:
+            assert(0);
+        case 0:
+            lightComputed = true;
+            color = gBlockColors[type * 16 + light];
+            break;
+        case 1 << 2:	// spruce
+            color = 0x745A35;
+            break;
+        case 2 << 2:	// birch
+            color = 0xC5B077;
+            break;
+        case 3 << 2:	// jungle
+            color = 0xAC8555;
+            break;
+        case 4 << 2:	// acacia
+            color = 0xAF5D3C;
+            break;
+        case 5 << 2:	// dark oak
+            color = 0x493924;
+            break;
+        case 6 << 2:   // crimson
+            color = 0x8A3A5A;
+            break;
+        case 7 << 2:   // warped
+            color = 0x3A9794;
+            break;
+        case 8 << 2:    // mangrove
+            color = 0x783730;
+            break;
+        case 9 << 2:	// cherry
+            color = 0xDDA7A0;
+            break;
+        case 10 << 2:	// bamboo
+            color = 0xC4AF52;
+            break;
+        }
+        break;
+
+    case BLOCK_OAK_HANGING_SIGN:
+        dataVal = block->data[voxel];
+        if (dataVal & BIT_32)
+        {
+            color = 0x745632;   // spruce
+        }
+        break;
+
+    case BLOCK_BIRCH_HANGING_SIGN:
+        dataVal = block->data[voxel];
+        if (dataVal & BIT_32)
+        {
+            color = 0xAC8555;   // jungle
+        }
+        break;
+
+    case BLOCK_ACACIA_HANGING_SIGN:
+        dataVal = block->data[voxel];
+        if (dataVal & BIT_32)
+        {
+            color = 0x745632;   // dark oak
+        }
+        break;
+
+    case BLOCK_CRIMSON_HANGING_SIGN:
+        dataVal = block->data[voxel];
+        if (dataVal & BIT_32)
+        {
+            color = 0x745632;   // warped
+        }
+        break;
+
+    case BLOCK_MANGROVE_HANGING_SIGN:
+        dataVal = block->data[voxel];
+        if (dataVal & BIT_32)
+        {
+            color = 0x745632;   // mangrove
+        }
+        break;
+
     default:
         // Everything else
         lightComputed = true;
@@ -4324,7 +4556,7 @@ static unsigned int checkSpecialBlockColor(WorldBlock* block, unsigned int voxel
     }
 
     return color;
-}
+}   // endend
 
 // Draw a block at chunk bx,bz
 // opts is a bitmask representing render options (see MinewaysMap.h)
@@ -4920,10 +5152,21 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
     case BLOCK_CAVE_VINES_LIT:
     case BLOCK_AZALEA:
     case BLOCK_MANGROVE_LEAVES:
+    case BLOCK_DANDELION:
+    case BLOCK_CRYING_OBSIDIAN:
         // uses 0-1 
         if (dataVal < 2)
         {
             addBlock = 1;
+        }
+        break;
+    case BLOCK_TORCHFLOWER_CROP:
+        // uses 0-1, put on farmland
+        if (dataVal < 2)
+        {
+            addBlock = 1;
+            // add farmland underneath
+            block->grid[BLOCK_INDEX(4 + (type % 2) * 8, y - 1, 4 + (dataVal % 2) * 8)] = BLOCK_FARMLAND;
         }
         break;
     case BLOCK_FIRE:
@@ -5041,10 +5284,25 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
     case BLOCK_DEAD_CORAL_BLOCK:
     case BLOCK_CRIMSON_DOUBLE_SLAB:
     case BLOCK_RESPAWN_ANCHOR:
-        // uses 0-3
+        // uses 0-4
         if (dataVal < 5)
         {
             addBlock = 1;
+        }
+        break;
+    case BLOCK_PITCHER_CROP:
+        // uses 0-4
+        if (dataVal < 5)
+        {
+            addBlock = 1;
+            // add farmland underneath
+            block->grid[BLOCK_INDEX(4 + (type % 2) * 8, y - 1, 4 + (dataVal % 2) * 8)] = BLOCK_FARMLAND;
+            // if age is 3 or 4, add block above of same flower
+            if (dataVal > 2) {
+                bi = BLOCK_INDEX(4 + (type % 2) * 8, y + 1, 4 + (dataVal % 2) * 8);
+                block->grid[bi] = (unsigned char)type;
+                block->data[bi] = (unsigned char)(dataVal | 0x8 | typeHighBit); // 0x8 means half is upper
+            }
         }
         break;
     case BLOCK_CORAL:
@@ -5090,7 +5348,7 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
         {
             addBlock = 1;
             // for just chorus flower, put endstone below
-            if (type == BLOCK_CHORUS_FLOWER)
+            if (origType == BLOCK_CHORUS_FLOWER)
             {
                 block->grid[BLOCK_INDEX(4 + (type % 2) * 8, y - 1, 4 + (dataVal % 2) * 8)] = BLOCK_END_STONE;
             }
@@ -5120,8 +5378,8 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
         }
         break;
     case BLOCK_DOUBLE_FLOWER:
-        // uses 0-5, put flower head above it
-        if (dataVal < 6)
+        // uses 0-6, put flower head above it
+        if (dataVal < 7)
         {
             addBlock = 1;
             // add flower above
@@ -5211,6 +5469,7 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
     case BLOCK_BAMBOO_MOSAIC_STAIRS:
     case BLOCK_WOODEN_DOUBLE_SLAB:
     case BLOCK_CUT_COPPER_DOUBLE_SLAB:
+    case BLOCK_SUSPICIOUS_GRAVEL:
         // uses 0-7 - TODO we could someday add more blocks to neighbor the others, in order to show the stairs' "step block trim" feature of week 39
         if (dataVal < 8)
         {
@@ -5253,7 +5512,6 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
         }
         break;
     case BLOCK_OAK_PLANKS:
-    case BLOCK_POPPY:
         // uses 0-11
         if (dataVal < 12)
         {
@@ -5300,6 +5558,8 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
                 block->data[neighborIndex] = SAPLING_FIELD | 2;
                 block->grid[neighborIndex2] = BLOCK_FLOWER_POT;
                 block->data[neighborIndex2] = RED_MUSHROOM_FIELD | 0;
+                block->grid[neighborIndex3] = BLOCK_FLOWER_POT;  // torchflower
+                block->data[neighborIndex3] = YELLOW_FLOWER_FIELD | 1;  // torchflower
                 break;
             case 4:
                 block->grid[neighborIndex] = BLOCK_FLOWER_POT;
@@ -5452,7 +5712,7 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
         if ((dataVal & 0x03) < 2) {    // mangrove and cherry
             addBlock = 1;
             // add "wood" variant to map diagonally SE of original
-            if (dataVal < ((type == BLOCK_LOG) ? 4 : 2)) {
+            if (dataVal < ((origType == BLOCK_LOG) ? 4 : 2)) {
                 // add "wood" variant to map
                 neighborIndex = BLOCK_INDEX(6 + (type % 2) * 8, y, 6 + (dataVal % 2) * 8);
                 block->grid[neighborIndex] = (unsigned char)type;
@@ -5505,6 +5765,7 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
     case BLOCK_CAMPFIRE:
     case BLOCK_MANGROVE_SIGN_POST:
     case BLOCK_PINK_PETALS:
+    case BLOCK_POPPY:
         // uses all bits, 0-15
         addBlock = 1;
         break;
@@ -5628,7 +5889,7 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
                 block->grid[BLOCK_INDEX(x + 4 + (type % 2) * 8, y, z + 4 + (dataVal % 2) * 8)] = (unsigned char)type;
             }
         }
-        else if (type == BLOCK_STATIONARY_WATER) {
+        else if (origType == BLOCK_STATIONARY_WATER) {
             // for stationary water, bubble column is put at bottom
             if (dataVal == 15) {
                 addBlock = 1;
@@ -5873,7 +6134,7 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
         {
             addBlock = 1;
             // set higher bits BIT_8 and BIT_16
-            if (type == BLOCK_WALL_SIGN) {
+            if (origType == BLOCK_WALL_SIGN) {
                 // cycle 8 materials
                 finalDataVal = ((dataVal % 8) << 3) | (dataVal & 0x7);
             }
@@ -6179,7 +6440,7 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
                 bi = BLOCK_INDEX(bx, by, bz);
                 block->grid[bi] = BLOCK_PISTON_HEAD;
                 // sticky or not, plus direction
-                block->data[bi] |= (unsigned char)(trimVal | ((type == BLOCK_STICKY_PISTON) ? 0x8 : 0x0));
+                block->data[bi] |= (unsigned char)(trimVal | ((origType == BLOCK_STICKY_PISTON) ? 0x8 : 0x0));
             }
         }
         break;
@@ -6239,11 +6500,11 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
             bi = BLOCK_INDEX(4 + (type % 2) * 8, y + 1, 4 + (dataVal % 2) * 8);
             block->grid[bi] = (unsigned char)type;
             // just a post
-            block->data[bi] = (unsigned char)(((type == BLOCK_CHORUS_PLANT)? BIT_16 : 0) | typeHighBit);
+            block->data[bi] = (unsigned char)(((origType == BLOCK_CHORUS_PLANT)? BIT_16 : 0) | typeHighBit);
         }
 
         // for just chorus plant, put endstone below
-        if (type == BLOCK_CHORUS_PLANT)
+        if (origType == BLOCK_CHORUS_PLANT)
         {
             finalDataVal |= BIT_16;
             block->grid[BLOCK_INDEX(4 + (type % 2) * 8, y - 1, 4 + (dataVal % 2) * 8)] = BLOCK_END_STONE;
@@ -6529,6 +6790,7 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
         break;
 
     case BLOCK_PURPUR_PILLAR:
+    case BLOCK_SNIFFER_EGG:
         // uses 0,4,8
         if ((dataVal == 0) || (dataVal == 4) || (dataVal == 8)) {
             addBlock = 1;
@@ -6771,6 +7033,48 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
         }
         break;
 
+    case BLOCK_OAK_WALL_HANGING_SIGN:
+        // 0-10 x 4 + 0-3 => 0-43
+    case BLOCK_OAK_HANGING_SIGN:
+    case BLOCK_BIRCH_HANGING_SIGN:
+    case BLOCK_ACACIA_HANGING_SIGN:
+    case BLOCK_CRIMSON_HANGING_SIGN:
+    case BLOCK_MANGROVE_HANGING_SIGN:
+    case BLOCK_BAMBOO_HANGING_SIGN:
+        // 0-64,
+        // add new style diagonally SE of original
+        {
+            addBlock = 1;
+            neighborIndex = BLOCK_INDEX(5 + (type % 2) * 8, y, 5 + (dataVal % 2) * 8);
+            int neighborIndex2 = BLOCK_INDEX(6 + (type % 2) * 8, y, 6 + (dataVal % 2) * 8);
+            int neighborIndex3 = BLOCK_INDEX(7 + (type % 2) * 8, y, 7 + (dataVal % 2) * 8);
+
+            block->grid[neighborIndex] = (unsigned char)type;
+            block->data[neighborIndex] = (unsigned char)((dataVal + 16) | typeHighBit);
+            // third block needed only when "total" dataVal is < 44
+            if ((origType != BLOCK_OAK_WALL_HANGING_SIGN) || (dataVal < 12)) {
+                block->grid[neighborIndex2] = (unsigned char)type;
+                block->data[neighborIndex2] = (unsigned char)((dataVal + 32) | typeHighBit);
+            }
+            // fourth block needed only for non-wall hanging signs (48-63)
+            if (origType != BLOCK_OAK_WALL_HANGING_SIGN) {
+                block->grid[neighborIndex3] = (unsigned char)type;
+                block->data[neighborIndex3] = (unsigned char)((dataVal + 48) | typeHighBit);
+            }
+
+            if (origType != BLOCK_OAK_WALL_HANGING_SIGN) {
+                // add wood block or fence post overhead each hanging sign
+                bi = BLOCK_INDEX(4 + (type % 2) * 8, y + 1, 4 + (dataVal % 2) * 8);
+                block->grid[bi] = BLOCK_STONE;
+                // Y+1 is 256 higher
+                block->grid[neighborIndex + 256] = BLOCK_FENCE;
+                // goes stone/fence/stone/fence since "attach" bit is next-to-highest
+                block->grid[neighborIndex2 + 256] = BLOCK_STONE;
+                block->grid[neighborIndex3 + 256] = BLOCK_FENCE;
+            }
+        }
+        break;
+
         // don't show special blocks to users
 #ifndef _DEBUG
     case BLOCK_UNKNOWN:
@@ -6798,7 +7102,7 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
         }
 #endif
     }
-}
+}   // endend
 
 void testNumeral(WorldBlock* block, int type, int y, int digitPlace, int outType)
 {
