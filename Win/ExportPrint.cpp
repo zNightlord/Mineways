@@ -287,7 +287,8 @@ INT_PTR CALLBACK ExportPrint(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
             CheckDlgButton(hDlg, IDC_MATERIAL_PER_BLOCK_FAMILY, BST_INDETERMINATE);
             CheckDlgButton(hDlg, IDC_SPLIT_BY_BLOCK_TYPE, BST_INDETERMINATE);
             if (epd.fileType == FILE_TYPE_USD) {
-                CheckDlgButton(hDlg, IDC_G3D_MATERIAL, epd.chkCustomMaterial[epd.fileType]);
+                // indeterminate if exportMDL is off, for USD
+                CheckDlgButton(hDlg, IDC_G3D_MATERIAL, epd.chkExportMDL ? epd.chkCustomMaterial[epd.fileType] : BST_INDETERMINATE);
                 CheckDlgButton(hDlg, IDC_EXPORT_MDL, epd.chkExportMDL);
             }
             else
@@ -1013,14 +1014,14 @@ INT_PTR CALLBACK ExportPrint(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
                     // depending on file format, explain problems and solutions
                     if (epd.fileType == FILE_TYPE_WAVEFRONT_ABS_OBJ || epd.fileType == FILE_TYPE_WAVEFRONT_REL_OBJ)
                         // Sculpteo
-                        MessageBox(NULL, _T("Warning: this checkbox allows tiny features to be exported for 3D printing. Some of these small bits - fences, free-standing signs - may snap off during manufacture. Fattened versions of these objects are used by default, but even these can break. Also, the edge connection and floater checkboxes have been unchecked, since these options can cause problems. Finally, the meshes for some objects have elements that can cause Sculpteo's slicer problems - either visually check the uploaded file carefully, or if you're lucky enough to have access, use netfabb to clean up the mesh."),
+                        MessageBox(NULL, _T("Warning: this checkbox allows tiny features to be exported for 3D printing. Some of these small bits - fences, free-standing signs - may snap off during manufacture. Fattened versions of these objects are used by default, but even these can break. Also, the edge connection and floater checkboxes have been unchecked, since these options can cause problems. Finally, the meshes for some objects have elements that can cause Sculpteo's slicer problems - either visually check the uploaded file carefully or run it through a mesh cleanup system such as Netfabb; old free version: https://github.com/3DprintFIT/netfabb-basic-download."),
                             _T("Warning"), MB_OK | MB_ICONWARNING | MB_SYSTEMMODAL);
                     else if (epd.fileType == FILE_TYPE_VRML2)
                         // Shapeways
-                        MessageBox(NULL, _T("Warning: this checkbox allows tiny features to be exported for 3D printing. Some of these small bits - fences, free-standing signs - may snap off during manufacture. Fattened versions of these objects are used by default, but even these can break, so Shapeways may refuse to print the model. Also, the edge connection and floater checkboxes have been unchecked, since these options can cause problems. The one bit of good news is that Shapeways' software will clean up the mesh for you, so at least any geometric inconsistencies will not cause you problems."),
+                        MessageBox(NULL, _T("Warning: this checkbox allows tiny features to be exported for 3D printing. Some of these small bits - fences, free-standing signs - may snap off during manufacture. Fattened versions of these objects are used by default, but even these can break, so Shapeways may refuse to print the model. Also, the edge connection and floater checkboxes have been unchecked, since these options can cause problems. The one bit of good news is that Shapeways' software will clean up the mesh for you, so at least any geometric inconsistencies will not cause you problems. If you are 3D printing otherwise, you may need to clean up the mesh with a system such as Netfabb; old free version: https://github.com/3DprintFIT/netfabb-basic-download."),
                             _T("Warning"), MB_OK | MB_ICONWARNING | MB_SYSTEMMODAL);
                     else
-                        MessageBox(NULL, _T("Warning: this checkbox allows tiny features to be exported for 3D printing. Some of these small bits - fences, free-standing signs - may snap off during manufacture. Fattened versions of these objects are used by default, but even these can break. Also, the edge connection and floater checkboxes have been unchecked, since these options can cause problems. Finally, the meshes for some objects have elements that can cause some 3D printer slicers problems; you might want to clean up the mesh with software such as netfabb basic on desktop or free at http://cloud.netfabb.com."),
+                        MessageBox(NULL, _T("Warning: this checkbox allows tiny features to be exported for 3D printing. Some of these small bits - fences, free-standing signs - may snap off during manufacture. Fattened versions of these objects are used by default, but even these can break. Also, the edge connection and floater checkboxes have been unchecked, since these options can cause problems. Finally, the meshes for some objects have elements that can cause some 3D printer slicers problems; you may need to clean up the mesh with a system such as Netfabb; old free version: https://github.com/3DprintFIT/netfabb-basic-download."),
                             _T("Warning"), MB_OK | MB_ICONWARNING | MB_SYSTEMMODAL);
                     CheckDlgButton(hDlg, IDC_FATTEN, BST_CHECKED);
                     CheckDlgButton(hDlg, IDC_DELETE_FLOATERS, BST_UNCHECKED);
@@ -1031,6 +1032,12 @@ INT_PTR CALLBACK ExportPrint(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
                 else if (IsDlgButtonChecked(hDlg, IDC_EXPORT_ALL) == BST_UNCHECKED)
                 {
                     // if lesser is toggled back off, turn on the defaults
+                    if (IsDlgButtonChecked(hDlg, IDC_RADIO_EXPORT_SEPARATE_TILES)) {
+                        MessageBox(NULL, _T("Warning: turning details off changes the export mode to \"Export all textures to three large, mosaic images,\" as the \"Export individual blocks\" export mode is incompatible with full block export. New textures are created that are composites, e.g., fern atop a grass block."),
+                            _T("Warning"), MB_OK | MB_ICONWARNING | MB_SYSTEMMODAL);
+                        CheckDlgButton(hDlg, IDC_RADIO_EXPORT_MOSAIC_TEXTURES, 1);
+                        CheckDlgButton(hDlg, IDC_RADIO_EXPORT_SEPARATE_TILES, 0);
+                    }
                     CheckDlgButton(hDlg, IDC_DELETE_FLOATERS, BST_CHECKED);
                     CheckDlgButton(hDlg, IDC_CONNECT_PARTS, BST_CHECKED);
                     CheckDlgButton(hDlg, IDC_CONNECT_CORNER_TIPS, BST_CHECKED);
@@ -1046,6 +1053,12 @@ INT_PTR CALLBACK ExportPrint(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
                 }
                 else if (IsDlgButtonChecked(hDlg, IDC_EXPORT_ALL) == BST_UNCHECKED)
                 {
+                    if (IsDlgButtonChecked(hDlg, IDC_RADIO_EXPORT_SEPARATE_TILES)) {
+                        MessageBox(NULL, _T("Warning: turning details off changes the export mode to \"Export all textures to three large, mosaic images,\" as the \"Export individual blocks\" export mode is incompatible with full block export. New textures are created that are composites, e.g., fern atop a grass block."),
+                            _T("Warning"), MB_OK | MB_ICONWARNING | MB_SYSTEMMODAL);
+                        CheckDlgButton(hDlg, IDC_RADIO_EXPORT_MOSAIC_TEXTURES, 1);
+                        CheckDlgButton(hDlg, IDC_RADIO_EXPORT_SEPARATE_TILES, 0);
+                    }
                     // definitely make compositing uncheckable at this point - full blocks mean that composite overlay must be used, vs. separate objects
                     CheckDlgButton(hDlg, IDC_COMPOSITE_OVERLAY, BST_INDETERMINATE);
 

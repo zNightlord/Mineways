@@ -31,6 +31,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 #include "ColorSchemes.h"
 #include "ExportPrint.h"
 #include "Location.h"
+#include "nbt.h"    // just for SlowFindIndexFromName()
 #ifdef SKETCHFAB
 #include "publishSkfb.h"
 #endif
@@ -120,7 +121,7 @@ static Options gOptions = { 0,   // which world is visible
     NULL };
 
 static WorldGuide gWorldGuide;
-// find versions here: https://minecraft.gamepedia.com/Data_version
+// find versions here: https://minecraft.wiki/w/Data_version
 static int gVersionID = 0;								// Minecraft version 1.9 (finally) introduced a version number for the releases. 0 means Minecraft world is earlier than 1.9.
 // translate the number above into a version number, e.g. 12, 13, 14 for 1.12, 1.13, 1.14:
 static int gMinecraftVersion = 0;
@@ -251,6 +252,10 @@ static bool gShowError = true;
 // the ability of the left mouse (i.e., pan movement) to the middle mouse button instead
 static int gRemapMouse[3] = { 0,1,2 };
 
+static TranslationTuple *gModTranslations = NULL;
+
+static int gUserSelectedBiome = -1;
+
 #define LEFT_MOUSE_BUTTON_INDEX 0
 #define MIDDLE_MOUSE_BUTTON_INDEX 1
 #define RIGHT_MOUSE_BUTTON_INDEX 2
@@ -326,9 +331,13 @@ typedef struct ImportedSet {
     HANDLE logfile;
     ChangeBlockCommand* pCBChead;
     ChangeBlockCommand* pCBClast;
+    bool showError;
+    bool showWarning;
+    bool showInformational;
 } ImportedSet;
 
 static WindowSet gWS;
+static ImportedSet *gpIS;
 
 // Error codes - see ObjFileManip.h for error numbers, look for MW_NO_ERROR
 static struct {
@@ -342,13 +351,13 @@ static struct {
     {_T("Warning: too many polygons.\n\nThere are more than one million polygons in file. This is usually too many for Shapeways."), _T("Warning"), MB_OK | MB_ICONWARNING},	// <<2
     {_T("Warning: multiple separate parts found after processing.\n\nThis may not be what you want to print. Increase the value for 'Delete floating parts' to delete these. Try the 'Debug: show separate parts' export option to see if the model is what you expected."), _T("Warning"), MB_OK | MB_ICONWARNING},	// <<3
     {_T("Warning: at least one dimension of the model is too long.\n\nCheck the dimensions for this printer's material: look in the top of the model file itself, using a text editor."), _T("Warning"), MB_OK | MB_ICONWARNING},	// <<4
-    {_T("Warning: Mineways encountered an unknown block type in your model. Such blocks are converted to bedrock or, for 1.13+ blocks, to grass. Mineways does not understand blocks added by mods, and uses the older (simpler) schematic format so does not support blocks added in 1.13 or newer versions. If you are not using mods nor exporting 1.13 or newer blocks, your version of Mineways may be out of date. Check http://mineways.com for a newer version."), _T("Warning"), MB_OK | MB_ICONWARNING},	// <<5
-    {_T("Warning: too few rows of block textures were found in your terrain\ntexture file. Newer block types will not export properly.\nPlease use the TileMaker program or other image editor\nto make a TerrainExt*.png with 62 rows."), _T("Warning"), MB_OK | MB_ICONWARNING },	// <<6 VERTICAL_TILES
+    {_T("Warning: Mineways encountered an unknown block type in your model. Such blocks are converted to bedrock. Mineways does not understand blocks added by mods, and uses the older (simpler) schematic format so does not support blocks added in 1.13 or newer versions. If you are not using mods nor exporting 1.13 or newer blocks, your version of Mineways may be out of date. Check http://mineways.com for a newer version."), _T("Warning"), MB_OK | MB_ICONWARNING},	// <<5
+    {_T("Warning: too few rows of block textures were found in your terrain\ntexture file. Newer block types will not export properly.\nPlease use the TileMaker program or other image editor\nto make a TerrainExt*.png with 67 rows."), _T("Warning"), MB_OK | MB_ICONWARNING },	// <<6 VERTICAL_TILES
     {_T("Warning: one or more Change Block commands specified location(s) that were outside the selected volume."), _T("Warning"), MB_OK | MB_ICONWARNING },	// <<6
     {_T("Warning: with the large Terrain File you're using, the output texture is extremely large. Other programs make have problems using it. We recommend that you use the 'Export tiles' option instead, or reduce the size of your Terrain File by using the '-t 256' (or smaller) option in TileMaker.\n\nThis warning will not be repeated this session."), _T("Warning"), MB_OK | MB_ICONWARNING },	// <<6
+    {_T("Warning: only air blocks found; no file output. If you see something on the map, you likely need to set the Depth slider near the top to 0, or tap the space bar for a reasonable guess."), _T("Export warning"), MB_OK | MB_ICONWARNING},	// <<7
+    {_T("Warning: all solid blocks were deleted; no file output"), _T("Export warning"), MB_OK | MB_ICONWARNING},	// <<8
 
-    {_T("Error: no solid blocks found; no file output. If you see something on the map, you likely need to set the Depth slider at the top to 0, or tap the space bar for a reasonable guess."), _T("Export warning"), MB_OK | MB_ICONERROR},	// <<7
-    {_T("Error: all solid blocks were deleted; no file output"), _T("Export warning"), MB_OK | MB_ICONERROR},	// <<8
     {_T("Error creating export file; no file output"), _T("Export error"), MB_OK | MB_ICONERROR},	// <<9
     {_T("Error: cannot write to export file"), _T("Export error"), MB_OK | MB_ICONERROR},	// <<10
     {_T("Error: the incoming terrainExt*.png file resolution must be divisible by 16 horizontally and at least 16 pixels wide."), _T("Export error"), MB_OK | MB_ICONERROR},	// <<11
@@ -461,9 +470,11 @@ static char* removeLeadingWhitespace(char* line);
 static void cleanseBackslashes(char* line);
 static void saveErrorMessage(ImportedSet& is, wchar_t* error, char* restOfLine = NULL);
 static void saveWarningMessage(ImportedSet& is, wchar_t* error);
-static void saveMessage(ImportedSet& is, wchar_t* error, wchar_t* msgType, int increment, char* restOfLine = NULL);
+static void saveMessage(ImportedSet& is, wchar_t* error, wchar_t* msgType, int increment, char* restOfLine = NULL, LPCTSTR readyWcharLine = NULL);
 static bool validBoolean(ImportedSet& is, char* string);
+static bool validBooleanOrScript(ImportedSet& is, char* string);
 static bool interpretBoolean(char* string);
+static bool interpretScript(char* string);
 static bool validMouse(ImportedSet& is, char* string);
 static int interpretMouse(char* string);
 
@@ -1489,6 +1500,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 //                swprintf( bufa, 100, L"selection box: x %d, y %d to x %d, y %d\n", gStartHiX, gStartHiZ, mx, mz );
 //                OutputDebugStringW( bufa );
 //#endif
+                // If shift is held down, take the largest coordinate and make a box with it
+                if (GetKeyState(VK_SHIFT) < 0) {
+                    int dx = mx - gStartHiX;
+                    int dz = mz - gStartHiZ;
+                    if (abs(dx) > abs(dz)) {
+                        mz = gStartHiZ + ((dz < 0) ? -abs(dx) : abs(dx));
+                    }
+                    else {
+                        mx = gStartHiX + ((dx < 0) ? -abs(dz) : abs(dz));
+                    }
+                }
+
                 SetHighlightState(gHighlightOn, gStartHiX, gTargetDepth, gStartHiZ, mx, gCurDepth, mz, gMinHeight, gMaxHeight, HIGHLIGHT_UNDO_IGNORE);
                 enableBottomControl(gHighlightOn, /* hwndBottomSlider, hwndBottomLabel, */ hwndInfoBottomLabel);
                 drawInvalidateUpdate(hWnd);
@@ -1870,7 +1893,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     wsprintf(infoString, L"World is the built-in [Block Test World]");
                     break;
                 case WORLD_LEVEL_TYPE:
-                    // TODO: add this table to convert to strings https://minecraft.fandom.com/wiki/Data_version
+                    // TODO: add this table to convert to strings https://minecraft.wiki/w/Data_version
                     char levelName[MAX_PATH_AND_FILE];
                     // the only place we ever need the level name, other than populating the world list
                     GetLevelName(gWorldGuide.world, levelName, MAX_PATH_AND_FILE);
@@ -2468,6 +2491,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_ERASEBKGND:
     {
+        // trying https://www.catch22.net/tuts/win32/flicker-free-drawing/ - it doesn't help
+        //return 1;
         hdc = (HDC)wParam;
         GetClipBox(hdc, &rect);
         rect.bottom = MAIN_WINDOW_TOP;
@@ -3299,9 +3324,10 @@ static void gotoSurface(HWND hWnd, HWND hwndSlider, HWND hwndLabel)
 
 static void updateStatus(int mx, int mz, int my, const char* blockLabel, int type, int dataVal, int biome, HWND hwndStatus)
 {
-    wchar_t buf[150];
+    wchar_t buf[500];
     char sbuftype[100];
     char sbufbiome[100];
+    char sbufselect[100];
     char sbufmap[100];
 
     // always show all information - it's fine
@@ -3318,15 +3344,24 @@ static void updateStatus(int mx, int mz, int my, const char* blockLabel, int typ
     else
         sbufbiome[0] = '\0';
 
+    // note selected area, if any
+    int on, minx, miny, minz, maxx, maxy, maxz;
+    GetHighlightState(&on, &minx, &miny, &minz, &maxx, &maxy, &maxz, gMinHeight);
+    if (gHighlightOn) {
+        sprintf_s(sbufselect, 100, "; select [%d,%d] to [%d,%d], %d X %d", minx, minz, maxx, maxz, maxx - minx + 1, maxz - minz + 1);
+    }
+    else {
+        sbufselect[0] = '\0';
+    }
+
     // also note map chunk file name and chunk itself
     if (gWorldGuide.type == WORLD_TEST_BLOCK_TYPE) {
         sbufmap[0] = '\0';
     }
     else {
         // (((mx>>4) % 32) + 32) % 32) ensures the value is non-negative - there's probably a better way
-        sprintf_s(sbufmap, 100, "; r.%d.%d.mca, chunk [%d, %d] {%d, %d}", mx >> 9, mz >> 9, (((mx>>4) % 32) + 32) % 32, (((mz>>4) % 32) + 32) % 32, mx>>4, mz>>4);
+        sprintf_s(sbufmap, 100, "; cursor at r.%d.%d.mca, chunk [%d, %d] {%d, %d}", mx >> 9, mz >> 9, (((mx >> 4) % 32) + 32) % 32, (((mz >> 4) % 32) + 32) % 32, mx >> 4, mz >> 4);
     }
-
 
     // if my is out of bounds, print dashes
     if (my < -1 + gMinHeight || my >= gMaxHeight + 1)
@@ -3339,14 +3374,14 @@ static void updateStatus(int mx, int mz, int my, const char* blockLabel, int typ
         // In Nether, show corresponding overworld coordinates
         if (gOptions.worldType & HELL)
             //wsprintf(buf,L"%d,%d; y=%d[%d,%d] %S \t\tBtm %d",mx,mz,my,mx*8,mz*8,blockLabel,gTargetDepth);
-            wsprintf(buf, L"%d,%d,y=%d[%d,%d]; %S%S%S%S%S", mx, mz, my, mx * 8, mz * 8, 
+            wsprintf(buf, L"%d,%d,y=%d[%d,%d]; %S%S%S%S%S%S", mx, mz, my, mx * 8, mz * 8, 
                 WATERLOGGED_LABEL(type, dataVal) ? "waterlogged " : "",
-                blockLabel, sbuftype, sbufbiome, sbufmap);	// char to wchar
+                blockLabel, sbuftype, sbufbiome, sbufselect, sbufmap);	// char to wchar
         else
             //wsprintf(buf,L"%d,%d; y=%d %S \t\tBottom %d",mx,mz,my,blockLabel,gTargetDepth);
-            wsprintf(buf, L"%d,%d,y=%d; %S%S%S%S%S", mx, mz, my, 
+            wsprintf(buf, L"%d,%d,y=%d; %S%S%S%S%S%S", mx, mz, my, 
                 WATERLOGGED_LABEL(type, dataVal) ? "waterlogged " : "",
-                blockLabel, sbuftype, sbufbiome, sbufmap);	// char to wchar
+                blockLabel, sbuftype, sbufbiome, sbufselect, sbufmap);	// char to wchar
     }
     SendMessage(hwndStatus, SB_SETTEXT, 0, (LPARAM)buf);
 }
@@ -3441,11 +3476,12 @@ static void updateProgress(float progress, wchar_t* buf)
 
 static void drawTheMap()
 {
-    if (gLoaded)
+    if (gLoaded) {
+        ClearUnknownBlockNameString();
         checkMapDrawErrorCode(
             DrawMap(&gWorldGuide, gCurX, gCurZ, gCurDepth - gMinHeight, gMaxHeight, bitWidth, bitHeight, gCurScale, map, &gOptions, gHitsFound, updateProgress, gMinecraftVersion, gVersionID)
         );
-    else {
+    } else {
         // avoid clearing nothing at all.
         if (bitWidth > 0 && bitHeight > 0)
             memset(map, 0xff, bitWidth * bitHeight * 4);
@@ -3499,7 +3535,7 @@ static int loadSchematic(wchar_t* pathAndFile)
 
     // All data's read in! Now we let the mapping system take over and load on demand.
     gSpawnX = gSpawnY = gSpawnZ = gPlayerX = gPlayerY = gPlayerZ = 0;
-    gVersionID = 1343;	// latest 1.12.2 https://minecraft.gamepedia.com/Data_version
+    gVersionID = 1343;	// latest 1.12.2 https://minecraft.wiki/w/Data_version
     gMinecraftVersion = DATA_VERSION_TO_RELEASE_NUMBER(gVersionID);
     setHeightsFromVersionID();
 
@@ -3550,7 +3586,7 @@ static int loadWorld(HWND hWnd)
         // load test world
         MY_ASSERT(gWorldGuide.world[0] == 0);
         gSpawnX = gSpawnY = gSpawnZ = gPlayerX = gPlayerY = gPlayerZ = 0;
-        gVersionID = 3105;	// Change this to the current release number https://minecraft.fandom.com/wiki/Data_version
+        gVersionID = 3953;	// Change this to the current release number https://minecraft.wiki/w/Data_version
         gMinecraftVersion = DATA_VERSION_TO_RELEASE_NUMBER(gVersionID);
         setHeightsFromVersionID();
         break;
@@ -3560,7 +3596,7 @@ static int loadWorld(HWND hWnd)
         // world, then reload and carry on.
         //gHighlightOn=FALSE;
         //SetHighlightState(gHighlightOn,0,gTargetDepth,0,0,gCurDepth,0, gMinHeight, gMaxHeight, HIGHLIGHT_UNDO_CLEAR);
-        // Get the NBT file type, lowercase "version". Should be 19333 or higher to be Anvil. See http://minecraft.gamepedia.com/Level_format#level.dat_format
+        // Get the NBT file type, lowercase "version". Should be 19333 or higher to be Anvil. See http://minecraft.wiki/w/Level_format#level.dat_format
         gSubError = GetFileVersion(gWorldGuide.world, &gWorldGuide.nbtVersion, gFileOpened, MAX_PATH_AND_FILE);
         if (gSubError != 0) {
             gWorldGuide.type = WORLD_UNLOADED_TYPE;
@@ -3579,15 +3615,37 @@ static int loadWorld(HWND hWnd)
             gWorldGuide.type = WORLD_UNLOADED_TYPE;
             return 3;
         }
-        if (GetPlayer(gWorldGuide.world, &gPlayerX, &gPlayerY, &gPlayerZ) != 0) {
+        int dimension;
+        if (GetPlayer(gWorldGuide.world, &gPlayerX, &gPlayerY, &gPlayerZ, &dimension) != 0) {
             // if this fails, it's a server world, so set the values equal to the spawn location; return no error
-            // from http://minecraft.gamepedia.com/Level_format
+            // from http://minecraft.wiki/w/Level_format
             // Player: The state of the Singleplayer player. This overrides the <player>.dat file with the same name as the
             // Singleplayer player. This is only saved by Servers if it already exists, otherwise it is not saved for server worlds. See Player.dat Format.
             gPlayerX = gSpawnX;
             gPlayerY = gSpawnY;
             gPlayerZ = gSpawnZ;
             gWorldGuide.isServerWorld = true;
+        }
+        else {
+            // use dimension to set world type viewed.
+            if (dimension == 1) {
+                // Nether
+                // could do this, but then we need to set a bunch of other options: 
+                // gOptions.worldType |= HELL;
+
+                // in Nether, so convert; for now, return overworld position, always
+                gPlayerX = gPlayerX * 8;
+                gPlayerZ = gPlayerZ * 8;
+            }
+            else if (dimension == 2) {
+                // End
+                //gOptions.worldType |= ENDER;
+            }
+            else {
+                // Overworld
+                //gOptions.worldType &= ~(HELL | ENDER);
+                assert(dimension == 0);
+            }
         }
         // This may or may not work, so we ignore errors.
         GetFileVersionId(gWorldGuide.world, &gVersionID);
@@ -4473,11 +4531,13 @@ static int processSketchfabExport(PublishSkfbData* skfbPData, wchar_t* objFileNa
     gpEFD->radioScaleToHeight = 1;
     gpEFD->radioScaleByCost = 0;
     gpEFD->chkCreateModelFiles[gpEFD->fileType] = 0;
+    // faces must be doubled for Sketchfab
+    gpEFD->chkDoubledBillboards = 1;
 
     int errCode = SaveVolume(objFileName, gpEFD->fileType, &gOptions, &gWorldGuide, gExeDirectory,
         gpEFD->minxVal, gpEFD->minyVal, gpEFD->minzVal, gpEFD->maxxVal, gpEFD->maxyVal, gpEFD->maxzVal, gMinHeight, gMaxHeight,
         updateProgress, terrainFileName, schemeSelected, &outputFileList, (int)gMinewaysMajorVersion, (int)gMinewaysMinorVersion, gVersionID, gChangeBlockCommands,
-        gInstanceChunkSize, gBiomeSelected, gGroupCount, gGroupCountSize, gGroupCountArray);
+        gInstanceChunkSize, gUserSelectedBiome, gBiomeSelected, gGroupCount, gGroupCountSize, gGroupCountArray);
 
     deleteCommandBlockSet(gChangeBlockCommands);
     gChangeBlockCommands = NULL;
@@ -5019,11 +5079,15 @@ static int saveObjFile(HWND hWnd, wchar_t* objFileName, int printModel, wchar_t*
         int errCode = SaveVolume(objFileName, gpEFD->fileType, &gOptions, &gWorldGuide, gExeDirectory,
             gpEFD->minxVal, gpEFD->minyVal, gpEFD->minzVal, gpEFD->maxxVal, gpEFD->maxyVal, gpEFD->maxzVal, gMinHeight, gMaxHeight,
             updateProgress, terrainFileName, schemeSelected, &outputFileList, (int)gMinewaysMajorVersion, (int)gMinewaysMinorVersion, gVersionID, gChangeBlockCommands,
-            gInstanceChunkSize, gBiomeSelected, gGroupCount, gGroupCountSize, gGroupCountArray);
+            gInstanceChunkSize, gUserSelectedBiome, gBiomeSelected, gGroupCount, gGroupCountSize, gGroupCountArray);
         deleteCommandBlockSet(gChangeBlockCommands);
         gChangeBlockCommands = NULL;
 
         if (errCode < MW_BEGIN_ERRORS) {
+            // things "succeeded", though no files were output. Hacky
+            retCode = 99999;
+        }
+        if (errCode < MW_BEGIN_NOTHING_TO_DO) {
             // note how many files were output - if an error occurred, we output and zip nothing
             retCode = outputFileList.count;
 
@@ -5114,11 +5178,10 @@ static int saveObjFile(HWND hWnd, wchar_t* objFileName, int printModel, wchar_t*
         // show errors first
         if (errCode != MW_NO_ERROR)
         {
-            // TODO: really, for scripting, if we're logging errors, these should all actually go into the .log file
             PopupErrorDialogs(errCode);
         }
 
-        if (errCode < MW_BEGIN_ERRORS) {
+        if (errCode < MW_BEGIN_NOTHING_TO_DO) {
 
             // output stats, if printing or rendering and there *are* stats (showStatistics is 0 if there's nothing in the volume)
             if (showStatistics) {
@@ -6126,6 +6189,16 @@ static bool readAndExecuteScript(wchar_t* importFile, ImportedSet& is)
 
 Exit:
     fclose(fh);
+    // if we suppressed errors, etc. with "Show error: script", that means suppress until the script is over.
+    if (is.showInformational) {
+        gShowInformational = true;
+    }
+    if (is.showWarning) {
+        gShowWarning = true;
+    }
+    if (is.showError) {
+        gShowError = true;
+    }
     return retCode;
 }
 
@@ -6160,8 +6233,8 @@ static void initializeImportedSet(ImportedSet& is, ExportFileData* pEFD, wchar_t
     is.terrainFile[0] = (char)0;
     is.colorScheme[0] = (char)0;
     is.importFile = importFile;
+    is.lineNumber = 1;
     // set by memset
-    //is.lineNumber = 0;
     //is.errorMessagesStringSize = 0;
     //is.errorMessages = NULL;
     is.processData = true;
@@ -7609,7 +7682,9 @@ static int interpretScriptLine(char* line, ImportedSet& is)
         if (is.processData) {
             if (!commandExportFile(is, error, model, strPtr2)) {
                 saveErrorMessage(is, error);
-                return INTERPRETER_FOUND_ERROR;
+                // abort only if errors are not suppressed? TODO - not sure this should be allowed.
+                //if (gShowError)
+                    return INTERPRETER_FOUND_ERROR;
             }
         }
         return INTERPRETER_FOUND_VALID_LINE;
@@ -7995,8 +8070,10 @@ JumpToSpawn:
 
     strPtr = findLineDataNoCase(line, "Clear change block commands");
     if (strPtr != NULL) {
-        deleteCommandBlockSet(is.pCBChead);
-        is.pCBChead = is.pCBClast = NULL;
+        if (is.processData) {
+            deleteCommandBlockSet(is.pCBChead);
+            is.pCBChead = is.pCBClast = NULL;
+        }
         return INTERPRETER_FOUND_VALID_LINE;
     }
 
@@ -8044,7 +8121,7 @@ JumpToSpawn:
         int list[3] = {-1, -1, -1};
         list[leftRemap] = list[middleRemap] = list[rightRemap] = 0;
         if (list[0] + list[1] + list[2] < 0) {
-            saveErrorMessage(is, L"must use left, middle, and right once each for Set mouse order command.", strPtr); return INTERPRETER_FOUND_ERROR;
+            saveErrorMessage(is, L"must use left, middle, and right once each for 'Set mouse order' command.", strPtr); return INTERPRETER_FOUND_ERROR;
         }
 
         if (is.processData) {
@@ -8082,6 +8159,103 @@ JumpToSpawn:
         return INTERPRETER_FOUND_VALID_LINE;
     }
 
+    // Note, is exported in model file, but
+    // Should NOT read in this scripting-only setting when importing a file, since it takes effect for only the next export.
+    // Which is why this code is in the scripting-only interpretation area.
+    strPtr = findLineDataNoCase(line, "Export using biome:");
+    if (strPtr != NULL) {
+        int val;
+        if (1 != sscanf_s(strPtr, "%d", &val))
+        {
+            saveErrorMessage(is, L"could not find ID value for 'Export using biome' command.");
+            return INTERPRETER_FOUND_ERROR;
+        }
+        // could be more exacting, but GIGO:
+        if (val < -1 || val >= 256) return INTERPRETER_FOUND_ERROR;
+        if (is.processData)
+        {
+            gUserSelectedBiome = val;
+        }
+        return INTERPRETER_FOUND_VALID_LINE;
+    }
+
+    strPtr = findLineDataNoCase(line, "Translate:");
+    if (strPtr != NULL) {
+        if (2 != sscanf_s(strPtr, "%s %s",
+            string1, (unsigned)_countof(string1),
+            string2, (unsigned)_countof(string2)
+        ))
+        {
+            saveErrorMessage(is, L"could not find two names for the 'Translate' command."); return INTERPRETER_FOUND_ERROR;
+        }
+        // if either block has a colon in it, the person needs to read the docs
+        if (strchr(string1, ':') ) {
+            wsprintf(error, L"first name %S should not include a colon in it for the 'Translate' command.", string1);
+            saveErrorMessage(is, error); return INTERPRETER_FOUND_ERROR;
+        }
+        if (strchr(string2, ':') ) {
+            wsprintf(error, L"second name %S should not include a colon in it for the 'Translate' command.", string2);
+            saveErrorMessage(is, error); return INTERPRETER_FOUND_ERROR;
+        }
+        // find if the second name has a "+" at the end. This means "use its data".
+        size_t str2len = strlen(string2);
+        bool useData = false;
+        if (string2[str2len - 1] == '+') {
+            // trim the '+' off it
+            string2[str2len - 1] = 0;
+            useData = true;
+        }
+        // find if second name is a valid block
+        int typeValue = SlowFindIndexFromName(string2);
+        if (typeValue < 0 ) {
+            wsprintf(error, L"second name %S is not a valid block name for the 'Translate' command. See https://bit.ly/minewaysnames for valid names.", string2);
+            saveErrorMessage(is, error); return INTERPRETER_FOUND_ERROR;
+        }
+
+        if (is.processData) {
+            // check if this modded name is already in the list
+            TranslationTuple* ptt = gModTranslations;
+            while (ptt) {
+                if (strcmp(ptt->name, string1) == 0) {
+                    // matches, so just replace contents and done
+                    ptt->type = typeValue;
+                    return INTERPRETER_FOUND_VALID_LINE;
+                }
+                ptt = ptt->next;
+            }
+
+            // not in the list, so add to list of translations, just a simple linked list of tuples
+            ptt = (TranslationTuple*)malloc(sizeof(TranslationTuple));
+            size_t stringLength = strlen(string1) + 1;
+            ptt->name = (char*)malloc(stringLength);
+            strcpy_s(ptt->name, stringLength, string1);
+            ptt->type = typeValue;
+            ptt->useData = useData;
+            ptt->next = gModTranslations;
+            gModTranslations = ptt;
+            SetModTranslations(gModTranslations);
+        }
+        return INTERPRETER_FOUND_VALID_LINE;
+    }
+
+    strPtr = findLineDataNoCase(line, "Clear translations");
+    if (strPtr != NULL) {
+        if (is.processData)
+        {
+            // free linked list
+            TranslationTuple* ptt = gModTranslations;
+            while (ptt) {
+                free(ptt->name);
+                TranslationTuple* next_ptt = ptt->next;
+                free(ptt);
+                ptt = next_ptt;
+            }
+            gModTranslations = NULL;
+            SetModTranslations(gModTranslations);
+        }
+        return INTERPRETER_FOUND_VALID_LINE;
+    }
+
     strPtr = findLineDataNoCase(line, "Show informational:");
     if (strPtr != NULL) {
         if (1 != sscanf_s(strPtr, "%s", string1, (unsigned)_countof(string1)))
@@ -8089,10 +8263,13 @@ JumpToSpawn:
             saveErrorMessage(is, L"could not find boolean value for 'Show informational' command.");
             return INTERPRETER_FOUND_ERROR;
         }
-        if (!validBoolean(is, string1)) return INTERPRETER_FOUND_ERROR;
+        if (!validBooleanOrScript(is, string1)) return INTERPRETER_FOUND_ERROR;
         if (is.processData)
         {
+            // if "script", this gets set to false
             gShowInformational = interpretBoolean(string1);
+            // setting to true means that at the end of processing, gShowInformational will get set to be on again
+            is.showInformational = interpretScript(string1);
         }
         return INTERPRETER_FOUND_VALID_LINE;
     }
@@ -8104,10 +8281,13 @@ JumpToSpawn:
             saveErrorMessage(is, L"could not find boolean value for 'Show warning' command.");
             return INTERPRETER_FOUND_ERROR;
         }
-        if (!validBoolean(is, string1)) return INTERPRETER_FOUND_ERROR;
+        if (!validBooleanOrScript(is, string1)) return INTERPRETER_FOUND_ERROR;
         if (is.processData)
         {
+            // if "script", this gets set to false
             gShowWarning = interpretBoolean(string1);
+            // setting to true means that at the end of processing, gShowWarning will get set to be on again
+            is.showWarning = interpretScript(string1);
         }
         return INTERPRETER_FOUND_VALID_LINE;
     }
@@ -8119,10 +8299,13 @@ JumpToSpawn:
             saveErrorMessage(is, L"could not find boolean value for 'Show error' command.");
             return INTERPRETER_FOUND_ERROR;
         }
-        if (!validBoolean(is, string1)) return INTERPRETER_FOUND_ERROR;
+        if (!validBooleanOrScript(is, string1)) return INTERPRETER_FOUND_ERROR;
         if (is.processData)
         {
+            // if "script", this gets set to false
             gShowError = interpretBoolean(string1);
+            // setting to true means that at the end of processing, gShowError will get set to be on again
+            is.showError = interpretScript(string1);
         }
         return INTERPRETER_FOUND_VALID_LINE;
     }
@@ -8821,15 +9004,20 @@ static void cleanseBackslashes(char* line)
     }
 }
 
+static void saveSuppressedMessage(ImportedSet& is, int isError, LPCTSTR readyWcharLine)
+{
+    saveMessage(is, (isError == 2 ? L"Error" : ((isError == 1 ) ? L"Warning" : L"Informational")), L"Suppressed", isError == 2, NULL, readyWcharLine);
+}
+
 static void saveErrorMessage(ImportedSet& is, wchar_t* error, char* restOfLine)
 {
-    saveMessage(is, error, L"Error", 1, restOfLine);
+    saveMessage(is, error, L"Error", 1, restOfLine, NULL);
 }
 static void saveWarningMessage(ImportedSet& is, wchar_t* error)
 {
-    saveMessage(is, error, L"Warning", 0, NULL);
+    saveMessage(is, error, L"Warning", 0, NULL, NULL);
 }
-static void saveMessage(ImportedSet& is, wchar_t* error, wchar_t* msgType, int increment, char* restOfLine)
+static void saveMessage(ImportedSet& is, wchar_t* error, wchar_t* msgType, int increment, char* restOfLine, LPCTSTR readyWcharLine)
 {
     if (is.errorMessages == NULL) {
         is.errorMessagesStringSize = 1024;
@@ -8838,7 +9026,8 @@ static void saveMessage(ImportedSet& is, wchar_t* error, wchar_t* msgType, int i
     }
 
     size_t oldlength = wcslen(is.errorMessages);
-    size_t addlength = 50 + wcslen(error) + ((restOfLine != NULL) ? strlen(restOfLine) : 0);
+    // 50 is for buf[50], which may get appended
+    size_t addlength = 50 + wcslen(error) + ((restOfLine != NULL) ? strlen(restOfLine) : 0) + ((readyWcharLine != NULL) ? wcslen(readyWcharLine) : 0);
     // enough room?
     if (is.errorMessagesStringSize < oldlength + addlength) {
         is.errorMessagesStringSize *= 2;
@@ -8850,14 +9039,23 @@ static void saveMessage(ImportedSet& is, wchar_t* error, wchar_t* msgType, int i
         //free(oldStr);
     }
     // append error message
-    // If error does not start with "Error" or "Warning" then add this, and line number.
-    if (wcsstr(error, msgType) != error)
-    {
-        wchar_t buf[50];
-        wsprintf(buf, L"%s reading line %d: ", msgType, is.lineNumber);
+    // If a suppressed message, just output directly
+    wchar_t buf[50];
+    if (wcscmp(L"Suppressed", msgType) == 0) {
+        wsprintf(buf, L"Run-time problem executing line %d: ", is.lineNumber);
         wcscat_s(is.errorMessages, is.errorMessagesStringSize, buf);
     }
-    wcscat_s(is.errorMessages, is.errorMessagesStringSize, error);
+    else {
+        // If error does not start with "Error" or "Warning" then add this, and line number.
+        if (wcsstr(error, msgType) != error)
+        {
+            wsprintf(buf, L"%s reading line %d: ", msgType, is.lineNumber);
+            wcscat_s(is.errorMessages, is.errorMessagesStringSize, buf);
+        }
+        // add the message to the long string.
+        wcscat_s(is.errorMessages, is.errorMessagesStringSize, error);
+    }
+
     if (restOfLine && (*restOfLine != (char)0))
     {
         wcscat_s(is.errorMessages, is.errorMessagesStringSize, L" Rest of line: ");
@@ -8874,6 +9072,13 @@ static void saveMessage(ImportedSet& is, wchar_t* error, wchar_t* msgType, int i
         }
         wcscat_s(is.errorMessages, is.errorMessagesStringSize, badCommand);
     }
+
+    // add any wide char stuff directly
+    if (readyWcharLine) {
+        wcscat_s(is.errorMessages, is.errorMessagesStringSize, readyWcharLine);
+    }
+
+    // seal the deal
     wcscat_s(is.errorMessages, is.errorMessagesStringSize, L"\n");
     is.errorsFound += increment;
 }
@@ -8891,10 +9096,25 @@ static bool validBoolean(ImportedSet& is, char* string)
     }
 }
 
+static bool validBooleanOrScript(ImportedSet& is, char* string)
+{
+    // yes, just the "s" matters for script
+    if ((string[0] == 'S') || (string[0] == 's')) {
+        return true;
+    }
+    return validBoolean(is, string);
+}
+
 static bool interpretBoolean(char* string)
 {
     // YES, yes, TRUE, true, 1
     return ((string[0] == 'Y') || (string[0] == 'y') || (string[0] == 'T') || (string[0] == 't') || (string[0] == '1'));
+}
+
+static bool interpretScript(char* string)
+{
+    // script gives true (or anything starting with "s", why not)
+    return ((string[0] == 'S') || (string[0] == 's'));
 }
 
 static bool validMouse(ImportedSet& is, char* string)
@@ -9135,24 +9355,39 @@ static bool commandLoadWorld(ImportedSet& is, wchar_t* error)
         }
 
         // if the world is already loaded, don't reload it.
-        if (wcscmp(backupWorld, gWorldGuide.world) != 0 || (gSameWorld == FALSE))
-        {
+        //if (wcscmp(backupWorld, gWorldGuide.world) != 0 || (gSameWorld == FALSE))
+        //{
             // not the same, attempt to load!
             gSameWorld = FALSE;
             if (loadWorld(is.ws.hWnd))	// uses gWorldGuide.world
             {
+                switch (gWorldGuide.type) {
+                case WORLD_TEST_BLOCK_TYPE:
+                    swprintf_s(error, 1024, L"Mineways attempted to load world \"%s\" but could not do so. This is extremely strange, as this is the built-in test world. Please report this problem to Eric at erich@acm.org.", warningWorld);
+                    break;
+
+                case WORLD_LEVEL_TYPE:
+                    swprintf_s(error, 1024, L"Mineways attempted to load world \"%s\" but could not do so. The full path was \"%s\". Either the world could not be found, or the world name is some wide character string that could not be stored in your import file. Please load the world manually and then try importing again.", warningWorld, gFileOpened);
+                    break;
+
+                case WORLD_SCHEMATIC_TYPE:
+                    swprintf_s(error, 1024, L"Mineways attempted to load world \"%s\" but could not do so. Either the world could not be found, or the world name is some wide character string that could not be stored in your import file. Please load the world manually and then try importing again.", warningWorld);
+                    break;
+
+                default:
+                    MY_ASSERT(gAlwaysFail);
+                }
                 // could not load world, so restore old world, if any;
                 wcscpy_s(gWorldGuide.world, MAX_PATH_AND_FILE, backupWorld);
                 if (gWorldGuide.world[0] != 0) {
                     gWorldGuide.type = backupWorldType;
                     loadWorld(is.ws.hWnd);	// uses gWorldGuide.world
                 }
-                swprintf_s(error, 1024, L"Mineways attempted to load world \"%s\" but could not do so. The full path was \"%s\". Either the world could not be found, or the world name is some wide character string that could not be stored in your import file. Please load the world manually and then try importing again.", warningWorld, gFileOpened);
                 return false;
             } // else success with just world folder name, and it's already saved to gWorldGuide.world
             // world loaded, so turn things on, etc.
             setUIOnLoadWorld(is.ws.hWnd, is.ws.hwndSlider, is.ws.hwndLabel, is.ws.hwndInfoLabel, is.ws.hwndBottomSlider, is.ws.hwndBottomLabel);
-        }
+        //}
     }
     else {
         // world didn't convert over - unlikely to hit this one
@@ -9346,6 +9581,9 @@ static bool openLogFile(ImportedSet& is)
         strcpy_s(outputString, 256, "Start processing script\n");
         if (PortaWrite(is.logfile, outputString, strlen(outputString))) goto OnFail;
 
+        // ugh, yet another global...
+        gpIS = &is;
+
         // Print local time as a string.
         errno_t errNum;
         struct tm newtime;
@@ -9450,7 +9688,7 @@ static void checkMapDrawErrorCode(int retCode)
     else if (gOneTimeDrawWarning & retCode) {
         // NBT_WARNING_NAME_NOT_FOUND is the only one now
         // currently the only warning - we will someday look at bits, I guess, in retCode
-        wsprintf(fullbuf, _T("Warning: at least one unknown block type '%S' was encountered and turned into '%S'.\n\nIf you are not running a Minecraft beta, mod, or conversion, please download the latest version of Mineways from mineways.com. If you think Mineways has a bug, please report it (see the Help menu)."),
+        wsprintf(fullbuf, _T("Warning: unknown block types '%S' encountered and turned into '%S'.\n\nIf you are not running a Minecraft beta, mod, or conversion, please download the latest version of Mineways from mineways.com. If you think Mineways has a bug, please report it (see the Help menu)."),
             MapUnknownBlockName(), gBlockDefinitions[GetUnknownBlockID()].name);
         FilterMessageBox(NULL, fullbuf,
             _T("Warning"), MB_OK | MB_ICONWARNING | MB_TOPMOST);
@@ -9491,8 +9729,9 @@ static bool saveMapFile(int xmin, int zmin, int xmax, int ymax, int zmax, wchar_
     // turn off highlight for map draw
     SetHighlightState(0, xmin, gTargetDepth, zmin, xmax, ymax, zmax, gMinHeight, gMaxHeight, HIGHLIGHT_UNDO_IGNORE);
 
+    ClearUnknownBlockNameString();
     checkMapDrawErrorCode(
-        DrawMapToArray(imageDst, &gWorldGuide, xmin, zmin, ymax, gMaxHeight, w, h, zoom, &gOptions, gHitsFound, updateProgress, gMinecraftVersion, gVersionID)
+        DrawMapToArray(imageDst, &gWorldGuide, xmin, zmin, ymax - gMinHeight, gMaxHeight, w, h, zoom, &gOptions, gHitsFound, updateProgress, gMinecraftVersion, gVersionID)
     );
 
     // check if map file has ".png" at the end - if not, add it.
@@ -9513,19 +9752,29 @@ static bool saveMapFile(int xmin, int zmin, int xmax, int ymax, int zmax, wchar_
 static int FilterMessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
 {
     wchar_t statusbuf[1024];
+    // if turned off, the message is still sent to the status line and to the log file, if any.
     if (!gShowInformational && (uType & MB_ICONINFORMATION)) {
         swprintf_s(statusbuf, 1024, L"Informational: %s", lpText);
         sendStatusMessage(gWS.hwndStatus, statusbuf);
+        if (gpIS && gpIS->logging && gpIS->logfile) {
+            saveSuppressedMessage(*gpIS, 0, lpText);
+        }
         return 1;
     }
     if (!gShowWarning && (uType & MB_ICONWARNING)) {
         swprintf_s(statusbuf, 1024, L"Warning: %s", lpText);
         sendStatusMessage(gWS.hwndStatus, statusbuf);
+        if (gpIS && gpIS->logging && gpIS->logfile) {
+            saveSuppressedMessage(*gpIS, 1, lpText);
+        }
         return 1;
     }
     if (!gShowError && (uType & MB_ICONERROR)) {
         swprintf_s(statusbuf, 1024, L"ERROR: %s", lpText);
         sendStatusMessage(gWS.hwndStatus, statusbuf);
+        if (gpIS && gpIS->logging && gpIS->logfile) {
+            saveSuppressedMessage(*gpIS, 2, lpText);
+        }
         return 1;
     }
     // note: we make all these message boxes system modal - they should always be in the user's face until dismissed.

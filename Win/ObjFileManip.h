@@ -34,7 +34,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include "vector.h"
-#include "blockinfo.h"
+#include "blockInfo.h"
 #include "rwpng.h"
 
 // If you change something here, you must also change gPopupInfo array in Mineways.cpp
@@ -50,11 +50,15 @@ THE POSSIBILITY OF SUCH DAMAGE.
 #define MW_CHANGE_BLOCK_COMMAND_OUT_OF_BOUNDS		(1<<7)
 #define MW_TEXTURE_RESOLUTION_HIGH          		(1<<8)
 
-// errors
-#define MW_BEGIN_ERRORS                           (1<<9)
+// export doesn't "fail", but doesn't output anything
+#define MW_BEGIN_NOTHING_TO_DO                    (1<<9)
 
 #define MW_NO_BLOCKS_FOUND                          (1<<9)
 #define MW_ALL_BLOCKS_DELETED                       (1<<10)
+
+// errors
+#define MW_BEGIN_ERRORS                           (1<<11)
+
 #define MW_CANNOT_CREATE_FILE                       (1<<11)
 #define MW_CANNOT_WRITE_TO_FILE                     (1<<12)
 #define MW_IMAGE_WRONG_WIDTH                        (1<<13)
@@ -319,7 +323,7 @@ typedef struct Model {
 extern Model gModel;
 
 
-// translate the world version from https://minecraft.gamepedia.com/Data_version to a version number: 12, 13, 14, 15, 16, 17, 18, 19...
+// translate the world version from https://minecraft.wiki/w/Data_version to a version number: 12, 13, 14, 15, 16, 17, 18, 19...
 #define	DATA_VERSION_TO_RELEASE_NUMBER(worldVersion) ((worldVersion) < 100 ? 8 : \
                                                      ((worldVersion) <= 184) ? 9 : \
                                                      ((worldVersion) <= 512) ? 10 : \
@@ -332,7 +336,8 @@ extern Model gModel;
                                                      ((worldVersion) <= 2730) ? 17 : \
                                                      ((worldVersion) <= 2975) ? 18 : \
                                                      ((worldVersion) <= 3442) ? 19 : \
-                                                     20)
+                                                     ((worldVersion) <= 3839) ? 20 : \
+                                                     21)
 
 
 void SetSeparatorObj(const wchar_t* separator);
@@ -341,7 +346,7 @@ void ClearCache();
 
 int SaveVolume(wchar_t* objFileName, int fileType, Options* options, WorldGuide* gWorldGuide, const wchar_t* curDir, int minx, int miny, int minz, int maxx, int maxy, int maxz, int mapMinHeight, int mapMaxHeight,
     ProgressCallback callback, wchar_t* terrainFileName, wchar_t* schemeSelected, FileList* outputFileList, int majorVersion, int minorVersion, int worldVersion, ChangeBlockCommand* pCBC, int instanceChunkSize,
-    int& biomeIndex, int& groupCount, int groupCountSize, int* groupCountArray);
+    int& userSelectedBiome, int& biomeIndex, int& groupCount, int groupCountSize, int* groupCountArray);
 
 int GetMinimumSelectionHeight(WorldGuide* pWorldGuide, Options* pOptions, int minx, int minz, int maxx, int maxz, int mapMinHeight, int mapMaxHeight, bool expandByOne, bool ignoreTransparent, int maxy);
 

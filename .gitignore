@@ -32,6 +32,7 @@ Win/teapot*.png
 docs/images/crushed
 mineways-cppcheck-build-dir
 ipch
+TileMaker/TileMaker/1.*
 TileMaker/TileMaker/blocks*
 TileMaker/TileMaker/MW_BLOCKS
 TileMaker/TileMaker/code*
@@ -39,10 +40,12 @@ TileMaker/TileMaker/make_*.bat
 TileMaker/TileMaker/output.*
 TileMaker/TileMaker/terrainBase*
 TileMaker/TileMaker/terrainExt*
+TileMaker/TileMaker/Mineways*
 TileMaker/Debug
 TileMaker/ipch
 TileMaker/Release
 TileMaker/x64
+TileMaker/TileMaker/crushed
 TileMaker/TileMaker/Debug
 TileMaker/TileMaker/ipch
 TileMaker/TileMaker/Release
@@ -58,7 +61,7 @@ TileMaker/TileMaker/*.pl
 TileMaker/TileMaker/textures/water_normal.png
 Win/mineways_log.txt
 TileMaker/TileMaker/jg-rtx*
-TileMaker/TileMaker/Luna_32x_Free_pack/*
+TileMaker/TileMaker/Luna*
 TileMaker/TileMaker/Smoolistic 1.16.210 V1/*
 TileMaker/TileMaker/screenshots/*
 TileMaker/TileMaker/resource_packs_processed/*

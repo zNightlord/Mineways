@@ -64,6 +64,7 @@ typedef struct BiomeTranslator {
 
 static bool makeHash = true;
 static bool makeBiomeHash = true;
+static TranslationTuple* modTranslations = NULL;
 
 // if defined, only those data values that have an effect on graphics display (vs. sound or
 // simulation) are actually filled in. This is a good thing for instancing, but allows the
@@ -71,7 +72,7 @@ static bool makeBiomeHash = true;
 // that we nonetheless don't track).
 #define GRAPHICAL_ONLY
 
-// Shows all data names and values and what uses them: https://minecraft.fandom.com/wiki/Java_Edition_data_values
+// Shows all data names and values and what uses them: https://minecraft.wiki/w/Java_Edition_data_values
 
 // properties and which blocks use them:
 // age: AGE_PROP
@@ -138,7 +139,7 @@ static bool makeBiomeHash = true;
 // powered: true|false
 #define DOOR_PROP			  3
 // for water and lava
-// See https://minecraft.fandom.com/wiki/Water#Block_states
+// See https://minecraft.wiki/w/Water#Block_states
 // level: 1-7|8 when falling true - note that level 0 is the "source block" and higher means further away
 #define FLUID_PROP			  4
 // saplings
@@ -164,7 +165,7 @@ static bool makeBiomeHash = true;
 // shape: straight|inner_left|inner_right|outer_left|outer_right - we ignore, deriving from neighbors
 #define STAIRS_PROP			 12
 // Redstone wire
-// north|south|east|west: none|side|up https://minecraft.gamepedia.com/Redstone#Block_state - we ignore, it's from geometry
+// north|south|east|west: none|side|up https://minecraft.wiki/w/Redstone#Block_state - we ignore, it's from geometry
 // power: 0-15
 #define WIRE_PROP		     13
 // Lever
@@ -239,7 +240,7 @@ static bool makeBiomeHash = true;
 // facing: down|up|north|south|west|east
 // extended: true|false - ignored, don't know what that is (block wouldn't exist otherwise, right?
 // type: sticky|normal
-// short: true|false - TODO, piston arm is shorter by 4 pixels, https://minecraft.gamepedia.com/Piston#Block_state_2 - not sure how to generate this state, so leaving it alone
+// short: true|false - TODO, piston arm is shorter by 4 pixels, https://minecraft.wiki/w/Piston#Block_state_2 - not sure how to generate this state, so leaving it alone
 #define PISTON_HEAD_PROP	 EXTENDED_FACING_PROP
 // south|west|north|east|down|up: true|false
 #define FENCE_AND_VINE_PROP	 34
@@ -371,19 +372,25 @@ static bool makeBiomeHash = true;
 // rotation: 0-15
 // attached: true/false
 #define ATTACHED_HANGING_SIGN   65
+// orientation 0-11
+// crafting 0-1 (0x10)
+// triggered 0-1 (0x20)
+#define CRAFTER_PROP        66
+// lit true|false gives 0x8 for copper bulbs
+#define BULB_PROP            67
 
-#define NUM_TRANS 1009
+#define NUM_TRANS 1069
 
 BlockTranslator BlockTranslations[NUM_TRANS] = {
     //hash ID data name flags
     // hash is computed once when 1.13 data is first read in.
     // second column is "traditional" type value, as found in blockInfo.cpp; third column is high-order bit and data value, fourth is Minecraft name
     // Note: the HIGH_BIT gets "transferred" to the type in MinewaysMap's IDBlock() method, about 100 lines in.
-    // The list of names and data values: https://minecraft.gamepedia.com/Java_Edition_data_values
-    // and older https://minecraft.gamepedia.com/Java_Edition_data_values/Pre-flattening#Block_IDs
+    // The list of names and data values: https://minecraft.wiki/w/Java_Edition_data_values
+    // and older https://minecraft.wiki/w/Java_Edition_data_values/Pre-flattening#Block_IDs
     //hash,ID,BIT|dataval,  name, common properties flags
     { 0,   0,           0, "air", NO_PROP },
-    { 0,   0,           0, "empty", NO_PROP },  // not sure this is necessary, but it is mentioned in https://minecraft.fandom.com/wiki/Java_Edition_data_values
+    { 0,   0,           0, "empty", NO_PROP },  // not sure this is necessary, but it is mentioned in https://minecraft.wiki/w/Java_Edition_data_values
     { 0, 166,           0, "barrier", NO_PROP },
     { 0,   1,           0, "stone", NO_PROP },
     { 0,   1,           1, "granite", NO_PROP },
@@ -452,7 +459,8 @@ BlockTranslator BlockTranslations[NUM_TRANS] = {
     { 0, 161,           0, "acacia_leaves", LEAF_PROP },
     { 0, 161,           1, "dark_oak_leaves", LEAF_PROP },
     { 0,  32,           0, "dead_bush", NO_PROP },
-    { 0,  31,           1, "grass", NO_PROP }, // tall grass
+    { 0,  31,           1, "grass", NO_PROP },
+    { 0,  31,           1, "short_grass", NO_PROP }, // name change in 1.20.3, https://minecraft.wiki/w/Java_Edition_1.20.3
     { 0,  31,           2, "fern", NO_PROP },
     { 0,  19,           0, "sponge", NO_PROP },
     { 0,  19,           1, "wet_sponge", NO_PROP },
@@ -514,7 +522,7 @@ BlockTranslator BlockTranslations[NUM_TRANS] = {
     { 0,  42,           0, "iron_block", NO_PROP },
     { 0,  44,           0, "smooth_stone_slab", SLAB_PROP },	// renamed in 1.14 from stone_slab in 1.13 - it means "the chiseled one" as it's traditionally been; the new 1.14 "stone_slab" means "pure flat stone"
     { 0,  44,           1, "sandstone_slab", SLAB_PROP },
-    { 0, 182,           0, "red_sandstone_slab", SLAB_PROP }, // really, just uses 182 exclusively; sometimes rumored to be 205/0, but not so https://minecraft.gamepedia.com/Java_Edition_data_values#Stone_Slabs
+    { 0, 182,           0, "red_sandstone_slab", SLAB_PROP }, // really, just uses 182 exclusively; sometimes rumored to be 205/0, but not so https://minecraft.wiki/w/Java_Edition_data_values#Stone_Slabs
     { 0,  44,           2, "petrified_oak_slab", SLAB_PROP },
     { 0,  44,           3, "cobblestone_slab", SLAB_PROP },
     { 0,  44,           4, "brick_slab", SLAB_PROP },
@@ -717,8 +725,8 @@ BlockTranslator BlockTranslations[NUM_TRANS] = {
     { 0, 151,           0, "daylight_detector", DAYLIGHT_PROP },
     { 0, 153,           0, "nether_quartz_ore", NO_PROP },
     { 0, 154,           0, "hopper", HOPPER_PROP },
-    { 0, 155,           0, "quartz_block", NO_PROP },	// has AXIS_PROP in Bedrock edition, but not here, https://minecraft.gamepedia.com/Block_of_Quartz
-    { 0, 155,           1, "chiseled_quartz_block", NO_PROP },	// has AXIS_PROP in Bedrock edition, but not here, https://minecraft.gamepedia.com/Block_of_Quartz
+    { 0, 155,           0, "quartz_block", NO_PROP },	// has AXIS_PROP in Bedrock edition, but not here, https://minecraft.wiki/w/Block_of_Quartz
+    { 0, 155,           1, "chiseled_quartz_block", NO_PROP },	// has AXIS_PROP in Bedrock edition, but not here, https://minecraft.wiki/w/Block_of_Quartz
     { 0, 155,           0, "quartz_pillar", QUARTZ_PILLAR_PROP },	// note this always has an axis, so will be set to 2,3,4
     { 0, 155,           5, "quartz_bricks", NO_PROP },
     { 0, 156,           0, "quartz_stairs", STAIRS_PROP },
@@ -853,8 +861,8 @@ BlockTranslator BlockTranslations[NUM_TRANS] = {
     { 0, 217,           0, "structure_void", NO_PROP },
     { 0, 255,           0, "structure_block", STRUCTURE_PROP },
     // new 1.13 on down
-    { 0,   0,           0, "void_air", NO_PROP },	// consider these air until proven otherwise https://minecraft.gamepedia.com/Air
-    { 0,   0,           0, "cave_air", NO_PROP },	// consider these air until proven otherwise https://minecraft.gamepedia.com/Air
+    { 0,   0,           0, "void_air", NO_PROP },	// consider these air until proven otherwise https://minecraft.wiki/w/Air
+    { 0,   0,           0, "cave_air", NO_PROP },	// consider these air until proven otherwise https://minecraft.wiki/w/Air
     { 0, 205,           2, "prismarine_slab", SLAB_PROP }, // added to purpur slab and double slab, dataVal 2, just to be safe (see purpur_slab)
     { 0, 205,           3, "prismarine_brick_slab", SLAB_PROP }, // added to purpur slab and double slab, dataVal 3
     { 0, 205,           4, "dark_prismarine_slab", SLAB_PROP }, // added to purpur slab and double slab, dataVal 4
@@ -1289,7 +1297,7 @@ BlockTranslator BlockTranslations[NUM_TRANS] = {
     { 0, 132,  HIGH_BIT | 34, "raw_iron_block", NO_PROP },
     { 0, 132,  HIGH_BIT | 35, "raw_copper_block", NO_PROP },
     { 0, 132,  HIGH_BIT | 36, "raw_gold_block", NO_PROP },
-    { 0, 208,              0, "dirt_path", NO_PROP },   // in 1.17 renamed to dirt path and given textures https://minecraft.fandom.com/wiki/Dirt_Path
+    { 0, 208,              0, "dirt_path", NO_PROP },   // in 1.17 renamed to dirt path and given textures https://minecraft.wiki/w/Dirt_Path
     { 0, 132,  HIGH_BIT | 37, "deepslate_coal_ore", NO_PROP },
     { 0, 132,  HIGH_BIT | 38, "deepslate_iron_ore", NO_PROP },  // copper done way earlier, so be it...
     { 0, 132,  HIGH_BIT | 39, "deepslate_gold_ore", NO_PROP },
@@ -1297,7 +1305,7 @@ BlockTranslator BlockTranslations[NUM_TRANS] = {
     { 0, 132,  HIGH_BIT | 41, "deepslate_emerald_ore", NO_PROP },
     { 0, 132,  HIGH_BIT | 42, "deepslate_lapis_ore", NO_PROP },
     { 0, 132,  HIGH_BIT | 43, "deepslate_diamond_ore", NO_PROP },
-    { 0, 118,            0x0, "water_cauldron", NO_PROP }, // I assume this is the same as a cauldron, basically, with the level > 0, https://minecraft.fandom.com/wiki/Cauldron
+    { 0, 118,            0x0, "water_cauldron", NO_PROP }, // I assume this is the same as a cauldron, basically, with the level > 0, https://minecraft.wiki/w/Cauldron
     { 0, 118,            0x4, "lava_cauldron", NO_PROP }, // level directly translates to dataVal, bottom two bits
     { 0, 118,            0x8, "powder_snow_cauldron", NO_PROP }, // level directly translates to dataVal, bottom two bits
     { 0, 0,                0, "light", NO_PROP },   // for now, just make it air, since it normally doesn't appear
@@ -1408,6 +1416,67 @@ BlockTranslator BlockTranslations[NUM_TRANS] = {
     { 0, 207,       HIGH_BIT, "mangrove_hanging_sign", ATTACHED_HANGING_SIGN },
     { 0, 207, HIGH_BIT | BIT_32, "cherry_hanging_sign", ATTACHED_HANGING_SIGN },
     { 0, 208,       HIGH_BIT, "bamboo_hanging_sign", ATTACHED_HANGING_SIGN },
+    { 0, 144,        6 << 4, "piglin_wall_head", HEAD_WALL_PROP },
+    { 0, 144, 0x80 | 6 << 4, "piglin_head", HEAD_PROP },
+    { 0, 209,       HIGH_BIT, "trial_spawner", NO_PROP },
+    { 0, 210,       HIGH_BIT, "vault", NO_PROP },
+    { 0, 211,       HIGH_BIT, "crafter", CRAFTER_PROP },
+    { 0, 212,       HIGH_BIT, "heavy_core", NO_PROP },
+    { 0, 132,  HIGH_BIT | 48, "polished_tuff", NO_PROP },
+    { 0, 213,       HIGH_BIT, "copper_bulb", BULB_PROP },
+    { 0, 213,   HIGH_BIT | 1, "exposed_copper_bulb", BULB_PROP },
+    { 0, 213,   HIGH_BIT | 2, "weathered_copper_bulb", BULB_PROP },
+    { 0, 213,   HIGH_BIT | 3, "oxidized_copper_bulb", BULB_PROP },
+    { 0, 213,   HIGH_BIT | 4, "waxed_copper_bulb", BULB_PROP },
+    { 0, 213,   HIGH_BIT | 5, "waxed_exposed_copper_bulb", BULB_PROP },
+    { 0, 213,   HIGH_BIT | 6, "waxed_weathered_copper_bulb", BULB_PROP },
+    { 0, 213,   HIGH_BIT | 7, "waxed_oxidized_copper_bulb", BULB_PROP },
+    { 0, 132,  HIGH_BIT | 49, "chiseled_copper", BULB_PROP },
+    { 0, 132,  HIGH_BIT | 50, "exposed_chiseled_copper", BULB_PROP },
+    { 0, 132,  HIGH_BIT | 51, "weathered_chiseled_copper", BULB_PROP },
+    { 0, 132,   HIGH_BIT | 52, "oxidized_chiseled_copper", BULB_PROP },
+    { 0, 132,   HIGH_BIT | 53, "waxed_chiseled_copper", BULB_PROP },
+    { 0, 132,   HIGH_BIT | 54, "waxed_exposed_chiseled_copper", BULB_PROP },
+    { 0, 132,   HIGH_BIT | 55, "waxed_weathered_chiseled_copper", BULB_PROP },
+    { 0, 132,   HIGH_BIT | 56, "waxed_oxidized_chiseled_copper", BULB_PROP },
+    { 0, 214,       HIGH_BIT, "copper_grate", BULB_PROP },
+    { 0, 214,   HIGH_BIT | 1, "exposed_copper_grate", BULB_PROP },
+    { 0, 214,   HIGH_BIT | 2, "weathered_copper_grate", BULB_PROP },
+    { 0, 214,   HIGH_BIT | 3, "oxidized_copper_grate", BULB_PROP },
+    { 0, 214,   HIGH_BIT | 4, "waxed_copper_grate", BULB_PROP },
+    { 0, 214,   HIGH_BIT | 5, "waxed_exposed_copper_grate", BULB_PROP },
+    { 0, 214,   HIGH_BIT | 6, "waxed_weathered_copper_grate", BULB_PROP },
+    { 0, 214,   HIGH_BIT | 7, "waxed_oxidized_copper_grate", BULB_PROP },
+    { 0, 142,   HIGH_BIT | BIT_16 | 4, "tuff_slab", SLAB_PROP },
+    { 0, 142,   HIGH_BIT | BIT_16 | 5, "polished_tuff_slab", SLAB_PROP },
+    { 0, 142,   HIGH_BIT | BIT_16 | 6, "tuff_brick_slab", SLAB_PROP },
+    { 0, 132,   HIGH_BIT | 57, "tuff_bricks", NO_PROP },
+    { 0, 132,   HIGH_BIT | 58, "chiseled_tuff", NO_PROP },
+    { 0, 132,   HIGH_BIT | 59, "chiseled_tuff_bricks", NO_PROP },
+    { 0, 215,	    HIGH_BIT, "tuff_stairs", STAIRS_PROP },
+    { 0, 216,	    HIGH_BIT, "polished_tuff_stairs", STAIRS_PROP },
+    { 0, 217,	    HIGH_BIT, "tuff_brick_stairs", STAIRS_PROP },
+    { 0, 139,	          22, "tuff_wall", WALL_PROP },     // no data values used for walls, it's all implied in Mineways
+    { 0, 139,	          23, "polished_tuff_wall", WALL_PROP },
+    { 0, 139,	          24, "tuff_brick_wall", WALL_PROP },
+    { 0, 218,       HIGH_BIT, "copper_trapdoor", TRAPDOOR_PROP },
+    { 0, 219,       HIGH_BIT, "exposed_copper_trapdoor", TRAPDOOR_PROP },
+    { 0, 220,       HIGH_BIT, "weathered_copper_trapdoor", TRAPDOOR_PROP },
+    { 0, 221,       HIGH_BIT, "oxidized_copper_trapdoor", TRAPDOOR_PROP },
+    { 0, 222,       HIGH_BIT, "waxed_copper_trapdoor", TRAPDOOR_PROP },
+    { 0, 223,       HIGH_BIT, "waxed_exposed_copper_trapdoor", TRAPDOOR_PROP },
+    { 0, 224,       HIGH_BIT, "waxed_weathered_copper_trapdoor", TRAPDOOR_PROP },
+    { 0, 225,       HIGH_BIT, "waxed_oxidized_copper_trapdoor", TRAPDOOR_PROP },
+    { 0, 226,       HIGH_BIT, "copper_door", DOOR_PROP },
+    { 0, 227,       HIGH_BIT, "exposed_copper_door", DOOR_PROP },
+    { 0, 228,       HIGH_BIT, "weathered_copper_door", DOOR_PROP },
+    { 0, 229,       HIGH_BIT, "oxidized_copper_door", DOOR_PROP },
+    { 0, 230,       HIGH_BIT, "waxed_copper_door", DOOR_PROP },
+    { 0, 231,       HIGH_BIT, "waxed_exposed_copper_door", DOOR_PROP },
+    { 0, 232,       HIGH_BIT, "waxed_weathered_copper_door", DOOR_PROP },
+    { 0, 233,       HIGH_BIT, "waxed_oxidized_copper_door", DOOR_PROP },
+
+    // 1.20.3 additions (short_grass added next to "grass", above), https://minecraft.wiki/w/Java_Edition_1.20.3#General_2
 
  // Note: 140, 144 are reserved for the extra bit needed for BLOCK_FLOWER_POT and BLOCK_HEAD, so don't use these HIGH_BIT values
 };
@@ -1469,7 +1538,7 @@ void makeHashTable()
         int index = BlockTranslations[i].hashSum & HASH_MASK;
         HashLists[hashStart[index]++] = i;
     }
-    // done once to initialize gBlockDefinitions[i].subtype_mask values properly.
+    // Done once to initialize gBlockDefinitions[i].subtype_mask values properly.
     // These values determine if a bit determines if an object is a separate type of
     // thing, e.g., granite vs. stone, or needs a separate material, e.g., redstone wire
     // at different levels of illumination.
@@ -1527,6 +1596,8 @@ void makeHashTable()
         mask_array[BLOCK_CAKE] |= BIT_32;
         // lit version of cave_vines is same as unlit
         mask_array[BLOCK_CAVE_VINES_LIT] |= mask_array[BLOCK_CAVE_VINES];
+        // bulbs also should have "lit" be a part of the material
+        mask_array[BLOCK_COPPER_BULB] |= 0x8;
         // really, these should all be set properly already, but might as well make sure...
         for (i = 0; i < NUM_BLOCKS_DEFINED; i++) {
             // if you hit this assert, set the proper subtype_mask to be equal to mask_array's value here.
@@ -1621,9 +1692,15 @@ void makeHashTable()
 int findIndexFromName(char* name)
 {
     // quick out: if it's air, just be done
-    if (strcmp("air", name) == 0) {
+    // +10 is to avoid (useless) "minecraft:" string.
+    if (strcmp("air", name + 10) == 0) {
         return 0;
     }
+    if (strlen(name) < 11) {
+        // name is too short, probably some mod name like "train:turn" etc.
+        return -1;
+    }
+    name += 10;
     // to break on a specific named block
 #ifdef _DEBUG
     //if (strcmp("acacia_stairs", name) == 0) {
@@ -1645,6 +1722,23 @@ int findIndexFromName(char* name)
     }
     // fail!
     return -1;
+}
+
+int SlowFindIndexFromName(char* name)
+{
+    for (int i = 0; i < NUM_TRANS; i++) {
+        if (strcmp(name, BlockTranslations[i].name) == 0) {
+            return i;
+        }
+    }
+    // fail!
+    return -1;
+}
+
+// should be called any time the mod translation pointer changes
+void SetModTranslations(TranslationTuple* mt)
+{
+    modTranslations = mt;
 }
 
 void convertToLowercaseUnderline(char* dest, const char* name)
@@ -2045,7 +2139,7 @@ int nbtGetBlocks(bfFile* pbf, unsigned char* buff, unsigned char* data, unsigned
         // is this 1.18 release or later?
         // TODO: could be made faster? Could compare to Level or "sections" in one command.
         // 21w43 for 1.18 seems to be the one where we no longer go Level -> Sections but
-        // rather just go to sections. See https://minecraft.fandom.com/wiki/Java_Edition_21w43a#General_2
+        // rather just go to sections. See https://minecraft.wiki/w/Java_Edition_21w43a#General_2
         // We could test here; rather, just let it fail if "sections" is not found (who knows what error message will be generated... GIGO).
         //if (versionID >= 2844) {
             formatClass = FORMAT_1_18_AND_NEWER;
@@ -2139,10 +2233,10 @@ int nbtGetBlocks(bfFile* pbf, unsigned char* buff, unsigned char* data, unsigned
             return LINE_ERROR;
     }
     else {
-        // new format 1.13+See: https://minecraft.fandom.com/wiki/Chunk_format
-        // 1.18: https://minecraft.fandom.com/wiki/Java_Edition_1.18
+        // new format 1.13+See: https://minecraft.wiki/w/Chunk_format
+        // 1.18: https://minecraft.wiki/w/Java_Edition_1.18
 
-        // See: https://minecraft.fandom.com/wiki/Chunk_format
+        // See: https://minecraft.wiki/w/Chunk_format
         // 
         // How data is structured 1.13 through 1.17:
         // /region: a directory of "regular" world region files
@@ -2162,7 +2256,7 @@ int nbtGetBlocks(bfFile* pbf, unsigned char* buff, unsigned char* data, unsigned
         //           BlockLight: light data, which Mineways uses
         //           BlockStates: what data is is the 16x16x16 part of this chunk. Compressed format. Holds number for each voxel, pointing at a Palette entry.
         //           SkyLight: some other lighting data, which we ignore.
-        //     DataVersion: what format is the data in https://minecraft.fandom.com/wiki/Data_version#List_of_data_versions
+        //     DataVersion: what format is the data in https://minecraft.wiki/w/Data_version#List_of_data_versions
         // 
         // How data is structured in 1.18 BETAS (only!) of various sorts:
         // TODO: figure out when this changed yet again
@@ -2184,7 +2278,7 @@ int nbtGetBlocks(bfFile* pbf, unsigned char* buff, unsigned char* data, unsigned
         //           block_states: usually 2 entries
         //             palette: number of folders of entries, like in 1.17, see above.
         //             data: this is the compressed block_states data.
-        //     DataVersion: what format is the data in https://minecraft.fandom.com/wiki/Data_version#List_of_data_versions
+        //     DataVersion: what format is the data in https://minecraft.wiki/w/Data_version#List_of_data_versions
 
         // Read Biomes 1.13 through 1.17-ish
         if (len == 256) {
@@ -2202,7 +2296,7 @@ int nbtGetBlocks(bfFile* pbf, unsigned char* buff, unsigned char* data, unsigned
         }
         else if (len == 1024) {
             // 1.15 on, optionally
-            // TODO from https://minecraft.gamepedia.com/Java_Edition_1.15/Development_versions
+            // TODO from https://minecraft.wiki/w/Java_Edition_1.15/Development_versions
             // Biome information now stores Y-coordinates, allowing biomes to be changed based on height; previously, biome information only stored X and Z coordinates.
             // The Biomes array in the Level tag for each chunk now contains 1024 integers instead of 256.
             // len should be 1024
@@ -3210,17 +3304,19 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
 
     // for doors
     bool half, north, south, east, west, down, lit, powered, triggered, extended, attached, disarmed,
-        conditional, inverted, enabled, doubleSlab, mode, waterlogged, in_wall, signal_fire, has_book, up, hanging;
+        conditional, inverted, enabled, doubleSlab, mode, waterlogged, in_wall, signal_fire, has_book,
+        up, hanging, crafting, powered_bit;
     int axis, door_facing, hinge, open, face, rails, occupied, part, dropper_facing, eye, age,
         delay, locked, sticky, hatch, leaves, single, attachment, honey_level, stairs, bites, tilt,
-        thickness, vertical_direction, berries, flower_amount;
+        thickness, vertical_direction, berries, flower_amount, orientation;
     // to avoid Release build warning, but should always be set by code in practice
     int typeIndex = 0;
     half = north = south = east = west = down = lit = powered = triggered = extended = attached = disarmed
-        = conditional = inverted = enabled = doubleSlab = mode = in_wall = signal_fire = has_book = up = hanging = false; // waterlogged is always set false in loop
+        = conditional = inverted = enabled = doubleSlab = mode = in_wall = signal_fire = has_book
+        = up = hanging = crafting = powered_bit = false; // waterlogged is always set false in loop
     axis = door_facing = hinge = open = face = rails = occupied = part = dropper_facing = eye = age =
         delay = locked = sticky = hatch = leaves = single = attachment = honey_level = stairs = bites = tilt =
-        thickness = vertical_direction = berries = flower_amount = 0;
+        thickness = vertical_direction = berries = flower_amount = orientation = 0;
 
     // IMPORTANT: if any PROP field uses any of these:
     // triggered, extended, sticky, enabled, conditional, open, powered, face, has_book, powered, attachment, lit, signal_fire, honey_level
@@ -3241,6 +3337,8 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
         dataVal = 0;
         // avoid inheriting these properties, which are always folded in (false if not found in block, so does no harm)
         waterlogged = false;
+        // set true if the block found is not known
+        bool useData = true;
 
         for (;;)
         {
@@ -3279,23 +3377,71 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
                 //	type = type;
                 //}
 
-                // convert name to block value. +10 is to avoid (useless) "minecraft:" string.
-                // could be dangerous if len < 10 for whatever reason.
-                typeIndex = findIndexFromName(thisBlockName + 10);
+                // convert name to block value.
+                typeIndex = findIndexFromName(thisBlockName);
                 if (typeIndex > -1) {
+                    useData = true;
                     paletteBlockEntry[entryIndex] = BlockTranslations[typeIndex].blockId;
                     paletteDataEntry[entryIndex] = BlockTranslations[typeIndex].dataVal;
                 }
                 else {
                     // unknown type
-                    //  THIS IS WHERE TO PUT A DEBUG BREAK TO SEE WHAT NAME IS UNKNOWN: see thisBlockName.
-                    // TODO: could add a more complex system here to convert from various unknown block names to other IDs.
-                    // Test if we care about knowing which block name is unknown.
-                    typeIndex = BLOCK_AIR;  // to avoid problems interpreting this blocck
+                    useData = false;   // later allow the user to get the (somewhat random) data of the unknown block
+                    //  THIS IS WHERE TO PUT A DEBUG BREAK TO SEE WHAT NAME IS UNKNOWN: watch thisBlockName.
+                    typeIndex = BLOCK_AIR;  // to avoid problems interpreting this block
                     if (unknownBlock) {
-                        // return unknown block's name to output; really, should return all block names, just add to the string until it's full,
-                        // if the name is not already in the list. Handy for people trying to make block conversions. Make string a lot longer.
-                        strcpy_s(unknownBlock, 100, thisBlockName + 10);
+                        // return unknown block's name to output; return all block names as room permits, just add to the string until it's full,
+                        // if the name is not already in the list. Handy for people trying to make block conversions.
+
+                        // remove the part before the colon:
+                        char* unknownName = strchr(thisBlockName, ':');
+                        if (unknownName == NULL) {
+                            assert(0);  // weird, doesn't have a colon in its name. Is everything OK?
+                            unknownName = thisBlockName;
+                        }
+                        else {
+                            // get past colon
+                            unknownName++;
+                        }
+
+                        // Check for any list of names to translate to known blocks.
+                        // We translate, then go to set palette entry as above.
+                        TranslationTuple* ptt = modTranslations;
+                        bool matched = false;
+                        while (ptt) {
+                            if (strcmp(ptt->name, unknownName) == 0) {
+                                // found a match
+                                matched = true;
+                                paletteBlockEntry[entryIndex] = BlockTranslations[ptt->type].blockId;
+                                paletteDataEntry[entryIndex] = BlockTranslations[ptt->type].dataVal;
+                                // note that any dataVal translation will be magic - might destroy life as we know it.
+                                // But, allow the user to do it using ":*".
+                                useData = ptt->useData;
+                                break;
+                            }
+                            ptt = ptt->next;
+                        }
+                        if (matched) {
+                            continue;   // jump to the next in this big loop
+                        }
+
+                        // Name not found for translation, so report an error and add it to the list
+                        // is name already in string? Yes, there could be names inside names, but this isn't meant to be thorough.
+                        if (strstr(unknownBlock, unknownName) == NULL) {
+                            // name is unique
+                            size_t stringLength = strlen(unknownBlock);
+                            if (stringLength + strlen(unknownName) + 8 < MAX_PATH_AND_FILE) {
+                                if (stringLength > 0) {
+                                    // already added a name, so add comma
+                                    strcat_s(unknownBlock, MAX_PATH_AND_FILE, ", ");
+                                }
+                                strcat_s(unknownBlock, MAX_PATH_AND_FILE, unknownName);
+                            }
+                            else if (stringLength + 6 < MAX_PATH_AND_FILE) {
+                                // end it - no more room!
+                                strcat_s(unknownBlock, MAX_PATH_AND_FILE, ", etc.");
+                            }
+                        }
                     }
                     // Make unknown blocks air (0) by default, or whatever the user has set with the script command "Set unknown block ID".
                     paletteBlockEntry[entryIndex] = (unsigned char)(unknownBlockID & 0xff);
@@ -3378,9 +3524,9 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
                         // there does not seem to be any "check decay" flag 
                         else if (strcmp(token, "persistent") == 0) {
                             // if true, will decay; if false, will be checked for decay (what?)
-                            // https://minecraft.gamepedia.com/Leaves#Block_states
+                            // https://minecraft.wiki/w/Leaves#Block_states
                             // Instead, I'm guessing persistent means "no decay"
-                            // https://minecraft.gamepedia.com/Java_Edition_data_values#Leaves
+                            // https://minecraft.wiki/w/Java_Edition_data_values#Leaves
                             // ignore, since it is has no graphical effect
 #ifndef GRAPHICAL_ONLY
                             dataVal = (strcmp(value, "true") == 0) ? 4 : 0;
@@ -3544,7 +3690,7 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
                         }
                         // DOOR_PROP only
                         else if (strcmp(token, "hinge") == 0) {
-                            // NOTE: this is flipped from what the docs at https://minecraft.gamepedia.com/Java_Edition_data_values#Door
+                            // NOTE: this is flipped from what the docs at https://minecraft.wiki/w/Java_Edition_data_values#Door
                             // say, they say left is 1, but this works properly. Mojang, I suspect, means the hinge on the inside of
                             // the door, vs. outside, or something.
                             hinge = (strcmp(value, "right") == 0) ? 1 : 0;
@@ -3609,7 +3755,7 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
                         else if (strcmp(token, "down") == 0) {
                             down = (strcmp(value, "true") == 0);
                         }
-                        // redstone
+                        // redstone, copper bulbs, candles, much else
                         else if (strcmp(token, "lit") == 0) {
                             lit = (strcmp(value, "true") == 0);
                         }
@@ -3622,12 +3768,11 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
                         else if (strcmp(token, "part") == 0) {
                             part = (strcmp(value, "head") == 0) ? 8 : 0;
                         }
-                        // dropper/dispenser
+                        // dropper/dispenser and crafter
                         else if (strcmp(token, "triggered") == 0) {
-                            // ignore, non-graphical
-#ifndef GRAPHICAL_ONLY
+                            // ignore, non-graphical for some things.
+                            // matters for crafter
                             triggered = (strcmp(value, "true") == 0);
-#endif
                         }
                         // END_PORTAL_PROP (really, the frame)
                         else if (strcmp(token, "eye") == 0) {
@@ -3753,43 +3898,56 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
                         else if (strcmp(token, "charges") == 0) {
                             dataVal = atoi(value);
                         }
-                        // for jigsaw
+                        // for jigsaw and crafter
                         else if (strcmp(token, "orientation") == 0) {
+                            // orientation order: south, west, north, east; then up_ then down_
                             if (strcmp(value, "south_up") == 0) {
                                 dropper_facing = 3;
+                                orientation = 0;
                             }
                             else if (strcmp(value, "west_up") == 0) {
                                 dropper_facing = 2;
+                                orientation = 1;
                             }
                             else if (strcmp(value, "north_up") == 0) {
                                 dropper_facing = 4;
+                                orientation = 2;
                             }
                             else if (strcmp(value, "east_up") == 0) {
                                 dropper_facing = 5;
+                                orientation = 3;
                             }
                             else if (strcmp(value, "up_east") == 0) {
                                 dropper_facing = 1 | BIT_16 | BIT_8;
+                                orientation = 7;
                             }
                             else if (strcmp(value, "up_north") == 0) {
                                 dropper_facing = 1 | BIT_16;
+                                orientation = 6;
                             }
                             else if (strcmp(value, "up_west") == 0) {
                                 dropper_facing = 1;
+                                orientation = 5;
                             }
                             else if (strcmp(value, "up_south") == 0) {
                                 dropper_facing = 1 | BIT_8;
+                                orientation = 4;
                             }
                             else if (strcmp(value, "down_east") == 0) {
                                 dropper_facing = 0 | BIT_16 | BIT_8;
+                                orientation = 11;
                             }
                             else if (strcmp(value, "down_north") == 0) {
                                 dropper_facing = 0 | BIT_16;
+                                orientation = 10;
                             }
                             else if (strcmp(value, "down_west") == 0) {
                                 dropper_facing = 0;
+                                orientation = 9;
                             }
                             else if (strcmp(value, "down_south") == 0) {
                                 dropper_facing = 0 | BIT_8;
+                                orientation = 8;
                             }
                             else {
                                 // unknown state found
@@ -3802,7 +3960,7 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
                             // 1-4 candles == 0-3 * 16 (i.e., 0x00, 0x10, 0x20, 0x30)
                             dataVal |= ((atoi(value) - 1) << 4);
                         }
-                        // for big dripleaf https://minecraft.fandom.com/wiki/Big_Dripleaf
+                        // for big dripleaf https://minecraft.wiki/w/Big_Dripleaf
                         else if (strcmp(token, "tilt") == 0) {
                             if (strcmp(value, "none") == 0) {
                                 tilt = 0;
@@ -3822,13 +3980,13 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
                                 assert(0);
                             }
                         }
-                        // for cave vines and cave vines plant (which also has "age") https://minecraft.fandom.com/wiki/Glow_Berries#ID
+                        // for cave vines and cave vines plant (which also has "age") https://minecraft.wiki/w/Glow_Berries#ID
                         // BERRIES_PROP
                         else if (strcmp(token, "berries") == 0) {
                             // "age" is also folded into dataVal for cave_vines_plant, which is why we can't use the dataVal directly
                             berries = (strcmp(value, "true") == 0) ? 0x2 : 0;
                         }
-                        // for pointed dripstone https://minecraft.fandom.com/wiki/Pointed_Dripstone#ID
+                        // for pointed dripstone https://minecraft.wiki/w/Pointed_Dripstone#ID
                         else if (strcmp(token, "thickness") == 0) {
                             if (strcmp(value, "tip") == 0) {
                                 thickness = 0;
@@ -3850,7 +4008,7 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
                                 assert(0);
                             }
                         }
-                        // also for pointed dripstone https://minecraft.fandom.com/wiki/Pointed_Dripstone#ID
+                        // also for pointed dripstone https://minecraft.wiki/w/Pointed_Dripstone#ID
                         else if (strcmp(token, "vertical_direction") == 0) {
                             vertical_direction = (strcmp(value, "down") == 0) ? 0x8 : 0;
                         }
@@ -3879,8 +4037,9 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
                             dataVal |= atoi(value);
                         }
 
-                        // for the chiseled bookshelf, just mark the low bit with a 1 if there is any occupied book slot.
-                        // direction is in 0x7 field
+                        // for the chiseled bookshelf, just mark the 0x8 bit with a 1 if there is any occupied book slot.
+                        // We do not differentiate how many books.
+                        // Direction is in 0x7 field
                         else if (strcmp(token, "slot_0_occupied") == 0 ||
                             strcmp(token, "slot_1_occupied") == 0 ||
                             strcmp(token, "slot_2_occupied") == 0 ||
@@ -3889,16 +4048,92 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
                             strcmp(token, "slot_5_occupied") == 0 ) {
                             dataVal |= (strcmp(value, "true") == 0) ? 8 : 0;
                         }
-                        
                         // for pink petals
                         else if (strcmp(token, "flower_amount") == 0) {
                             flower_amount = atoi(value);
                         }
 
+                        // for trial spawner and vault
+                        else if (strcmp(token, "ominous") == 0) {
+                            dataVal |= (strcmp(value, "true") == 0) ? 0x4 : 0;
+                        }
+
+                        // for trial_spawner:
+                        // low 2 bits are trial_spawner_state
+                        // next 1 bit is ominous
+                        else if (strcmp(token, "trial_spawner_state") == 0) {
+                            // there are only three states that matter visually:
+                            // waiting_for_reward_ejection, waiting_for_players, and active are all the same, except for illumination level
+                            // cooldown and inactive are the same
+                            // ejecting_reward
+                            if (strcmp(value, "active") == 0) {
+                                dataVal |= 0x1;
+                            }
+                            else if (strcmp(value, "waiting_for_reward_ejection") == 0) {
+                                dataVal |= 0x1;
+                            }
+                            else if (strcmp(value, "waiting_for_players") == 0) {
+                                // different illumination level
+                                dataVal |= 0x2;
+                            }
+                            else if (strcmp(value, "ejecting_reward") == 0) {
+                                dataVal |= 0x3;
+                            }
+                            // last two just to check validity - don't do anything
+                            else if (strcmp(value, "cooldown") == 0) {
+                                //dataVal |= 0x0;
+                            }
+                            else if (strcmp(value, "inactive") == 0) {
+                                //dataVal |= 0x0;
+                            }
+                            else {
+                                // cooldown and inactive are the same, ignore as 0x0 state
+                                assert(0);
+                            }
+                        }
+
+                        // for vault:
+                        // low 2 bits are facing
+                        // next 1 bit is ominous
+                        // next 2 bits are vault_state: ejecting and unlocking are really the same visually
+                        else if (strcmp(token, "vault_state") == 0) {
+                            // there are only three states that matter visually:
+                            // waiting_for_reward_ejection, waiting_for_players, and active are all the same
+                            // cooldown and inactive are the same
+                            // ejecting_reward
+                            if (strcmp(value, "inactive") == 0) {
+                                //dataVal |= 0x0;
+                            }
+                            else if (strcmp(value, "active") == 0) {
+                                dataVal |= 0x1 << 3;
+                            }
+                            else if (strcmp(value, "unlocking") == 0) {
+                                // really the same as "ejecting", visually, but let's separate them since we have a state 0-3
+                                dataVal |= 0x2 << 3;
+                            }
+                            else if (strcmp(value, "ejecting") == 0) {
+                                dataVal |= 0x3 << 3;
+                            }
+                            else {
+                                // cooldown and inactive are the same, ignore as 0x0 state
+                                assert(0);
+                            }
+                        }
+
+                        // for crafter
+                        else if (strcmp(token, "crafting") == 0) {
+                            crafting = (strcmp(value, "true") == 0) ? 1 : 0;
+                        }
+
+                        // copper bulbs
+                        else if (strcmp(token, "powered_bit") == 0) {
+                            powered_bit = (strcmp(value, "true") == 0);
+                        }
+
 #ifdef _DEBUG
                         else {
                             // ignore, not used by Mineways for now, BlockTranslations[typeIndex]
-                            if (strcmp(token, "distance") == 0) {} // for leaves and scaffold, see https://minecraft.gamepedia.com/Leaves - not needed for graphics
+                            if (strcmp(token, "distance") == 0) {} // for leaves and scaffold, see https://minecraft.wiki/w/Leaves - not needed for graphics
                             else if (strcmp(token, "short") == 0) {} // for piston, TODO - what makes this property be true?
                             else if (strcmp(token, "note") == 0) {}
                             else if (strcmp(token, "instrument") == 0) {}
@@ -3910,7 +4145,8 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
                             else if (strcmp(token, "cracked") == 0) {}	// for decorated pot - ignored
                             else {
                                 // unknown property - look at token and value
-                                assert(0);
+                                static int ignore = 0;
+                                assert(ignore);
                             }
                         }
 #endif
@@ -3922,527 +4158,544 @@ static int readPalette(int& returnCode, bfFile* pbf, int mcVersion, unsigned cha
         }
         // done, so determine and fold in dataVal
         int tf = BlockTranslations[typeIndex].translateFlags;
-        switch (tf) {
-        default:
-            // prop defined but not used in list below - just use NO_PROP if the prop does nothing
-            assert(0);
-
-        // These next two use shared properties, which means the other PROPs that use any of these need to reset them (except for dropper_facing and door_facing).
-        case EXTENDED_FACING_PROP:
-            // properties DROPPER_PROP, PISTON_PROP, PISTON_HEAD_PROP, HOPPER_PROP, COMMAND_BLOCK_PROP, 
-            // also WALL_SIGN_PROP, OBSERVER_PROP
-            dataVal = dropper_facing | (extended ? 8 : 0) | sticky | (enabled ? 8 : 0) | (conditional ? 8 : 0) | (open ? 8 : 0) | (powered ? 8 : 0) | (triggered ? 8 : 0);
-            // We have to reset, as this property is used by lots of different blocks, each of which sets its own set of properties.
-            // Normally we don't have to reset, as (for example) a fence gate FENCE_GATE_PROP will always set the "open" property, it's always present, so when a second fence
-            // gate is found in the palette, it is guaranteed to have set this value, i.e., no clearing is needed there.
-            // However, here we use a bunch of properties above that are *likely* to not be set by the block with EXTENDED_FACING_PROP. For example, "sticky" is used by
-            // pistons, which use EXTENDED_FACING_PROP. We need to reset it to 0x0 so that if the next EXTENDED_FACING_PROP block, say a lightning rod, doesn't have that
-            // property, then that property won't get rest.
-            dropper_facing = 0;     // don't really need to reset this one, I think, as every EXTENDED_FACING_PROP should use it. But, doesn't hurt.
-            triggered = false; // non-graphical
-            extended = false;
-            sticky = 0x0;
-            enabled = false;
-            conditional = false;
-            open = 0x0;
-            powered = false;
-            break;
-        case EXTENDED_SWNE_FACING_PROP:
-            // properties GRINDSTONE_PROP, LECTERN_PROP, BELL_PROP, CAMPFIRE_PROP
-            // really, powered and signal_fire have no effect on rendering the objects themselves, but tracked for now anyway
-            dataVal = door_facing | (face << 2) // grindstone
-                | (has_book ? 4 : 0) | (powered ? 8 : 0) // lectern, and bell is powered
-                | (attachment << 4) // bell: 0x30 field (note that bell's 0x04 field is not used
-                | (lit ? 4 : 0)
-                //| (signal_fire ? 8 : 0) - commented out, as we now use 0x8 to mean it's a soul campfire; signal fire has no effect on rendering, AFAIK
-                | (honey_level << 2); // bee_nest, beehive
-            door_facing = face = 0; // don't need to do door_facing, and in fact the rest of the code doesn't reset this, as it should always be set by this prop anyway.
-            has_book = false;
-            powered = false;
-            attachment = 0;
-            lit = false;
-            signal_fire = false;
-            honey_level = 0;
-            break;
-
-        case NO_PROP:
-            // these are also ones where nothing needs to be done. They could all be called NO_PROP,
-            // but it's handy to know what blocks have what properties associated with them.
-        case SNOWY_PROP:
-        case SNOW_PROP:
-        case AGE_PROP:
-        case FLUID_PROP:
-        case SAPLING_PROP:
-        case LEAF_PROP:
-        case FARMLAND_PROP:
-        case STANDING_SIGN_PROP:
-        case WT_PRESSURE_PROP:
-        case PICKLE_PROP:
-        case WIRE_PROP:
-        case STRUCTURE_PROP:
-            break;
-
-        case TRULY_NO_PROP:
-            // well, it can have waterlogged, further down
-            dataVal = 0x0;
-            break;
-
-        case SLAB_PROP:
-            // everything is fine if double is false
-            if (doubleSlab) {
-                // turn single slabs into double slabs by using the type ID just before (it's traditional)
-                paletteBlockEntry[entryIndex]--;
-            }
-            break;
-        case CANDLE_PROP:
-            if (lit) {
-                // turn candle type into lit candle, which is one above an unlit candle
-                paletteBlockEntry[entryIndex]++;
-            }
-            lit = false;
-            break;
-        case AXIS_PROP:
-            // will get OR'ed in with type of block later
-            dataVal = axis;
-            break;
-        case NETHER_PORTAL_AXIS_PROP:
-            // was 4 and 8, make it 1 and 2
-            dataVal = axis >> 2;
-            break;
-        case CANDLE_CAKE_PROP:
-            // 3 lowest bits is number of bites, which is 0-6. However, 7 bites means there's a regular (non-colored) candle.
-            // 0x10 bit is whether the cake has a COLORED candle or not. If it does, then the four lowest bits are the color
-            // 0x20 bit is whether the candle is lit or not, for all 17 candles.
-            dataVal |= bites | (lit ? BIT_32 : 0x0);
-            // Must reset "lit", as the basic "cake" object does not have this property, but the candle cakes do.
-            // Similarly, "bites" must be reset, as candle cakes always have 0 bites and only care about "lit".
-            lit = false;
-            bites = 0;
-            break;
-        case TORCH_PROP:
-            // if dataVal is not set, i.e. is 0, then set to 5
-            if (dataVal == 0)
-                dataVal = 5;
-            // if this is a redstone torch, use the "lit" property to decide which block
-            if (!lit && (paletteBlockEntry[entryIndex] == 76)) {
-                // turn it off
-                paletteBlockEntry[entryIndex] = 75;
-            }
-            lit = false;
-            break;
-        case STAIRS_PROP:
-            // subtract one from the dataVal, which is the "facing" property, so that south == 0, west == 1, north == 2, east == 3
-            dataVal = (dataVal - 1) | (half ? 4 : 0) | stairs;
-            break;
-        case RAIL_PROP:
-            dataVal = rails;
-            if (!(paletteBlockEntry[entryIndex] == 66)) {
-                dataVal |= (powered ? 8 : 0);
-            }
-            // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
-            powered = false;
-            break;
-        case PRESSURE_PROP:
-            dataVal = powered ? 1 : 0;
-            // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
-            powered = false;
-            break;
-        case DOOR_PROP:
-            // if upper door, use hinge and powered, else use facing and open
-            if (half) {
-                // upper
-                dataVal = 8 | hinge | (powered ? 2 : 0);
-            }
-            else {
-                // lower
-                dataVal = open | door_facing;
-            }
-            // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
-            powered = false;
-            open = 0x0;
-            break;
-        case LEVER_PROP:
-            // which way is face?
-            if (face == 0) {
-                // floor, can only be 5 or 6, test south or north;
-                // but, may need to set dataVal properly.
-                // We don't have the full flexibility of 1.13,
-                // but rather use 1.12 rules here, that things go
-                // south when off, north when on, in order to get
-                // south and north orientations.
-                switch ((dataVal - 1) + (powered ? 4 : 0)) {
-                default:
-                case 0: // east
-                case 5: // west
-                    dataVal = 6 | 8;
-                    break;
-                case 1: // west
-                case 4: // east
-                    dataVal = 6;
-                    break;
-                case 2: // south
-                case 7: // north
-                    dataVal = 5 | 8;
-                    break;
-                case 3: // north
-                case 6: // south
-                    dataVal = 5;
-                    break;
-                }
-            }
-            else if (face == 1) {
-                // side
-                // surprisingly simple, see switch code that follows.
-                dataVal |= (powered ? 8 : 0);
-                /*
-                switch (stairs_facing) {
-                default:
-                case 0: // east
-                dataVal |= 1;
-                break;
-                case 1: // west
-                dataVal |= 2;
-                break;
-                case 2: // south
-                dataVal |= 3;
-                break;
-                case 3: // north
-                dataVal |= 4;
-                break;
-                }
-                */
-            }
-            else {
-                // ceiling, can only be 0 or 7
-                switch ((dataVal - 1) + (powered ? 4 : 0)) {
-                default:
-                case 0: // east
-                case 5: // west
-                    dataVal = 0 | 8;
-                    break;
-                case 1: // west
-                case 4: // east
-                    dataVal = 0;
-                    break;
-                case 2: // south
-                case 7: // north
-                    dataVal = 7 | 8;
-                    break;
-                case 3: // north
-                case 6: // south
-                    dataVal = 7;
-                    break;
-                }
-            }
-            // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
-            powered = false;
-            face = 0;
-            break;
-        case CHEST_PROP:
-            dataVal = 6 - dataVal;
-            // two upper bits 0x18 are 1 = single, 2 = left, 3 = right half; note if no bits found, then it's an old-style chest
-            dataVal |= (single << 3);
-            break;
-        case FACING_PROP:
-            dataVal = 6 - dataVal;
-            break;
-        case FURNACE_PROP:
-            dataVal = 6 - dataVal;
-            if (lit) {
-                // light furnace: move type to be the "lit" version.
-                paletteBlockEntry[entryIndex] = 62;
-            }
-            lit = false;
-            break;
-        case BUTTON_PROP:
-            // dataVal is set fron "facing" already (1234), just need face & powered
-            // check for top or bottom facing
-            // if button is on top or bottom, "facing" affects angle, bit 16
-            if (face == 0) {
-                dataVal = 5 | ((dataVal <= 2) ? BIT_16 : 0x0);
-            }
-            else if (face == 2) {
-                dataVal = 0 | ((dataVal <= 3) ? BIT_16 : 0x0);
-            }
-            //else if (face == 1) {
-            // not needed, as dataVal should be set just right at this point for walls
-            dataVal |= powered ? 0x8 : 0;
-            // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
-            powered = false;
-            face = 0;
-            break;
-        case TRAPDOOR_PROP:
-            dataVal = (half ? 8 : 0) | (open ? 4 : 0) | (4 - dataVal);
-            // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
-            open = 0x0;
-            break;
-        case TALL_FLOWER_PROP:
-            // Top half of sunflowers, etc., have just the 0x8 bit set, not the flower itself.
-            // Doesn't matter to Mineways per se, but if we export a schematic, we should make
-            // this data the same as Minecraft's. TODO - need to test flowers more
-            dataVal = half ? 0x8 : 0;
-            break;
-        case REDSTONE_ORE_PROP:
-            if (lit) {
-                // light redstone ore or redstone lamp
-                paletteBlockEntry[entryIndex]++;
-            }
-            lit = false;
-            break;
-        case FENCE_GATE_PROP:
-            // strange but true;
-            dataVal = (open ? 0x4 : 0x0) | ((door_facing + 3) % 4) | (in_wall ? 0x20 : 0);
-            // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
-            open = 0x0;
-            break;
-        case SWNE_FACING_PROP:
-            // south/west/north/east == 0/1/2/3
-            dataVal = (door_facing + 3) % 4;
-            break;
-        case CALIBRATED_SCULK_SENSOR_PROP:
-            // south/west/north/east == 0/1/2/3
-            // counts in the sculk_sensor_phase which has been put in BIT_16.
-            // We don't want power, but we do want to know if it's calibrated and if it's sculk_sensor_phase is active.
-            // Actually, we could leave off calibrated, 0x4 bit, as that should transmit at bottom
-            dataVal = ((door_facing + 3) % 4) | (dataVal & BIT_16); // (0x4 & BIT_16)
-            break;
-        case BED_PROP:
-            // south/west/north/east == 0/1/2/3
-            // note that "occupied" will not be set if GRAPHICAL_ONLY is defined
-            dataVal = ((door_facing + 3) % 4) + part + occupied;
-            break;
-        case FENCE_AND_VINE_PROP:
-            // Note that for vines, 0 means there's one "above" (really, underneath).
-            // When there's one above, there (happily) cannot be east/west/n/s, so
-            // no extra bit is needed or used internally.
-            dataVal = (south ? 1 : 0) | (west ? 2 : 0) | (north ? 4 : 0) | (east ? 8 : 0) | (down ? BIT_16 : 0) | (up ? BIT_32 : 0);
-            break;
-        case COCOA_PROP:
-            dataVal = ((door_facing + 3) % 4) + (age << 2);
-            break;
-        case LEAF_SIZE_PROP:
-            dataVal = (leaves << 1) | age;
-            break;
-        case HIGH_FACING_PROP:
-            dataVal = 0xf | (door_facing << 4);
-        case QUARTZ_PILLAR_PROP:
-            // for quartz pillar, change data val based on axis
-            switch (axis) {
+        if (useData) {
+            switch (tf) {
             default:
-            case 0:
-                paletteDataEntry[entryIndex] = 2;
+                // prop defined but not used in list below - just use NO_PROP if the prop does nothing
+                assert(0);
+
+                // These next two use shared properties, which means the other PROPs that use any of these need to reset them (except for dropper_facing and door_facing).
+            case EXTENDED_FACING_PROP:
+                // properties DROPPER_PROP, PISTON_PROP, PISTON_HEAD_PROP, HOPPER_PROP, COMMAND_BLOCK_PROP, 
+                // also WALL_SIGN_PROP, OBSERVER_PROP
+                dataVal = dropper_facing | (extended ? 8 : 0) | sticky | (enabled ? 8 : 0) | (conditional ? 8 : 0) | (open ? 8 : 0) | (powered ? 8 : 0) | (triggered ? 8 : 0);
+                // We have to reset, as this property is used by lots of different blocks, each of which sets its own set of properties.
+                // Normally we don't have to reset, as (for example) a fence gate FENCE_GATE_PROP will always set the "open" property, it's always present, so when a second fence
+                // gate is found in the palette, it is guaranteed to have set this value, i.e., no clearing is needed there.
+                // However, here we use a bunch of properties above that are *likely* to not be set by the block with EXTENDED_FACING_PROP. For example, "sticky" is used by
+                // pistons, which use EXTENDED_FACING_PROP. We need to reset it to 0x0 so that if the next EXTENDED_FACING_PROP block, say a lightning rod, doesn't have that
+                // property, then that property won't get rest.
+                dropper_facing = 0;     // don't really need to reset this one, I think, as every EXTENDED_FACING_PROP should use it. But, doesn't hurt.
+                triggered = false; // non-graphical
+                extended = false;
+                sticky = 0x0;
+                enabled = false;
+                conditional = false;
+                open = 0x0;
+                powered = false;
                 break;
-            case 4:
-                paletteDataEntry[entryIndex] = 3;
+            case EXTENDED_SWNE_FACING_PROP:
+                // properties GRINDSTONE_PROP, LECTERN_PROP, BELL_PROP, CAMPFIRE_PROP
+                // really, powered and signal_fire have no effect on rendering the objects themselves, but tracked for now anyway
+                dataVal = door_facing | (face << 2) // grindstone
+                    | (has_book ? 4 : 0) | (powered ? 8 : 0) // lectern, and bell is powered
+                    | (attachment << 4) // bell: 0x30 field (note that bell's 0x04 field is not used
+                    | (lit ? 4 : 0)
+                    //| (signal_fire ? 8 : 0) - commented out, as we now use 0x8 to mean it's a soul campfire; signal fire has no effect on rendering, AFAIK
+                    | (honey_level << 2); // bee_nest, beehive
+                door_facing = face = 0; // don't need to do door_facing, and in fact the rest of the code doesn't reset this, as it should always be set by this prop anyway.
+                has_book = false;
+                powered = false;
+                attachment = 0;
+                lit = false;
+                signal_fire = false;
+                honey_level = 0;
                 break;
-            case 8:
-                paletteDataEntry[entryIndex] = 4;
+
+            case NO_PROP:
+                // these are also ones where nothing needs to be done. They could all be called NO_PROP,
+                // but it's handy to know what blocks have what properties associated with them.
+            case SNOWY_PROP:
+            case SNOW_PROP:
+            case AGE_PROP:
+            case FLUID_PROP:
+            case SAPLING_PROP:
+            case LEAF_PROP:
+            case FARMLAND_PROP:
+            case STANDING_SIGN_PROP:
+            case WT_PRESSURE_PROP:
+            case PICKLE_PROP:
+            case WIRE_PROP:
+            case STRUCTURE_PROP:
                 break;
-            }
-            break;
-        case REPEATER_PROP:
-            // facing is 0x3
-            // delay is 0xC
-            // locked is 0x10
-            dataVal = ((door_facing + 3) % 4) | (delay << 2) | (locked << 4);
-            if (powered) {
-                // use active form
-                paletteBlockEntry[entryIndex]++;
-            }
-            // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
-            powered = false;
-            break;
-        case COMPARATOR_PROP:
-            dataVal = ((door_facing + 3) % 4) | (mode ? 4 : 0) | (powered ? 8 : 0);
-            // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
-            powered = false;
-            break;
-        case MUSHROOM_STEM_PROP:
-            // Old code, where we try to stuff the new, flexible settings into the limited old version numbers;
-            //dataVal = up ? 15 : 10;
-            //break;
-        case MUSHROOM_PROP:
-            // https://minecraft.gamepedia.com/Java_Edition_data_values#Brown_and_red_mushroom_blocks
-            // set w/b/n/e/t/s from low to high bits
-            dataVal = (west ? 0x1 : 0x0) | (down ? 0x2 : 0x0) | (north ? 0x4 : 0x0) | (east ? 0x8 : 0x0) | (up ? 0x10 : 0x0) | (south ? 0x20 : 0x0) |
-                (tf == MUSHROOM_STEM_PROP ? 0x40 : 0x0);    // steal the waterlog bit
-            // Old code, where we try to stuff the new, flexible settings into the limited old version numbers;
-            // useful for the old schematics
-            /*
-            if (north) {
-                // 1,2,3,14
-                if (south) {
-                    // 14 - all sides
-                    dataVal = 14;
+
+            case TRULY_NO_PROP:
+                // well, it can have waterlogged, further down
+                dataVal = 0x0;
+                break;
+
+            case SLAB_PROP:
+                // everything is fine if double is false
+                if (doubleSlab) {
+                    // turn single slabs into double slabs by using the type ID just before (it's traditional)
+                    paletteBlockEntry[entryIndex]--;
                 }
-                else if (west) {
-                    // top, west, and north:
-                    dataVal = 1;
+                break;
+            case CANDLE_PROP:
+                if (lit) {
+                    // turn candle type into lit candle, which is one above an unlit candle
+                    paletteBlockEntry[entryIndex]++;
                 }
-                else if (east) {
-                    // top, north, and east:
-                    dataVal = 3;
+                lit = false;
+                break;
+            case AXIS_PROP:
+                // will get OR'ed in with type of block later
+                dataVal = axis;
+                break;
+            case NETHER_PORTAL_AXIS_PROP:
+                // was 4 and 8, make it 1 and 2
+                dataVal = axis >> 2;
+                break;
+            case CANDLE_CAKE_PROP:
+                // 3 lowest bits is number of bites, which is 0-6. However, 7 bites means there's a regular (non-colored) candle.
+                // 0x10 bit is whether the cake has a COLORED candle or not. If it does, then the four lowest bits are the color
+                // 0x20 bit is whether the candle is lit or not, for all 17 candles.
+                dataVal |= bites | (lit ? BIT_32 : 0x0);
+                // Must reset "lit", as the basic "cake" object does not have this property, but the candle cakes do.
+                // Similarly, "bites" must be reset, as candle cakes always have 0 bites and only care about "lit".
+                lit = false;
+                bites = 0;
+                break;
+            case TORCH_PROP:
+                // if dataVal is not set, i.e. is 0, then set to 5
+                if (dataVal == 0)
+                    dataVal = 5;
+                // if this is a redstone torch, use the "lit" property to decide which block
+                if (!lit && (paletteBlockEntry[entryIndex] == 76)) {
+                    // turn it off
+                    paletteBlockEntry[entryIndex] = 75;
                 }
-                else
-                    // top and north
-                    dataVal = 2;
-            }
-            else {
-                // 0,4,5,6,7,8,9 (stem is separate with 10 and 15, above)
-                if (south) {
-                    // 7,8,9
-                    if (west) {
-                        // top, south, west
-                        dataVal = 7;
-                    }
-                    else if (east) {
-                        // top, south, east
-                        dataVal = 9;
-                    }
-                    else
-                        // top, south
-                        dataVal = 8;
+                lit = false;
+                break;
+            case STAIRS_PROP:
+                // subtract one from the dataVal, which is the "facing" property, so that south == 0, west == 1, north == 2, east == 3
+                dataVal = (dataVal - 1) | (half ? 4 : 0) | stairs;
+                break;
+            case RAIL_PROP:
+                dataVal = rails;
+                if (!(paletteBlockEntry[entryIndex] == 66)) {
+                    dataVal |= (powered ? 8 : 0);
+                }
+                // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
+                powered = false;
+                break;
+            case PRESSURE_PROP:
+                dataVal = powered ? 1 : 0;
+                // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
+                powered = false;
+                break;
+            case DOOR_PROP:
+                // if upper door, use hinge and powered, else use facing and open
+                if (half) {
+                    // upper
+                    dataVal = 8 | hinge | (powered ? 2 : 0);
                 }
                 else {
-                    // 0,4,5,6
-                    if (west) {
-                        // top, west
-                        dataVal = 4;
+                    // lower
+                    dataVal = open | door_facing;
+                }
+                // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
+                powered = false;
+                open = 0x0;
+                break;
+            case LEVER_PROP:
+                // which way is face?
+                if (face == 0) {
+                    // floor, can only be 5 or 6, test south or north;
+                    // but, may need to set dataVal properly.
+                    // We don't have the full flexibility of 1.13,
+                    // but rather use 1.12 rules here, that things go
+                    // south when off, north when on, in order to get
+                    // south and north orientations.
+                    switch ((dataVal - 1) + (powered ? 4 : 0)) {
+                    default:
+                    case 0: // east
+                    case 5: // west
+                        dataVal = 6 | 8;
+                        break;
+                    case 1: // west
+                    case 4: // east
+                        dataVal = 6;
+                        break;
+                    case 2: // south
+                    case 7: // north
+                        dataVal = 5 | 8;
+                        break;
+                    case 3: // north
+                    case 6: // south
+                        dataVal = 5;
+                        break;
+                    }
+                }
+                else if (face == 1) {
+                    // side
+                    // surprisingly simple, see switch code that follows.
+                    dataVal |= (powered ? 8 : 0);
+                    /*
+                    switch (stairs_facing) {
+                    default:
+                    case 0: // east
+                    dataVal |= 1;
+                    break;
+                    case 1: // west
+                    dataVal |= 2;
+                    break;
+                    case 2: // south
+                    dataVal |= 3;
+                    break;
+                    case 3: // north
+                    dataVal |= 4;
+                    break;
+                    }
+                    */
+                }
+                else {
+                    // ceiling, can only be 0 or 7
+                    switch ((dataVal - 1) + (powered ? 4 : 0)) {
+                    default:
+                    case 0: // east
+                    case 5: // west
+                        dataVal = 0 | 8;
+                        break;
+                    case 1: // west
+                    case 4: // east
+                        dataVal = 0;
+                        break;
+                    case 2: // south
+                    case 7: // north
+                        dataVal = 7 | 8;
+                        break;
+                    case 3: // north
+                    case 6: // south
+                        dataVal = 7;
+                        break;
+                    }
+                }
+                // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
+                powered = false;
+                face = 0;
+                break;
+            case CHEST_PROP:
+                dataVal = 6 - dataVal;
+                // two upper bits 0x18 are 1 = single, 2 = left, 3 = right half; note if no bits found, then it's an old-style chest
+                dataVal |= (single << 3);
+                break;
+            case FACING_PROP:
+                dataVal = 6 - dataVal;
+                break;
+            case FURNACE_PROP:
+                dataVal = 6 - dataVal;
+                if (lit) {
+                    // light furnace: move type to be the "lit" version.
+                    paletteBlockEntry[entryIndex] = 62;
+                }
+                lit = false;
+                break;
+            case BUTTON_PROP:
+                // dataVal is set fron "facing" already (1234), just need face & powered
+                // check for top or bottom facing
+                // if button is on top or bottom, "facing" affects angle, bit 16
+                if (face == 0) {
+                    dataVal = 5 | ((dataVal <= 2) ? BIT_16 : 0x0);
+                }
+                else if (face == 2) {
+                    dataVal = 0 | ((dataVal <= 3) ? BIT_16 : 0x0);
+                }
+                //else if (face == 1) {
+                // not needed, as dataVal should be set just right at this point for walls
+                dataVal |= powered ? 0x8 : 0;
+                // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
+                powered = false;
+                face = 0;
+                break;
+            case TRAPDOOR_PROP:
+                dataVal = (half ? 8 : 0) | (open ? 4 : 0) | (4 - dataVal);
+                // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
+                open = 0x0;
+                break;
+            case TALL_FLOWER_PROP:
+                // Top half of sunflowers, etc., have just the 0x8 bit set, not the flower itself.
+                // Doesn't matter to Mineways per se, but if we export a schematic, we should make
+                // this data the same as Minecraft's. TODO - need to test flowers more
+                dataVal = half ? 0x8 : 0;
+                break;
+            case REDSTONE_ORE_PROP:
+                if (lit) {
+                    // light redstone ore or redstone lamp
+                    paletteBlockEntry[entryIndex]++;
+                }
+                lit = false;
+                break;
+            case FENCE_GATE_PROP:
+                // strange but true;
+                dataVal = (open ? 0x4 : 0x0) | ((door_facing + 3) % 4) | (in_wall ? 0x20 : 0);
+                // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
+                open = 0x0;
+                break;
+            case SWNE_FACING_PROP:
+                // south/west/north/east == 0/1/2/3
+                dataVal = (door_facing + 3) % 4;
+                break;
+            case CALIBRATED_SCULK_SENSOR_PROP:
+                // south/west/north/east == 0/1/2/3
+                // counts in the sculk_sensor_phase which has been put in BIT_16.
+                // We don't want power, but we do want to know if it's calibrated and if it's sculk_sensor_phase is active.
+                // Actually, we could leave off calibrated, 0x4 bit, as that should transmit at bottom
+                dataVal = ((door_facing + 3) % 4) | (dataVal & BIT_16); // (0x4 & BIT_16)
+                break;
+            case BED_PROP:
+                // south/west/north/east == 0/1/2/3
+                // note that "occupied" will not be set if GRAPHICAL_ONLY is defined
+                dataVal = ((door_facing + 3) % 4) + part + occupied;
+                break;
+            case FENCE_AND_VINE_PROP:
+                // Note that for vines, 0 means there's one "above" (really, underneath).
+                // When there's one above, there (happily) cannot be east/west/n/s, so
+                // no extra bit is needed or used internally.
+                dataVal = (south ? 1 : 0) | (west ? 2 : 0) | (north ? 4 : 0) | (east ? 8 : 0) | (down ? BIT_16 : 0) | (up ? BIT_32 : 0);
+                // if you "cheat" you can put vines on all six sides. Sure, let's support that.
+                if (dataVal == 0x0) {
+                    dataVal = 0x3F; // all sides
+                }
+                break;
+            case COCOA_PROP:
+                dataVal = ((door_facing + 3) % 4) + (age << 2);
+                break;
+            case LEAF_SIZE_PROP:
+                dataVal = (leaves << 1) | age;
+                break;
+            case HIGH_FACING_PROP:
+                dataVal = 0xf | (door_facing << 4);
+            case QUARTZ_PILLAR_PROP:
+                // for quartz pillar, change data val based on axis
+                switch (axis) {
+                default:
+                case 0:
+                    dataVal = 2;
+                    break;
+                case 4:
+                    dataVal = 3;
+                    break;
+                case 8:
+                    dataVal = 4;
+                    break;
+                }
+                break;
+            case REPEATER_PROP:
+                // facing is 0x3
+                // delay is 0xC
+                // locked is 0x10
+                dataVal = ((door_facing + 3) % 4) | (delay << 2) | (locked << 4);
+                if (powered) {
+                    // use active form
+                    paletteBlockEntry[entryIndex]++;
+                }
+                // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
+                powered = false;
+                break;
+            case COMPARATOR_PROP:
+                dataVal = ((door_facing + 3) % 4) | (mode ? 4 : 0) | (powered ? 8 : 0);
+                // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
+                powered = false;
+                break;
+            case MUSHROOM_STEM_PROP:
+                // Old code, where we try to stuff the new, flexible settings into the limited old version numbers;
+                //dataVal = up ? 15 : 10;
+                //break;
+            case MUSHROOM_PROP:
+                // https://minecraft.wiki/w/Java_Edition_data_values#Brown_and_red_mushroom_blocks
+                // set w/b/n/e/t/s from low to high bits
+                dataVal = (west ? 0x1 : 0x0) | (down ? 0x2 : 0x0) | (north ? 0x4 : 0x0) | (east ? 0x8 : 0x0) | (up ? 0x10 : 0x0) | (south ? 0x20 : 0x0) |
+                    (tf == MUSHROOM_STEM_PROP ? 0x40 : 0x0);    // steal the waterlog bit
+                // Old code, where we try to stuff the new, flexible settings into the limited old version numbers;
+                // useful for the old schematics
+                /*
+                if (north) {
+                    // 1,2,3,14
+                    if (south) {
+                        // 14 - all sides
+                        dataVal = 14;
+                    }
+                    else if (west) {
+                        // top, west, and north:
+                        dataVal = 1;
                     }
                     else if (east) {
-                        // top, east
-                        dataVal = 6;
-                    }
-                    else if (up) {
-                        // top, only
-                        dataVal = 5;
+                        // top, north, and east:
+                        dataVal = 3;
                     }
                     else
-                        // nothing: pores on all sides
-                        dataVal = 0;
+                        // top and north
+                        dataVal = 2;
                 }
-            }
-            */
-            break;
-        case ANVIL_PROP:
-            dataVal = (door_facing + 3) % 4;
-            break;
-        case DAYLIGHT_PROP:
-            // change to inverted form if inverted is set
-            if (inverted) {
-                paletteBlockEntry[entryIndex] = 178;
-            }
-            break;
-        case TRIPWIRE_PROP:
-            dataVal = (powered ? 1 : 0) | (attached ? 4 : 0) | (disarmed ? 8 : 0);
-            // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
-            powered = false;
-            break;
-        case TRIPWIRE_HOOK_PROP:
-            dataVal = ((door_facing + 3) % 4) | (attached ? 4 : 0) | (powered ? 8 : 0);
-            // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
-            powered = false;
-            break;
-        case END_PORTAL_PROP:
-            dataVal = ((door_facing + 3) % 4) | (eye ? 4 : 0);
-            break;
+                else {
+                    // 0,4,5,6,7,8,9 (stem is separate with 10 and 15, above)
+                    if (south) {
+                        // 7,8,9
+                        if (west) {
+                            // top, south, west
+                            dataVal = 7;
+                        }
+                        else if (east) {
+                            // top, south, east
+                            dataVal = 9;
+                        }
+                        else
+                            // top, south
+                            dataVal = 8;
+                    }
+                    else {
+                        // 0,4,5,6
+                        if (west) {
+                            // top, west
+                            dataVal = 4;
+                        }
+                        else if (east) {
+                            // top, east
+                            dataVal = 6;
+                        }
+                        else if (up) {
+                            // top, only
+                            dataVal = 5;
+                        }
+                        else
+                            // nothing: pores on all sides
+                            dataVal = 0;
+                    }
+                }
+                */
+                break;
+            case ANVIL_PROP:
+                dataVal = (door_facing + 3) % 4;
+                break;
+            case DAYLIGHT_PROP:
+                // change to inverted form if inverted is set
+                if (inverted) {
+                    paletteBlockEntry[entryIndex] = 178;
+                }
+                break;
+            case TRIPWIRE_PROP:
+                dataVal = (powered ? 1 : 0) | (attached ? 4 : 0) | (disarmed ? 8 : 0);
+                // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
+                powered = false;
+                break;
+            case TRIPWIRE_HOOK_PROP:
+                dataVal = ((door_facing + 3) % 4) | (attached ? 4 : 0) | (powered ? 8 : 0);
+                // reset used value that is shared with other blocks (especially EXTENDED_FACING_PROP, which uses a bunch of properties but may not set them all)
+                powered = false;
+                break;
+            case END_PORTAL_PROP:
+                dataVal = ((door_facing + 3) % 4) | (eye ? 4 : 0);
+                break;
 
-            // If dataVal is 2-5, rotation is not used (head is on a wall) and high bit of head type is off, else it is put on.
-            // 7 | 654 | 3210
-            // bit 7 - is bottom four bits 3210 the rotation on floor? If off, put on wall.
-            // bits 654 - the head. Hopefully Minecraft won't add more than 8 heads...
-            // bits 3210 - depends on bit 7; rotation if on floor, or on which wall (2-5)
+                // If dataVal is 2-5, rotation is not used (head is on a wall) and high bit of head type is off, else it is put on.
+                // 7 | 654 | 3210
+                // bit 7 - is bottom four bits 3210 the rotation on floor? If off, put on wall.
+                // bits 654 - the head. Hopefully Minecraft won't add more than 8 heads...
+                // bits 3210 - depends on bit 7; rotation if on floor, or on which wall (2-5)
 
-        case HEAD_PROP:
-            // see BLOCK_HEAD in ObjFileManip.cpp for data layout, which is crazed
-            dataVal |= 0x80;	// it's a rotation, so flag it as such
-            break;
-        case HEAD_WALL_PROP:
-            // see BLOCK_HEAD in ObjFileManip.cpp for data layout, which is crazed
-            switch (door_facing) { // starts at 1: south, west, north, east
-            default:
-            case 1: // south
-                dataVal = 3;
+            case HEAD_PROP:
+                // see BLOCK_HEAD in ObjFileManip.cpp for data layout, which is crazed
+                dataVal |= 0x80;	// it's a rotation, so flag it as such
                 break;
-            case 2: // west
-                dataVal = 4;	// docs say 5, docs are wrong
+            case HEAD_WALL_PROP:
+                // see BLOCK_HEAD in ObjFileManip.cpp for data layout, which is crazed
+                switch (door_facing) { // starts at 1: south, west, north, east
+                default:
+                case 1: // south
+                    dataVal = 3;
+                    break;
+                case 2: // west
+                    dataVal = 4;	// docs say 5, docs are wrong
+                    break;
+                case 3: // north
+                    dataVal = 2;
+                    break;
+                case 0: // east
+                    dataVal = 5;	// docs say 4, docs are wrong
+                    break;
+                }
                 break;
-            case 3: // north
-                dataVal = 2;
+            case FAN_PROP:
+                // low 3 bits are the subtype
+                // fourth bit unused
+                // 2 bits 56 facing for the fan: NESW
+                // next bit waterlogged (done below)
+                dataVal = ((door_facing + 3) % 4) << 4;
                 break;
-            case 0: // east
-                dataVal = 5;	// docs say 4, docs are wrong
+            case EGG_PROP:
+                dataVal |= (hatch << 2);
+                break;
+                //case WIRE_PROP:
+                //    dataVal |= redstone_side;
+                //    break;
+            case AMETHYST_PROP:
+                dataVal = dropper_facing << 2;
+                dropper_facing = 0;
+                break;
+            case DRIPSTONE_PROP:
+                // up is vertical_direction, and if "down" the value is set to 0x08
+                dataVal = thickness | vertical_direction;
+                break;
+            case BIG_DRIPLEAF_PROP:
+                // bottommost bit is stem or not
+                dataVal = (door_facing | (tilt << 2)) << 1;
+                break;
+            case SMALL_DRIPLEAF_PROP:
+                // note that upper half is 0x0, lower is 0x1
+                dataVal = (door_facing << 1) | (half ? 0 : 1);
+                break;
+            case BERRIES_PROP:
+                dataVal = 0x0;
+                // use the lit berries form if berries present, see https://minecraft.wiki/w/Glow_Berries
+                if (berries) {
+                    paletteBlockEntry[entryIndex]++;
+                }
+                break;
+            case LANTERN_PROP:
+                dataVal = hanging ? 1 : 0;
+                break;
+            case PROPAGULE_PROP:
+                // use the age only if hanging. Age otherwise appears irrelevant?
+                dataVal = (hanging ? (0x8 | age) : 0);
+                break;
+            case PINK_PETALS_PROP:
+                // south/west/north/east == 0/1/2/3
+                // flower_amount reduced from 1-4 to 0-3, then *4 and folded into 0xc
+                // We don't want power, but we do want to know if it's calibrated and if it's sculk_sensor_phase is active.
+                // Actually, we could leave off calibrated, 0x4 bit, as that should transmit at bottom
+                dataVal = (door_facing % 4) | ((flower_amount - 1) << 2);
+                break;
+            case PITCHER_CROP_PROP:
+                // age and upper/lower
+                dataVal = age | (half ? 0x8 : 0);
+                break;
+            case ATTACHED_HANGING_SIGN:
+                // south/west/north/east == 0/1/2/3
+                dataVal |= (attached ? BIT_16 : 0x0);
+                break;
+            case CRAFTER_PROP:
+                // for crafter
+                dataVal = orientation | (crafting ? BIT_16 : 0) | (triggered ? BIT_32 : 0);
+                break;
+            case BULB_PROP:
+                // for copper bulbs
+                dataVal |= (lit ? 0x8 : 0) | (powered ? BIT_16 : 0);
+                // reset because basic cake doesn't reset lit to false, IIRC
+                lit = false;
                 break;
             }
-            break;
-        case FAN_PROP:
-            // low 3 bits are the subtype
-            // fourth bit unused
-            // 2 bits 56 facing for the fan: NESW
-            // next bit waterlogged (done below)
-            dataVal = ((door_facing + 3) % 4) << 4;
-            break;
-        case EGG_PROP:
-            dataVal |= (hatch << 2);
-            break;
-            //case WIRE_PROP:
-            //    dataVal |= redstone_side;
-            //    break;
-        case AMETHYST_PROP:
-            dataVal = dropper_facing << 2;
-            dropper_facing = 0;
-            break;
-        case DRIPSTONE_PROP:
-            // up is vertical_direction, and if "down" the value is set to 0x08
-            dataVal = thickness | vertical_direction;
-            break;
-        case BIG_DRIPLEAF_PROP:
-            // bottommost bit is stem or not
-            dataVal = (door_facing | (tilt << 2)) << 1;
-            break;
-        case SMALL_DRIPLEAF_PROP:
-            // note that upper half is 0x0, lower is 0x1
-            dataVal = (door_facing << 1) | (half ? 0 : 1);
-            break;
-        case BERRIES_PROP:
-            dataVal = 0x0;
-            // use the lit berries form if berries present, see https://minecraft.fandom.com/wiki/Glow_Berries
-            if (berries) {
-                paletteBlockEntry[entryIndex]++;
-            }
-            break;
-        case LANTERN_PROP:
-            dataVal = hanging ? 1 : 0;
-            break;
-        case PROPAGULE_PROP:
-            // use the age only if hanging. Age otherwise appears irrelevant?
-            dataVal = (hanging ? (0x8 | age) : 0);
-            break;
-        case PINK_PETALS_PROP:
-            // south/west/north/east == 0/1/2/3
-            // flower_amount reduced from 1-4 to 0-3, then *4 and folded into 0xc
-            // We don't want power, but we do want to know if it's calibrated and if it's sculk_sensor_phase is active.
-            // Actually, we could leave off calibrated, 0x4 bit, as that should transmit at bottom
-            dataVal = (door_facing % 4) | ((flower_amount - 1) << 2);
-            break;
-        case PITCHER_CROP_PROP:
-            // age and upper/lower
-            dataVal = age | (half ? 0x8 : 0);
-            break;
-        case ATTACHED_HANGING_SIGN:
-            // south/west/north/east == 0/1/2/3
-            dataVal |= (attached ? BIT_16 : 0x0);
-            break;
+
+            // make sure upper bits are not set - they should not be! Well, except for heads. So, comment out this test
+            //if (dataVal > 0x3F) {
+            //	// here's where to put a break for DEBUG
+            //	dataVal &= 0x3F;
+            //}
+            // always check for waterlogged
+            dataVal |= (waterlogged ? WATERLOGGED_BIT : 0x0);
+
+            paletteDataEntry[entryIndex] |= dataVal;
         }
-        // make sure upper bits are not set - they should not be! Well, except for heads. So, comment out this test
-        //if (dataVal > 0x3F) {
-        //	// here's where to put a break for DEBUG
-        //	dataVal &= 0x3F;
-        //}
-        // always check for waterlogged
-        dataVal |= (waterlogged ? WATERLOGGED_BIT : 0x0);
-
-        paletteDataEntry[entryIndex] |= dataVal;
         entryIndex++;
     }
 
@@ -4662,7 +4915,7 @@ int nbtGetSpawn(bfFile* pbf, int* x, int* y, int* z)
     return 0;
 }
 
-//  The NBT version of the level, 19133. See http://minecraft.gamepedia.com/Level_format#level.dat_format
+//  The NBT version of the level, 19133. See http://minecraft.wiki/w/Level_format#level.dat_format
 int nbtGetFileVersion(bfFile* pbf, int* version)
 {
     *version = 0x0; // initialize
@@ -4681,9 +4934,9 @@ int nbtGetFileVersion(bfFile* pbf, int* version)
     return 0;
 }
 
-// From Version, not version, see http://minecraft.gamepedia.com/Level_format#level.dat_format at bottom.
+// From Version, not version, see http://minecraft.wiki/w/Level_format#level.dat_format at bottom.
 // This is a newer tag for 1.9 and on, older worlds do not have them.
-// The NBT data version is also included, which tells the MC release. See https://minecraft.gamepedia.com/Data_version
+// The NBT data version is also included, which tells the MC release. See https://minecraft.wiki/w/Data_version
 // e.g., 1444 is 1.13, 1901 is 1.14
 int nbtGetFileVersionId(bfFile* pbf, int* versionId)
 {
@@ -4799,9 +5052,37 @@ int nbtGetPlayer(bfFile* pbf, int* px, int* py, int* pz)
     *pz = (int)readDouble(pbf);
     return 0;
 }
+int nbtGetDimension(bfFile * pbf, int* dimension)
+{
+    int len;
+    *dimension = 0; // overworld
+    //Data/Player/Dimension
+    if (bfseek(pbf, 1, SEEK_CUR) < 0)
+        return LINE_ERROR; //skip type
+    len = readWord(pbf); //name length
+    if (bfseek(pbf, len, SEEK_CUR) < 0)
+        return LINE_ERROR; //skip name ()
+    if (nbtFindElement(pbf, "Data") != 10)
+        return LINE_ERROR;
+    if (nbtFindElement(pbf, "Player") != 10)
+        return LINE_ERROR;
+    if (nbtFindElement(pbf, "Dimension") != 8)
+        return LINE_ERROR;
+    len = readWord(pbf);
+    char dimension_string[256];
+    if (bfread(pbf, dimension_string, len) < 0)
+        return LINE_ERROR;
+    // doesn't return a null-terminated string, so add one
+    dimension_string[len] = 0;
+    if (strstr(dimension_string, "nether") != NULL)
+        *dimension = 1;
+    else if (strstr(dimension_string, "end") != NULL)
+        *dimension = 2;
+    return 0;
+}
 
 //////////// schematic
-//  http://minecraft.gamepedia.com/Schematic_file_format
+//  http://minecraft.wiki/w/Schematic_file_format
 // return 0 if not found, 1 if all is well
 int nbtGetSchematicWord(bfFile* pbf, char* field, int* value)
 {

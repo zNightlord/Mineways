@@ -7,7 +7,7 @@
    <link rel="stylesheet" href="styles.css">
    <link rel="shortcut icon" href="icon.ico" type="image/x-icon" />
    <link rel="icon" href="icon.ico" type="image/x-icon" />
-   <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+   <script src="https://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
    <script src="script.js"></script>
    <title>Mineways Scripting Language</title>
 </head>
@@ -42,7 +42,7 @@
 				<li><a href="reference.html"><span>Quick Reference</span></a></li>
 				<li><a href="downloads.html#troubleshooting"><span>Troubleshooting</span></a></li>
 				<li><a href="mineways.html#rendering"><span>Rendering Tips</span></a></li>
-				<li><a href="http://www.youtube.com/playlist?list=PL3AE7AB94E9114715&feature=mh_lolz"><span>Videos</span></a></li>
+				<li><a href="https://www.youtube.com/playlist?list=PL3AE7AB94E9114715&feature=mh_lolz"><span>Videos</span></a></li>
 				<li class='active'><a href="scripting.html"><span>Scripting</span></a></li>
 				<li><a href="mineways.html#versions"><span>Versions</span></a></li>
 				<li class='last'><a href="https://github.com/erich666/Mineways"><span>Source Code</span></a></li>
@@ -52,20 +52,19 @@
 			<ul>
 				<li><a href="community.html"><span>Showcase</span></a></li>
 				<li><a href="https://www.youtube.com/playlist?list=PL3AE7AB94E9114715"><span>YouTube</span></a></li>
-				<li><a href='http://www.flickr.com/groups/mineways/pool/'><span>Flickr</span></a></li>
+				<li><a href='https://www.flickr.com/groups/mineways/pool/'><span>Flickr</span></a></li>
 				<li><a href='https://www.google.com/search?q=mineways&newwindow=1&source=lnms&tbm=isch'><span>Google Images</span></a></li>
-				<li><a href='https://www.shapeways.com/search?q=mineways'><span>Shapeways</span></a></li>
-				<li><a href='http://www.sculpteo.com/en/gallery/today/?search=mineways'><span>Sculpteo</span></a></li>
 				<li class='last'><a href='https://sketchfab.com/tags/minecraft'><span>Sketchfab</span></a></li>
 			</ul>
 		</li>
-		<li class='has-sub'><a href="http://www.reddit.com/r/mineways/"><span>Community</span></a>
+		<li class='has-sub'><a href="https://www.reddit.com/r/mineways/"><span>Community</span></a>
 			<ul>
-				<li><a href="http://www.reddit.com/r/mineways/"><span>Reddit</span></a></li>
+				<li><a href="https://www.reddit.com/r/mineways/"><span>Reddit</span></a></li>
 				<li><a href="https://discord.gg/wfayQA6Dyc"><span>Discord</span></a></li>
 				<li><a href="https://www.minecraftforum.net/forums/minecraft-java-edition/discussion/326119-mineways-3d-prints-of-minecraft-objects?page=100"><span>Minecraft Forum</span></a></li>
 				<li><a href="https://groups.google.com/forum/#!forum/mineways"><span>Google Group</span></a></li>
-				<li class='last'><a href="https://github.com/erich666/Mineways/issues"><span>Issues on Github</span></a></li>			</ul>
+				<li class='last'><a href="https://github.com/erich666/Mineways/issues"><span>Issues on Github</span></a></li>
+			</ul>
 		</li>
 		<li class='last'><a href="contact.html"><span>Contact</span></a></li>
 	</ul>
@@ -84,11 +83,11 @@
 <UL>
 <LI><a href="#mec">Model Export Commands</a>
 <UL>
-<LI><a href="#sqes">Example</a>
+<LI><a href="#sqes">Export example</a>
 </UL>
 <LI><a href="#sic">Scripting Interface Commands</a>
 <UL>
-<LI><a href="#uie">Examples</a>
+<LI><a href="#uie">Multiple exports example and tools</a>
 </UL>
 <LI><a href="#sketchfab">Sketchfab Export Commands</a>
 <UL>
@@ -182,6 +181,7 @@
 
 <tr>
 <td>
+World: <i>Royal Albert Hall</i><br>
 Minecraft world: <i>Happy Blocks Land</i><br>
 Minecraft world: <i>C:\Users\erich\AppData\Roaming\.minecraft\saves\Round World</i><br>
 Minecraft world: <i>C:\Users\erich\schematics\teapot.schematic</i><br>
@@ -189,7 +189,7 @@ Minecraft world: [Block Test World]
 Extracted from Minecraft world saves/<i>BestWorld</i> [deprecated]
 </td>
 <td>
-The world to load, accessed by the folder name. The .minecraft/saves directory is assumed, but a full path can be given if desired. The full path is always needed for schematics. Use <I>[Block Test World]</I> to load this special test world.
+The world to load (or reload), accessed by the folder name. The .minecraft/saves directory is assumed, but a full path can be given if desired. The full path is always needed for schematics. Use <I>[Block Test World]</I> to load this special test world.
 </td>
 </tr>
 
@@ -364,7 +364,7 @@ The commands above are available for scripting, unless listed as <B>"Model only.
 <P>
 If you wish to set any export options, it's wise to first set the export mode and file type by using the "Set render type:" or "Set 3D print type:" command. If you don't, the export settings will be applied to whatever file type was last exported, if any, and a warning will pop up.
 <P>
-Because it's a powerful system that can itself create files, the script file is read twice. Syntax errors are checked for and flagged on the first read; no actions are done. If there are no syntax errors, then the script is read again and executed line by line. Script execution is aborted if some execution error is found and caught. Pro tip: if you want to test a script for syntax errors and not execute it, put "FAIL" (or anything else that's not a command) as a line in the script. It will flag this line, and any other lines causing errors, and will not execute the script until all are fixed.
+Because it's a powerful system that can itself create files, the script file is read twice. Syntax errors are checked for and flagged on the first read; no actions are done. If there are no syntax errors, then the script is read again and executed line by line. Script execution is aborted <I>for the whole script</I> if any execution error is found and caught. Pro tip: if you want to test a script for syntax errors and not execute it, put "FAIL" (or anything else that's not a command) as a line in the script. It will flag this line, and any other lines causing errors, and will not execute the script until all are fixed.
 <P>
 Even with error checking, it's definitely possible to set combinations that may crash Mineways, as there are complex interactions between systems and especially between blocks and some combinations are simply illegal. If things get wedged, just restart Mineways, which always resets its defaults to a known good state.
 <P>
@@ -508,29 +508,32 @@ Export for Rendering: C:\Users\erich\Desktop\nether.obj<br>
 <P>
 For the world that is currently loaded, this sets the render type and file format, switches to the Nether level of the world loaded, selects an area, zooms the map, and performs a rendering export to the file nether.obj
 <P>
-Note that you could use this type of command sequence to export a bunch of adjacent areas, which you could then load into Blender or any other application as you wished. This can help you avoid hitting memory limits in Mineways, etc. Here's a script that comes with Mineways (along with hunk_maker.py, a Python program you can modify to generate sets of hunks as you wish; open and read the top of hunk_maker.py for how to edit and run it):
+Note that you could use this type of command sequence to export a bunch of adjacent areas, which you could then load into Blender or any other application as you wished. This can help you avoid hitting memory limits in Mineways, etc. As an example, here are the commands in <B>hunk_output.mwscript</B>, a script that comes with Mineways (along with <B>hunk_maker.py</B>, a Python program you can modify to generate sets of hunks as you wish; open and read the top of <B>hunk_maker.py</B> for how to edit and run it):
 </P>
 <P>
 <div id="code">
-// file hunk_output.mwscript.txt
+// file hunk_output.mwscript
+Show informational: script
+Show warning: script
+Show error: script
+Save log file: c:\temp\script_run.log
 Set render type: Wavefront OBJ absolute indices<br>
-File type: Export individual textures to directory texture<br>
+File type: Export individual textures to directory hunks_textures<br>
 Center model: no<br>
-Use biomes: no<br>
 Create block faces at the borders: no<br>
 Selection location min to max: 0, 50, 0 to 99, 255, 99<br>
-Export for Rendering: C:\Users\erich\Desktop\hunk00.obj<br>
+Export for Rendering: C:\temp\hunk00.obj<br>
 Selection location min to max: 0, 50, 100 to 99, 255, 199<br>
-Export for Rendering: C:\Users\erich\Desktop\hunk01.obj<br>
+Export for Rendering: C:\temp\hunk01.obj<br>
 Selection location min to max: 100, 50, 0 to 199, 255, 99<br>
-Export for Rendering: C:\Users\erich\Desktop\hunk10.obj<br>
+Export for Rendering: C:\temp\hunk10.obj<br>
 Selection location min to max: 100, 50, 100 to 199, 255, 199<br>
-Export for Rendering: C:\Users\erich\Desktop\hunk11.obj<br>
+Export for Rendering: C:\temp\hunk11.obj<br>
 </div>
 <P>
 Load your world, run this script via Import Settings, and it will dump four exports, with absolute coordinates, so that they can be loaded into a modeler and nicely join with each other. The "50" lower Y height is just a guess as to how deep you might want to go for a typical above-ground export - you can override this as you wish. Biomes are off, since the biome is computed for the center of each hunk and so will differ. Block faces at the borders being off means that the polygons where the hunks join are not output, saving on polygon count. You can set that to "yes" if you prefer. You 
 <P>
-The one gotcha is that differently named (but usually identical in content) PNG texture files are made for each separate model. If you prefer sharing PNG files (which saves on memory), I solve this problem here by setting the File type to use individual textures for each block type face, such as "grass_top.png"; these have the same names for all exported files.
+The one gotcha is that differently named (but usually identical in content) PNG texture files are made for each separate model. If you prefer sharing PNG files (which saves on memory), I solve this problem here by setting the File type to use individual textures for each block type face, such as "grass_top.png"; these have the same names for all exported files, all put in the same "hunks_textures" directory.
 
 
 <h2 id="sketchfab">Sketchfab Script Commands</h2>
@@ -653,24 +656,41 @@ You can specify a series of commands, which are applied in the order given. Each
 <B>Notes</B>
 </td>
 </tr>
-
+ 
 <tr>
 <td>
-Show informational: <i>true</i><br>
-Show warning: <i>YES</i><br>
-Show error: <i>no</i><br>
+Export using biome: <I>6</I><br>
+Export using biome: <I>13</I> Snowy Mountains
 </td>
 <td>
-You can suppress informational, warning, and error pop-up dialog messages by setting the corresponding property to false. By default, all these are set to true. Note that it's usually wise to set these all back to true at the end of any script that turns them off, as these settings are permanent for the session. That is, if you turn off errors in a script, all export errors are suppressed from then on, which can be confusing. If suppressed, these messages will instead show up (usually briefly!) in the status line in the lower left of Mineways when exporting. Note that other warnings, such as when you manually turn on some experimental feature, are always displayed and cannot be suppressed.
+If <a href="mineways.html#biome_center">Use biome in center of export area</a> is selected on export, or script "Use biomes: YES", the biome type at the center of the exported area is used, affecting coloration. You can override which biome is used with this "Export using biome" command, setting a different number before exporting. IMPORTANT: you must also have set "Use biomes: YES".
+<P>
+You must select the number associated with the biome you want <a href="https://github.com/erich666/Mineways/blob/master/Win/biomes.cpp#L43">this piece of code</a>. For example, 6 is Swamp. Anything after the number is ignored (such as "Snowy Mountains" above), so you can use that area as a place to note what the number means. This number is -1 by default (which means it doesn't affect anything), and will get reset to -1 after a (successful or unsuccessful, biomes exported or not) model export.
+<P>
+When you export, the biome you used will be displayed in a comment near the top of the model file created. When you import this file, this "Export using biome" setting <i>will be ignored</i>. This command is meant as a temporary override, controlled entirely by scripting. When in doubt, set it before any export if you're using this feature (and don't forget to also set "Use biomes: YES").
 </td>
 </tr>
 
 <tr>
 <td>
-Set unknown block ID: <i>322</i>
+Show informational: <i>true</i><br>
+Show warning: <i>NO</i><br>
+Show error: <i>script</i><br>
 </td>
 <td>
-Set this value before opening a modded world, e.g., in a startup script. Modded worlds have block types not understood by Mineways. By default, unknown blocks are removed, "replaced by air", ID 0. You can set a <a href="https://github.com/erich666/Mineways/blob/master/Win/blockInfo.cpp#L72">block family ID</a> that you want to use instead. Note that after the unknown block is turned into that block type, it is treated exactly like that block type, including gettings its faces removed if the face is fully covered by a neighboring block. To have the unknown block not get culled in this way, you might consider using ID 322, "conduit", to give a small floating block that will not removed (because it doesn't border anything).
+You can suppress informational, warning, and execution error pop-up dialog messages by setting the corresponding property to false. By default, all these are set to true. If you instead set the status to "script", this means the messages will be suppressed for the current script only and returned to "true" (normally visible) after the script is executed. Note that it's usually wise to set these all back to true at the end of any script that turns them off, as these settings are permanent for the session, so "script" is usually your best bet. Execution errors (not warnings) will abort a script, even if turned off with this command.
+<P>
+If turned off or set to "script", these messages will instead show up (usually briefly!) in the status line in the lower left of Mineways when exporting. They will also be sent to the script log file, if set - see the next command. A few warnings, such as when you manually turn on some experimental feature or for Sketchfab uploads, are always displayed and cannot be suppressed.
+</td>
+</tr>
+
+<tr>
+<td>
+Save log file: <i>filename</i>
+</td>
+<td>
+Instead of displaying script syntax errors, warnings, and informational messages to the screen in pop-up dialogs, write this information to the specified log file. Typically use this command at the beginning of a script. The log file is closed when the script is processed (that is, you'll have to issue this command again for any succeeding scripts). This is handy if you have syntax errors and want to look at them later.
+<P>Normally only <I>syntax</I> errors in the script commands are saved to the log. Actual execution errors are still popped up. If you use "Show error: false" and similar commands for warnings, etc., these messages will be recorded in the log file instead. That said, a true execution error will still cause the script to abort, as usual. See the file <B>hunk_output.mwscript</B> for an example of how to use these commands.
 </td>
 </tr>
 
@@ -719,6 +739,39 @@ Clear out all stored 'Change blocks' commands. While exporting will clear out an
 
 <tr>
 <td>
+Set unknown block ID: <i>322</i>
+</td>
+<td>
+Set this value before opening a modded world. Modded worlds have block types not understood by Mineways. By default, unknown blocks are converted to bedrock blocks. You can set a <a href="https://github.com/erich666/Mineways/blob/master/Win/blockInfo.cpp#L72">block family ID</a> that you want to use instead. Note that after the unknown block is turned into that block type, it is treated exactly like that block type, including gettings its faces removed if the face is fully covered by a neighboring block.
+<P>
+By default the ID is set to 7, Bedrock. For Minecraft 1.12 and earlier this value must be 255 or lower. You might prefer setting it to, say, 103 - Melon. See "Translate" for a more powerful way to translate unknown blocks.
+</td>
+</tr>
+
+<tr>
+<td>
+Translate: track_signal beacon
+<br>
+Translate: unobtainium_slab purpur_slab+
+</td>
+<td>
+Added to help <a href="https://github.com/erich666/Mineways/issues/44">mod</a> and beta users a bit. For Minecraft 1.13 and newer. Pair some unknown block name to some standard name, e.g.: "Translate: nixie_tube beehive". Do not put quotes around the names, and any modding prefix in the file, e.g., "create:", should not be included - it is ignored. The list of block names that Mineways currently accepts is <b><a href="https://github.com/erich666/Mineways/blob/master/Win/nbt.cpp#L386">here</a></b>. If you want to attempt to use the block states of the modded block, put a "+" at the end of the block you're translating to. For example, "Translate: white_stained_glass_trapdoor bamboo_trapdoor+" tells Mineways to use the <a href="https://minecraft.wiki/w/Trapdoor#Block_states">block states of the trapdoor</a>. Unknown block states will of course be ignored. See the script <B>mod_translation.mwscript</B> for an example setup. MCPrep's <a href="https://theduckcow.com/dev/blender/mcprep/">meshswap feature</a> can also help modify things after export (<a href="https://github.com/Moo-Ack-Productions/MCprep/issues/56">more info</a>).
+<P>
+Normally you want to set these translations before loading a modded world. To have these changes take effect on a world that is loaded, hit "r" or use the script command "Minecraft world:" to reload. <B>This feature is experimental!</B> If you try to use block states via "+" and things don't match up, you'll likely get weird results or even possibly crash.
+</td>
+</tr>
+
+<tr>
+<td>
+Clear translations
+</td>
+<td>
+Clear all pairings set by the "Translate:" command. To have these changes take effect on a world that is loaded, hit "r" or use the script command "Minecraft world:".
+</td>
+</tr>
+
+<tr>
+<td>
 Custom printer cost per ccm: <i>0.03</i><br>
 Custom printer cost per printer ccm: <i>0.00</i><br>
 Custom printer handling cost: <i>0.00</i><br>
@@ -728,16 +781,7 @@ Custom printer maximum size: <i>20.0 20.0 19.0</i><br>
 Custom printer minimum wall thickness: <i>1.5</i><br>
 </td>
 <td>
-The custom printer material that is used by the STL exporter can have its attributes set for showing the cost on export. You can set the cost per cubic centimeter (ccm) of material used (assuming a solid model), the cost per ccm of printer volume used (i.e., including the empty space, a bounding box around the model; Shapeways uses this for its <a href="https://www.shapeways.com/materials/strong-and-flexible-plastic?li=nav">Strong &amp; Flexible</a> material, for example), the "handling" cost (added in), the minimum cost a model will cost, the currency symbol (only the first character is used), the volume size of the 3D printer in centimeters (to warn if the print is too large), and the minimum wall thickness in <b>millimeters</b> for printing. Any or all of these can be set; the defaults are shown when not modified. PLA is typically priced at $24 for a 1 kilogram (800 cubic centimeters) spool. That is, $24/800 ccm then costs $0.03 per cubic centimeter.
-</td>
-</tr>
-
-<tr>
-<td>
-Save log file: <i>filename</i>
-</td>
-<td>
-Instead of displaying script syntax errors, warnings, and completion messages to the screen in a pop-up dialog, append this information to the specified log file. Typically call this at the beginning of a script. The log file is closed when the script is processed. This is handy if you have errors and want to look at them later. That said, I added it mostly for testing errors, as the popup dialog is limited to showing the first 20 errors, while the log file has no limit. Note: only syntax errors in the script commands are saved to the log. Actual execution errors are still popped up. You can hide errors by using the <a href="#soc">"Show error: false"</a> command (but, sorry, these don't get saved to the log - they should, but there you have it, a hole in Mineways' error handling).
+The custom printer material that is used by the STL exporter can have its attributes set for showing the cost on export. You can set the cost per cubic centimeter (ccm) of material used (assuming a solid model), the cost per ccm of printer volume used (i.e., including the empty space, a bounding box around the model; some 3D print services use this measure for pricing), the "handling" cost (added in), the minimum cost a model will cost, the currency symbol (only the first character is used), the volume size of the 3D printer in centimeters (to warn if the print is too large), and the minimum wall thickness in <b>millimeters</b> for printing. Any or all of these can be set; the defaults are shown when not modified. PLA is typically priced at $24 for a 1 kilogram (800 cubic centimeters) spool. That is, $24/800 ccm then costs $0.03 per cubic centimeter.
 </td>
 </tr>
 
@@ -746,13 +790,13 @@ Instead of displaying script syntax errors, warnings, and completion messages to
 
 <h3 id="cbce">Change blocks command examples</h3>
 
-The Change blocks command specifies a set of blocks to turn into a particular block ID and data value in a particular volume of space. It has seven variants, depending on whether you specify the from, to, and at values. Here are examples of each variant. A simple example is the heightfield.py Python program that comes with Mineways, which reads an image and creates a heightfield.mwscript file, example also included. See <a href="https://youtu.be/nqLYO4qofcM">this video</a> for the process.
+The Change blocks command specifies a set of blocks to turn into a particular block ID and data value in a particular volume of space. It has seven variants, depending on whether you specify the from, to, and at values. Here are examples of each variant. A simple example is the <B>heightfield.py</B> Python program that comes with Mineways, which reads an image and creates a <B>heightfield.mwscript</B> file, example also included. See <a href="https://youtu.be/nqLYO4qofcM">this video</a> for the process.
 
 <P>
-Block names in the examples below are the standard English names seen in the game itself, not the internal "namespaced ID". <a href="https://minecraft.gamepedia.com/Block_of_Diamond#Data_values">For example</a>, it's "block of diamond", not "diamond_block". See the names in <a href="https://github.com/erich666/Mineways/blob/master/Win/blockInfo.cpp#L70">this file</a>. Capitalization is unimportant.
+Block names in the examples below are the standard English names seen in the game itself, not the internal "namespaced ID". <a href="https://minecraft.wiki/w/Block_of_Diamond#Data_values">For example</a>, it's "block of diamond", not "diamond_block". See the names in <a href="https://github.com/erich666/Mineways/blob/master/Win/blockInfo.cpp#L70">this file</a>. Capitalization is unimportant.
 
 <P>
-<B>IMPORTANT NOTE:</B> This feature uses <a href="https://minecraft.gamepedia.com/Java_Edition_data_value/Pre-flattening#Block_IDs">the old "pre-flattening" type/dataVal format</a> for specifying blocks, which went away in Minecraft 1.13. You can look up the type values <a href="https://minecraft.gamepedia.com/Java_Edition_data_value/Pre-flattening#Block_IDs">here</a> - click the "[show]" link to the right of the "Block IDs" title. Wiser is to use the block names explicitly, as found in <a href="https://github.com/erich666/Mineways/blob/master/Win/blockInfo.cpp#L70">this file</a>. That said, I have shoved many newer 1.13+ blocks in various places, e.g., a warped_slab, blackstone_slab, and other new slabs have the same block ID, 361 (= 256+105), as crimson_slab, with a dataVal of 1, 2, etc. - see that encoded <a href="https://github.com/erich666/Mineways/blob/master/Win/nbt.cpp#L1078">here</a>. As an example, "crimson slab":2 means <a href="https://github.com/erich666/Mineways/blob/master/Win/nbt.cpp#L1079">a blackstone slab</a> (ignore "HIGH_BIT" in the code). I hope this helps.
+<B>IMPORTANT NOTE:</B> This feature uses <a href="https://minecraft.wiki/w/Java_Edition_data_value/Pre-flattening#Block_IDs">the old "pre-flattening" type/dataVal format</a> for specifying blocks, which went away in Minecraft 1.13. You can look up the type values <a href="https://minecraft.wiki/w/Java_Edition_data_value/Pre-flattening#Block_IDs">here</a> - click the "[show]" link to the right of the "Block IDs" title. Wiser is to use the block names explicitly, as found in <a href="https://github.com/erich666/Mineways/blob/master/Win/blockInfo.cpp#L70">this file</a>. That said, I have shoved many newer 1.13+ blocks in various places, e.g., a warped_slab, blackstone_slab, and other new slabs have the same block ID, 361 (= 256+105), as crimson_slab, with a dataVal of 1, 2, etc. - see that encoded <a href="https://github.com/erich666/Mineways/blob/master/Win/nbt.cpp#L1078">here</a>. As an example, "crimson slab":2 means <a href="https://github.com/erich666/Mineways/blob/master/Win/nbt.cpp#L1079">a blackstone slab</a> (ignore "HIGH_BIT" in the code). I hope this helps.
 
 <P>
 Basically, if you're reading this and are extremely bitter that I don't clearly support some particular block you want and can't figure out how to set it, <a href="contact.html">write me</a> and plead your case. I could probably rework the nbt.cpp code to also use the namespaced ID names.
@@ -780,13 +824,13 @@ The specific location, no matter what's in it (even air), is turned into TNT. Fo
 Change blocks: to 24:1
 </div>
 <P>
-Everything solid (not air) in the whole volume is turned into <a href="http://minecraft.gamepedia.com/Data_values#Sandstone">chiseled sandstone</a>. The long form is Change blocks: from 1-255 to 24:1
+Everything solid (not air) in the whole volume is turned into <a href="https://minecraft.wiki/w/Data_values#Sandstone">chiseled sandstone</a>. The long form is Change blocks: from 1-255 to 24:1
 <P>
 <div id="code">
 Change blocks: from "stained glass","glass pane","stained glass pane" to "glass"
 </div>
 <P>
-Any of the given forms of glass are turned into glass blocks in the entire exported volume (defined by "Selection location:"). Note that the "from" range can be a list of blocks by ID number or name. A range can also be given, e.g., 64,71,193-197 specifics all full doors. You can also give specific <a href="http://minecraft.gamepedia.com/Data_values#Data">data values</a>, e.g., "wood planks":1-5 means all variants of wood planks other than oak, which uses <a href="http://minecraft.gamepedia.com/Data_values#Wood_Planks">data value 1</a>.
+Any of the given forms of glass are turned into glass blocks in the entire exported volume (defined by "Selection location:"). Note that the "from" range can be a list of blocks by ID number or name. A range can also be given, e.g., 64,71,193-197 specifics all full doors. You can also give specific <a href="https://minecraft.wiki/w/Data_values#Data">data values</a>, e.g., "wood planks":1-5 means all variants of wood planks other than oak, which uses <a href="https://minecraft.wiki/w/Data_values#Wood_Planks">data value 1</a>.
 <P>
 <div id="code">
 Change blocks: at -5,50,45 to 50,255,90
@@ -798,25 +842,25 @@ The at/to volume specified is cleared out, turned to air. The long form is Chang
 Change blocks: from "wheat" to "cactus" at -5,0,-45 to 50,255,90
 </div>
 <P>
-This example finds any wheat blocks in the given volume and changes them to cactus blocks. The names are those shown in the "Block" column on <a href="http://minecraft.gamepedia.com/Data_values/Block_IDs">this page</a>. Or, find these names and IDs in <a href="https://github.com/erich666/Mineways/blob/master/Win/blockInfo.cpp#L65">this table</a>.
+This example finds any wheat blocks in the given volume and changes them to cactus blocks. The names are those shown in the "Block" column on <a href="https://minecraft.wiki/w/Data_values/Block_IDs">this page</a>. Or, find these names and IDs in <a href="https://github.com/erich666/Mineways/blob/master/Win/blockInfo.cpp#L65">this table</a>.
 <P>
 <div id="code">
 Change blocks: from 59 to 81 at -5,0,-45   // wheat to cactus
 </div>
 <P>
-This is the same as say from "wheat" to "cactus", instead using the decimal "Dec" number shown in <a href="http://minecraft.gamepedia.com/Data_values/Block_IDs">this table</a>. If you're not sure of the name, use the ID to be safe - you can always add a comment, as shown. Note how the "at" location specifies only a single block in this example, just to show a different example; if that block is wheat, it will be turned into a cactus.
+This is the same as say from "wheat" to "cactus", instead using the decimal "Dec" number shown in <a href="https://minecraft.wiki/w/Data_values/Block_IDs">this table</a>. If you're not sure of the name, use the ID to be safe - you can always add a comment, as shown. Note how the "at" location specifies only a single block in this example, just to show a different example; if that block is wheat, it will be turned into a cactus.
 <P>
 <div id="code">
 Change blocks: from "wheat":0-6 to "wheat":7 at -5,0,-45 to 50,255,90
 </div>
 <P>
-Here the <a href="http://minecraft.gamepedia.com/Data_values#Data">data values</a> for wheat are specified. The data value is a number from 0 to 15 and specifies variants of blocks. Wheat's values are <a href="http://minecraft.gamepedia.com/Data_values#Crops">0-7</a>, specifying the growth stage, 7 being fully mature. This example says to make all the wheat fully mature, by taking data values 0-6 and changing them all to 7.
+Here the <a href="https://minecraft.wiki/w/Data_values#Data">data values</a> for wheat are specified. The data value is a number from 0 to 15 and specifies variants of blocks. Wheat's values are <a href="https://minecraft.wiki/w/Data_values#Crops">0-7</a>, specifying the growth stage, 7 being fully mature. This example says to make all the wheat fully mature, by taking data values 0-6 and changing them all to 7.
 <P>
 <div id="code">
 Change blocks: from "wheat":0-6,141-142,207 to "wheat":7 at -5,0,-45 to 50,255,90
 </div>
 <P>
-Any <a href="http://minecraft.gamepedia.com/Data_values#Crops">growing wheat</a>, carrots (ID 141) through potatoes (ID 142), and beetroot seeds (ID 207) are turned into fully grown wheat in the specified area. This is about as elaborate as you can go. All the commands below are shorthand variants, using defaults for missing fields.
+Any <a href="https://minecraft.wiki/w/Data_values#Crops">growing wheat</a>, carrots (ID 141) through potatoes (ID 142), and beetroot seeds (ID 207) are turned into fully grown wheat in the specified area. This is about as elaborate as you can go. All the commands below are shorthand variants, using defaults for missing fields.
 <P>
 <i>Usually</i> if you don't specify a "from" range, it means everything solid (not air). The one exception is if you set "to" and a volume, in which case air is also turned into the specified block type. The "to" value is "air" by default. If the location volume is not given, the whole export selection area is used.
 <P>
@@ -824,7 +868,7 @@ Any <a href="http://minecraft.gamepedia.com/Data_values#Crops">growing wheat</a>
 Change blocks: from 198-255 at -319,50,-1077 to -302,50,-1059
 </div>
 <P>
-All blocks greater or equal in <a href="http://minecraft.gamepedia.com/Data_values/Block_IDs">ID</a> to 198 ("end rod") in the given at/to volume are turned into "air", i.e., cleared out. If no "to" ID is given, air is used.
+All blocks greater or equal in <a href="https://minecraft.wiki/w/Data_values/Block_IDs">ID</a> to 198 ("end rod") in the given at/to volume are turned into "air", i.e., cleared out. If no "to" ID is given, air is used.
 
 
 <h2 id="c">Comments</h2>
@@ -852,7 +896,7 @@ Export for Rendering: c:\temp\mysave.obj      // forward slashes in the path spe
 
 You can use command-line options with Mineways so that it is customized on startup. For example, you could provide a different initial window size, then run a script that loads your favorite world and takes you to where you were last building.
 <P>
-You can <a href="http://www.makeuseof.com/tag/write-simple-batch-bat-file/">store this command line in a .bat file</a> and double-click that file, or <a href="http://windows.tips.net/T010869_Changing_Shortcut_Properties.html">change your options on the shortcut for Mineways itself</a>. See the file <b>mineways.bat</b> in Mineways for an example. It starts Mineways with a larger window, then calls the scripting/startup.mwscript script (which does nothing, but which you can edit to perform the various startup script commands shown above).
+You can <a href="https://www.makeuseof.com/tag/write-simple-batch-bat-file/">store this command line in a .bat file</a> and double-click that file, or <a href="https://windows.tips.net/T010869_Changing_Shortcut_Properties.html">change your options on the shortcut for Mineways itself</a>. See the file <b>mineways.bat</b> in Mineways for an example. It starts Mineways with a larger window, then calls the <B>scripting/startup.mwscript</B> script (which does nothing, but which you can edit to perform the various startup script commands shown above).
 <P>
 Syntax:
 <P>
@@ -904,13 +948,13 @@ Import the settings for the previously-exported model MyCastle.obj, its renderin
 mineways.exe scripting/startup.mwscript
 </div>
 <P>
-Run the script "startup.mwscript" in the scripting directory at startup. Useful for setting default export options or other things you prefer.
+Run the script <B>startup.mwscript</B> in the scripting directory at startup. Useful for setting default export options or other things you prefer.
 <P>
 <div id="code">
 mineways.exe "C:\Mineways\My House.obj" C:\Mineways\modify.mwscript
 </div>
 <P>
-If you exported a model just how you like it, you can import it and modify its settings with whatever commands are in your modify.mwscript. When using multiple scripts, it's wise to give the full path to each file, as Mineways will modify the default directory used to load files. Note that double quotes are needed when the file or path contains a space character, such as shown in this example for "My House.obj".
+If you exported a model just how you like it, you can import it and modify its settings with whatever commands are in your <B>modify.mwscript</B>. When using multiple scripts, it's wise to give the full path to each file, as Mineways will modify the default directory used to load files. Note that double quotes are needed when the file or path contains a space character, such as shown in this example for "My House.obj".
 <P>
 <div id="code">
 mineways.exe -m "C:\Mineways\Load Eiffel.mwscript" C:\Mineways\export.mwscript C:\Mineways\close.mwscript
@@ -944,7 +988,7 @@ You should see any *.mwscript files with Mineways icons next to them:
 <P>
 Now when you double-click on a file ending with .mwscript, it will run this script on startup.
 <P>
-On the Mac, follow <a href="http://osxdaily.com/2013/08/08/change-default-application-open-files-mac-os-x/">these instructions</a>.
+On the Mac, follow <a href="https://osxdaily.com/2013/08/08/change-default-application-open-files-mac-os-x/">these instructions</a>.
 
 	
 <h1 id="default">Default Rendering Options</h1>
@@ -1005,7 +1049,7 @@ Melt snow blocks: no<br>
 
 <h1 id="pse">Perl Script Example</h1>
 
-Here's a simple Perl script to generate a Mineways script. It shows the power of scripting to make models. Another example is the heightfield.py file that comes with Mineways, which reads an image and creates a heightfield. See <a href="https://youtu.be/nqLYO4qofcM">this video</a> for the process.
+Here's a simple Perl script to generate a Mineways script. It shows the power of scripting to make models. Another example is the <B>heightfield.py</B> file that comes with Mineways, which reads an image and creates a heightfield. See <a href="https://youtu.be/nqLYO4qofcM">this video</a> for the process.
 <P>
 <div id="code">
 $Cobras = 8;<br>
@@ -1051,7 +1095,7 @@ Running the script to set up the scene, then exporting (manually) to Sketchfab, 
 	<div id="footer">
 		<hr>
 		<p>Webmaster: <a href="mailto:erich@acm.org">Eric Haines</a>, erich@acm.org - visit the <a href="contact.html">support page</a>
-		<br id="lastUpdate">Last updated 5/9/2023</p>	</div>
+		<br id="lastUpdate">Last updated 11/6/2024</p>	</div>
 </div>
 
 </body>

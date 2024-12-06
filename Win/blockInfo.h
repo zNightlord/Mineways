@@ -426,7 +426,7 @@ typedef struct Options {
 } Options;
 
 // number of blocks with entries in block info table (max number at bottom + 1) - now that 255 is used, we need this
-#define NUM_BLOCKS_DEFINED 465
+#define NUM_BLOCKS_DEFINED 490
 // number of official Minecraft blocks (no longer needed - we used to have the block after everything be special)
 #define NUM_BLOCKS_STANDARD NUM_BLOCKS_DEFINED
 // number of blocks we want to show on the map (no longer needed - includes the unknown one)
@@ -496,7 +496,7 @@ typedef struct Options {
 // this object is a 3D bit, and this bit is set if it can actually glue horizontal neighboring blocks together
 // - not really used. TODO - may want to use this to decide whether objects should be grouped together or whatever.
 #define BLF_3D_BIT_GLUE     0x100000
-// set if the block does not affect fluid height. See https://minecraft.gamepedia.com/Waterlogging
+// set if the block does not affect fluid height. See https://minecraft.wiki/w/Waterlogging
 #define BLF_DNE_FLUID		0x200000
 // set if the block connects to redstone - do only if there's no orientation to the block, e.g. repeaters attach only on two sides, so don't have this flag
 // What this means: given a block, it will have BLF_CONNECTS_REDSTONE for it if, when you put the block
@@ -506,9 +506,9 @@ typedef struct Options {
 #define BLF_NONE			0x800000
 // is an offset tile, rendered separately: rails, vines, lily pad, redstone, ladder (someday, tripwire? TODO)
 #define BLF_OFFSET			0x1000000
-// is a billboard or similar that is always underwater, such as seagrass and kelp. See https://minecraft.gamepedia.com/Waterlogging
+// is a billboard or similar that is always underwater, such as seagrass and kelp. See https://minecraft.wiki/w/Waterlogging
 #define BLF_WATERLOG		0x2000000
-// is a billboard or similar that may waterlog, such as coral fans; bit 0x100 is set if waterlogged. See https://minecraft.gamepedia.com/Waterlogging
+// is a billboard or similar that may waterlog, such as coral fans; bit 0x100 is set if waterlogged. See https://minecraft.wiki/w/Waterlogging
 #define BLF_MAYWATERLOG		0x4000000
 // this object is a gate that attachs to fences if oriented properly - like BLF_FENCE_NEIGHBOR, but needs orientation to connect
 #define BLF_FENCE_GATE		0x8000000
@@ -1012,4 +1012,29 @@ enum block_types {
     BLOCK_CRIMSON_HANGING_SIGN = 462,
     BLOCK_MANGROVE_HANGING_SIGN = 463,
     BLOCK_BAMBOO_HANGING_SIGN = 464,
+    BLOCK_TRIAL_SPAWNER = 465,
+    BLOCK_VAULT = 466,
+    BLOCK_CRAFTER = 467,
+    BLOCK_HEAVY_CORE = 468,
+    BLOCK_COPPER_BULB = 469,
+    BLOCK_COPPER_GRATE = 470,
+    BLOCK_TUFF_STAIRS = 471,
+    BLOCK_POLISHED_TUFF_STAIRS = 472,
+    BLOCK_TUFF_BRICK_STAIRS = 473,
+    BLOCK_COPPER_TRAPDOOR = 474,
+    BLOCK_EXPOSED_COPPER_TRAPDOOR = 475,
+    BLOCK_WEATHERED_COPPER_TRAPDOOR = 476,
+    BLOCK_OXIDIZED_COPPER_TRAPDOOR = 477,
+    BLOCK_WAXED_COPPER_TRAPDOOR = 478,
+    BLOCK_WAXED_EXPOSED_COPPER_TRAPDOOR = 479,
+    BLOCK_WAXED_WEATHERED_COPPER_TRAPDOOR = 480,
+    BLOCK_WAXED_OXIDIZED_COPPER_TRAPDOOR = 481,
+    BLOCK_COPPER_DOOR = 482,
+    BLOCK_EXPOSED_COPPER_DOOR = 483,
+    BLOCK_WEATHERED_COPPER_DOOR = 484,
+    BLOCK_OXIDIZED_COPPER_DOOR = 485,
+    BLOCK_WAXED_COPPER_DOOR = 486,
+    BLOCK_WAXED_EXPOSED_COPPER_DOOR = 487,
+    BLOCK_WAXED_WEATHERED_COPPER_DOOR = 488,
+    BLOCK_WAXED_OXIDIZED_COPPER_DOOR = 489,
 };

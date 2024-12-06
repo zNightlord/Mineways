@@ -61,9 +61,9 @@ UnitType gUnitTypeTable[MODELS_UNITS_TABLE_SIZE] = {
     { L"Inches", "inches", 100.0f / 2.54f }
 };
 
-// First column "comment" number is from https://minecraft.gamepedia.com/Java_Edition_data_values/Pre-flattening#Block_IDs through 255, then I just assign numbers as I wish.
+// First column "comment" number is from https://minecraft.wiki/w/Java_Edition_data_values/Pre-flattening#Block_IDs through 255, then I just assign numbers as I wish.
 // For sub-blocks, see https://minecraft-ids.grahamedgecombe.com/
-// Other interesting pages: https://minecraft.gamepedia.com/Solid_block maximum block height, https://minecraft.gamepedia.com/Materials material attributes (not all that useful to me, but still)
+// Other interesting pages: https://minecraft.wiki/w/Solid_block maximum block height, https://minecraft.wiki/w/Materials material attributes (not all that useful to me, but still)
 // The "subtype_mask" (shown as "mtl") field shows which bits are used to determine which type of block it is (vs. orientation or other sub-data about the block). This field gets recalculated by the
 // software itself, but putting it here gives a sense of what blocks can be added to with new content.
 BlockDefinition gBlockDefinitions[NUM_BLOCKS_DEFINED] = {
@@ -102,12 +102,12 @@ BlockDefinition gBlockDefinitions[NUM_BLOCKS_DEFINED] = {
     { /*  28 */ "Detector Rail",          		0xCD5E58, 1.000f, 0xff7711, 0xff7711, 0.12345f,   3,12, 0x00, BLF_FLATTEN | BLF_BILLBOARD | BLF_3D_BIT | BLF_CUTOUTS | BLF_DNE_FLUID | BLF_CONNECTS_REDSTONE | BLF_OFFSET | BLF_MAYWATERLOG},
     { /*  29 */ "Sticky Piston",          		0x719e60, 1.000f, 0xff7711, 0xff7711, 0.12345f,  12, 6, 0x00, BLF_ALMOST_WHOLE | BLF_TRUE_GEOMETRY | BLF_3D_BIT},	//1d
     { /*  30 */ "Cobweb",                 		0xeeeeee, 1.000f, 0xff7711, 0xff7711, 0.12345f,  11, 0, 0x00, BLF_BILLBOARD | BLF_CUTOUTS | BLF_DNE_FLUID},	//1e
-    { /*  31 */ "Grass",       /*output!*/		0x8cbd57, 1.000f, 0xff7711, 0xff7711, 0.12345f,   7, 2, 0x07, BLF_FLATTEN | BLF_SMALL_BILLBOARD | BLF_CUTOUTS | BLF_DNE_FLUID},	//1f/31
+    { /*  31 */ "Short Grass", /* 1.20.3 name*/	0x8cbd57, 1.000f, 0xff7711, 0xff7711, 0.12345f,   7, 2, 0x07, BLF_FLATTEN | BLF_SMALL_BILLBOARD | BLF_CUTOUTS | BLF_DNE_FLUID},	//1f/31
     { /*  32 */ "Dead Bush",              		0x946428, 1.000f, 0xff7711, 0xff7711, 0.12345f,   7, 3, 0x00, BLF_FLATTEN | BLF_SMALL_BILLBOARD | BLF_CUTOUTS | BLF_DNE_FLUID},	//20/32
     { /*  33 */ "Piston",                 		0x95774b, 1.000f, 0xff7711, 0xff7711, 0.12345f,  12, 6, 0x00, BLF_ALMOST_WHOLE | BLF_TRUE_GEOMETRY | BLF_3D_BIT},	//21
     { /*  34 */ "Piston Head",            		0x95774b, 1.000f, 0xff7711, 0xff7711, 0.12345f,  11, 6, 0x00, BLF_ALMOST_WHOLE | BLF_TRUE_GEOMETRY | BLF_3D_BIT},	//22/34
     { /*  35 */ "Wool",                   		0xEEEEEE, 1.000f, 0xff7711, 0xff7711, 0.12345f,   0, 4, 0x0f, BLF_WHOLE | BLF_FENCE_NEIGHBOR},	//23 - gets converted to colors at end
-    { /*  36 */ "Block moved by Piston",  		0x000000, 1.000f, 0xff7711, 0xff7711, 0.12345f,  11, 6, 0x00, BLF_NONE},	//24 (36) - really, nothing...
+    { /*  36 */ "Block moved by Piston",  		0x010101, 1.000f, 0xff7711, 0xff7711, 0.12345f,  11, 6, 0x00, BLF_NONE},	//24 (36) - really, nothing...
     { /*  37 */ "Dandelion",              		0xD3DD05, 1.000f, 0xff7711, 0xff7711, 0.12345f,  13, 0, 0x01, BLF_FLATTEN | BLF_SMALL_BILLBOARD | BLF_CUTOUTS | BLF_DNE_FLUID},	//25
     { /*  38 */ "Poppy",                  		0xCE1A05, 1.000f, 0xff7711, 0xff7711, 0.12345f,  12, 0, 0x0f, BLF_FLATTEN | BLF_SMALL_BILLBOARD | BLF_CUTOUTS | BLF_DNE_FLUID},	//26 - 38
     { /*  39 */ "Brown Mushroom",         		0xc19171, 1.000f, 0xff7711, 0xff7711, 0.12345f,  13, 1, 0x00, BLF_FLATTEN | BLF_SMALL_BILLBOARD | BLF_CUTOUTS | BLF_DNE_FLUID | BLF_EMITTER},	//27
@@ -145,7 +145,7 @@ BlockDefinition gBlockDefinitions[NUM_BLOCKS_DEFINED] = {
     { /*  71 */ "Iron Door",              		0xb2b2b2, 1.000f, 0xff7711, 0xff7711, 0.12345f,   2, 5, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT},	//47 (71) 2,6 bottom TODO BLF_FLATSIDE?
     { /*  72 */ "Oak Pressure Plate",     		0x9d7f4e, 1.000f, 0xff7711, 0xff7711, 0.12345f,   4, 0, 0x00, BLF_FLATTEN | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_CONNECTS_REDSTONE},	//48
     { /*  73 */ "Redstone Ore",           		0x8f0303, 1.000f, 0xff7711, 0xff7711, 0.12345f,   3, 3, 0x00, BLF_WHOLE | BLF_FENCE_NEIGHBOR},	//49
-    { /*  74 */ "Glowing Redstone Ore",   		0x900303, 1.000f, 0xff7711, 0xff7711, 0.12345f,   3, 3, 0x00, BLF_WHOLE | BLF_FENCE_NEIGHBOR | BLF_EMITTER},	// unobtainable normally! https://minecraft.fandom.com/wiki/Redstone_Ore#Lit_redstone_ore_%22item%22
+    { /*  74 */ "Glowing Redstone Ore",   		0x900303, 1.000f, 0xff7711, 0xff7711, 0.12345f,   3, 3, 0x00, BLF_WHOLE | BLF_FENCE_NEIGHBOR | BLF_EMITTER},	// unobtainable normally! https://minecraft.wiki/w/Redstone_Ore#Lit_redstone_ore_%22item%22
     { /*  75 */ "Redstone Torch (inactive)",	0x560000, 1.000f, 0xff7711, 0xff7711, 0.12345f,   3, 7, 0x00, BLF_MIDDLER | BLF_FLATTEN | BLF_SMALL_BILLBOARD | BLF_CUTOUTS | BLF_DNE_FLUID | BLF_CONNECTS_REDSTONE},	//4b
     { /*  76 */ "Redstone Torch (active)",  	0xfd0000, 1.000f, 0xff7711, 0xff7711, 0.12345f,   3, 6, 0x00, BLF_MIDDLER | BLF_FLATTEN | BLF_SMALL_BILLBOARD | BLF_CUTOUTS | BLF_EMITTER | BLF_DNE_FLUID | BLF_CONNECTS_REDSTONE},	//4c should be BLF_EMITTER, 0x00FF, But it makes the whole block glow
     { /*  77 */ "Stone Button",           		0xacacac, 1.000f, 0xff7711, 0xff7711, 0.12345f,   1, 0, 0x00, BLF_FLATTEN_SMALL | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_DNE_FLUID},	//4d
@@ -205,7 +205,7 @@ BlockDefinition gBlockDefinitions[NUM_BLOCKS_DEFINED] = {
     { /* 129 */ "Emerald Ore",            		0x7D8E81, 1.000f, 0xff7711, 0xff7711, 0.12345f,  11,10, 0x00, BLF_WHOLE | BLF_FENCE_NEIGHBOR },    //81
     { /* 130 */ "Ender Chest",            		0x293A3C, 1.000f, 0xff7711, 0xff7711, 0.12345f,  10,13, 0x00, BLF_ALMOST_WHOLE | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_MAYWATERLOG | BLF_EMITTER },    //82 - don't really have tiles for this one, added to terrainExt.png
     { /* 131 */ "Tripwire Hook",          		0xC79F63, 1.000f, 0xff7711, 0xff7711, 0.12345f,  12,10, 0x00, BLF_SMALL_MIDDLER | BLF_TRUE_GEOMETRY | BLF_FLATTEN_SMALL | BLF_DNE_FLUID },    //83 - decal
-    { /* 132 */ "Tripwire",               		0x000000, 1.000f, 0xff7711, 0xff7711, 0.12345f,  13,10, 0x00, BLF_NONE | BLF_DNE_FLUID},    //84 - sorta redwire decal, 0x00FF, But really it should be invisible, so BLF_NONE. Color 0x8F8F8F
+    { /* 132 */ "Tripwire",               		0x010101, 1.000f, 0xff7711, 0xff7711, 0.12345f,  13,10, 0x00, BLF_NONE | BLF_DNE_FLUID},    //84 - sorta redwire decal, 0x00FF, But really it should be invisible, so BLF_NONE. Color 0x8F8F8F
     // alternate { /* 130 */ "Tripwire",               0x8F8F8F, 1.000f, 0xff7711, 0xff7711, 0.12345f,  13,10, 0x0F, BLF_FLATTOP|BLF_CUTOUTS},    //84 - sorta redwire decal, but really it should be invisible, so BLF_NONE. Color 0x8F8F8F
     { /* 133 */ "Block of Emerald",       		0x53D778, 1.000f, 0xff7711, 0xff7711, 0.12345f,  12,14, 0x00, BLF_WHOLE | BLF_FENCE_NEIGHBOR },    //85
     { /* 134 */ "Spruce Stairs",          		0x785836, 1.000f, 0xff7711, 0xff7711, 0.12345f,   6,12, 0x00, BLF_STAIRS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE | BLF_MAYWATERLOG },    //86
@@ -241,7 +241,7 @@ BlockDefinition gBlockDefinitions[NUM_BLOCKS_DEFINED] = {
     { /* 163 */ "Acacia Stairs",          		0xBA683B, 1.000f, 0xff7711, 0xff7711, 0.12345f,   0,22, 0x00, BLF_STAIRS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE | BLF_MAYWATERLOG },    //A3
     { /* 164 */ "Dark Oak Stairs",        		0x492F17, 1.000f, 0xff7711, 0xff7711, 0.12345f,   1,22, 0x00, BLF_STAIRS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE | BLF_MAYWATERLOG },    //A4/164
     { /* 165 */ "Slime Block",            		0x787878, 0.700f, 0xff7711, 0xff7711, 0.12345f,   3,22, 0x00, BLF_WHOLE | BLF_TRUE_GEOMETRY | BLF_TRANSPARENT | BLF_FENCE_NEIGHBOR },	// A5/165 - 1.8
-    { /* 166 */ "Barrier",                		0xE30000, 0.000f, 0xff7711, 0xff7711, 0.12345f,  14,25, 0x00, BLF_WHOLE | BLF_CUTOUTS },	// A6/166 - 1.8 - to make visible, set alpha to 1.0
+    { /* 166 */ "Barrier",                		0xE30000, 0.000f, 0xff7711, 0xff7711, 0.12345f,  14,25, 0x00, BLF_WHOLE | BLF_CUTOUTS | BLF_MAYWATERLOG },	// A6/166 - 1.8 - to make visible, set alpha to 1.0, 1.20.2 - in creative may now waterlog
     { /* 167 */ "Iron Trapdoor",          		0xC0C0C0, 1.000f, 0xff7711, 0xff7711, 0.12345f,   2,22, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_FLATTEN | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_MAYWATERLOG },	// A7/167 - 1.8
     { /* 168 */ "Prismarine",             		0x66ADA1, 1.000f, 0xff7711, 0xff7711, 0.12345f,  12,22, 0x03, BLF_WHOLE | BLF_FENCE_NEIGHBOR },	// 1.8 add
     { /* 169 */ "Sea Lantern",            		0xD3DBD3, 1.000f, 0xff7711, 0xff7711, 0.12345f,  14,22, 0x00, BLF_WHOLE | BLF_FENCE_NEIGHBOR | BLF_EMITTER },   //59
@@ -532,7 +532,7 @@ BlockDefinition gBlockDefinitions[NUM_BLOCKS_DEFINED] = {
     { /* 445 */ "Bamboo Button",                0xC4AF52, 1.000f, 0xff7711, 0xff7711, 0.12345f, 14, 60, 0x00, BLF_FLATTEN_SMALL | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_DNE_FLUID },
     { /* 446 */ "Bamboo Door",                  0xC2AE53, 1.000f, 0xff7711, 0xff7711, 0.12345f,  8, 60, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT },
     { /* 447 */ "Bamboo Fence",                 0xD0BC5B, 1.000f, 0xff7711, 0xff7711, 0.12345f, 12, 60, 0x00, BLF_MIDDLER | BLF_FENCE | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE | BLF_MAYWATERLOG },
-    { /* 448 */ "Bamboo Fence Gate",            0xD1BC5A, 1.000f, 0xff7711, 0xff7711, 0.12345f, 11, 60, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_FENCE_GATE | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE },
+    { /* 448 */ "Bamboo Fence Gate",            0xD1BC5A, 1.000f, 0xff7711, 0xff7711, 0.12345f, 11, 60, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_FENCE_GATE | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE }, // TODOTODO someday use 10, 60 for bamboo fence gate texture
     { /* 449 */ "Bamboo Pressure Plate",        0xC4AF52, 1.000f, 0xff7711, 0xff7711, 0.12345f, 14, 60, 0x00, BLF_FLATTEN | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_CONNECTS_REDSTONE },
     { /* 450 */ "Bamboo Stairs",                0xC4AF52, 1.000f, 0xff7711, 0xff7711, 0.12345f, 14, 60, 0x00, BLF_STAIRS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE | BLF_MAYWATERLOG },
     { /* 451 */ "Bamboo Trapdoor",              0xC9B560, 1.000f, 0xff7711, 0xff7711, 0.12345f, 15, 60, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_FLATTEN | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_MAYWATERLOG },   // tricky case: could be a flattop, or a flatside. For now, render it
@@ -549,6 +549,31 @@ BlockDefinition gBlockDefinitions[NUM_BLOCKS_DEFINED] = {
     { /* 462 */ "Crimson Hanging Sign",         0x8A3A5A, 1.000f, 0xff7711, 0xff7711, 0.12345f, 13, 43, 0x20, BLF_SMALL_MIDDLER | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_DNE_FLUID | BLF_MAYWATERLOG },
     { /* 463 */ "Mangrove Hanging Sign",        0x783730, 1.000f, 0xff7711, 0xff7711, 0.12345f, 15, 54, 0x20, BLF_SMALL_MIDDLER | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_DNE_FLUID | BLF_MAYWATERLOG },
     { /* 464 */ "Bamboo Hanging Sign",          0xC4AF52, 1.000f, 0xff7711, 0xff7711, 0.12345f, 11, 60, 0x00, BLF_SMALL_MIDDLER | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_DNE_FLUID | BLF_MAYWATERLOG },
+    { /* 465 */ "Trial Spawner",           		0x767677, 1.000f, 0xff7711, 0xff7711, 0.12345f, 13, 64, 0x00, BLF_WHOLE | BLF_FENCE_NEIGHBOR | BLF_EMITTER },
+    { /* 466 */ "Vault",           		        0x404E56, 1.000f, 0xff7711, 0xff7711, 0.12345f, 12, 65, 0x00, BLF_WHOLE | BLF_FENCE_NEIGHBOR | BLF_EMITTER },
+    { /* 467 */ "Crafter",           		    0x777272, 1.000f, 0xff7711, 0xff7711, 0.12345f, 10, 62, 0x00, BLF_WHOLE | BLF_FENCE_NEIGHBOR },
+    { /* 468 */ "Heavy Core",              		0x5B606A, 1.000f, 0xff7711, 0xff7711, 0.12345f,  9, 63, 0x00, BLF_MIDDLER | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_DNE_FLUID | BLF_MAYWATERLOG | BLF_EMITTER },
+    { /* 469 */ "Copper Bulb",           		0xA81E09, 1.000f, 0xff7711, 0xff7711, 0.12345f, 10, 61, 0x0F, BLF_WHOLE | BLF_FENCE_NEIGHBOR | BLF_EMITTER },   // note that 0x8 is included, for lit
+    { /* 470 */ "Copper Grate",                 0xC26D51, 1.000f, 0xff7711, 0xff7711, 0.12345f,  0, 62, 0x07, BLF_WHOLE | BLF_FENCE_NEIGHBOR | BLF_CUTOUTS | BLF_MAYWATERLOG },
+    { /* 471 */ "Tuff Stairs",                  0x6F6F69, 1.000f, 0xff7711, 0xff7711, 0.12345f,  7, 49, 0x00, BLF_STAIRS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE | BLF_MAYWATERLOG },
+    { /* 472 */ "Polished Tuff Stairs",         0x636965, 1.000f, 0xff7711, 0xff7711, 0.12345f,  3, 64, 0x00, BLF_STAIRS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE | BLF_MAYWATERLOG },
+    { /* 473 */ "Tuff Brick Stairs",            0x656962, 1.000f, 0xff7711, 0xff7711, 0.12345f, 15, 64, 0x00, BLF_STAIRS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_3D_BIT_GLUE | BLF_MAYWATERLOG },
+    { /* 474 */ "Copper Trapdoor",      		0xC16C52, 1.000f, 0xff7711, 0xff7711, 0.12345f,  1, 62, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_FLATTEN | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_MAYWATERLOG },   // tricky case: could be a flattop, or a flatside. For now, render it
+    { /* 475 */ "Exposed Copper Trapdoor",      0xA47E6A, 1.000f, 0xff7711, 0xff7711, 0.12345f,  8, 63, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_FLATTEN | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_MAYWATERLOG },   // tricky case: could be a flattop, or a flatside. For now, render it
+    { /* 476 */ "Weathered Copper Trapdoor",    0x6E9B72, 1.000f, 0xff7711, 0xff7711, 0.12345f,  8, 66, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_FLATTEN | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_MAYWATERLOG },   // tricky case: could be a flattop, or a flatside. For now, render it
+    { /* 477 */ "Oxidized Copper Trapdoor",     0x55A486, 1.000f, 0xff7711, 0xff7711, 0.12345f,  2, 64, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_FLATTEN | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_MAYWATERLOG },   // tricky case: could be a flattop, or a flatside. For now, render it
+    { /* 478 */ "Waxed Copper Trapdoor",      	0xC16C52, 1.000f, 0xff7711, 0xff7711, 0.12345f,  1, 62, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_FLATTEN | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_MAYWATERLOG },   // tricky case: could be a flattop, or a flatside. For now, render it
+    { /* 479 */ "Waxed Exposed Copper Trapdoor",0xA47E6A, 1.000f, 0xff7711, 0xff7711, 0.12345f,  8, 63, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_FLATTEN | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_MAYWATERLOG },   // tricky case: could be a flattop, or a flatside. For now, render it
+    { /* 480 */ "Waxed Weathered Copper Trapdoor",0x6E9B72, 1.000f, 0xff7711, 0xff7711, 0.12345f,  8, 66, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_FLATTEN | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_MAYWATERLOG },   // tricky case: could be a flattop, or a flatside. For now, render it
+    { /* 481 */ "Waxed Oxidized Copper Trapdoor",0x55A486, 1.000f, 0xff7711, 0xff7711, 0.12345f,  2, 64, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_FLATTEN | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT | BLF_MAYWATERLOG },   // tricky case: could be a flattop, or a flatside. For now, render it
+    { /* 482 */ "Copper Door",      		    0xC36F55, 1.000f, 0xff7711, 0xff7711, 0.12345f, 15, 61, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT },
+    { /* 483 */ "Exposed Copper Door",          0xA87C6C, 1.000f, 0xff7711, 0xff7711, 0.12345f,  6, 63, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT },
+    { /* 484 */ "Weathered Copper Door",        0x6F9972, 1.000f, 0xff7711, 0xff7711, 0.12345f,  6, 66, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT },
+    { /* 485 */ "Oxidized Copper Door",         0x54A387, 1.000f, 0xff7711, 0xff7711, 0.12345f,  0, 64, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT },
+    { /* 486 */ "Waxed Copper Door",      	    0xC36F55, 1.000f, 0xff7711, 0xff7711, 0.12345f, 15, 61, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT },  // identical to above four, just names differ, ugh
+    { /* 487 */ "Waxed Exposed Copper Door",    0xA87C6C, 1.000f, 0xff7711, 0xff7711, 0.12345f,  6, 63, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT },
+    { /* 488 */ "Waxed Weathered Copper Door",  0x6F9972, 1.000f, 0xff7711, 0xff7711, 0.12345f,  6, 66, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT },
+    { /* 489 */ "Waxed Oxidized Copper Door",   0x54A387, 1.000f, 0xff7711, 0xff7711, 0.12345f,  0, 64, 0x00, BLF_MIDDLER | BLF_ENTRANCE | BLF_CUTOUTS | BLF_TRUE_GEOMETRY | BLF_3D_BIT },
 
     // Important note: 396 is skipped, it's the BLOCK_FLOWER_POT, also skip 400, BLOCK_HEAD. Nicer still would be to redo the code for those two blocks (and redo IDBlock() method) so that we don't use up all 8 bits
 };

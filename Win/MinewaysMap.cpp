@@ -77,15 +77,10 @@ static bool gUndoAvailable = false;
 // was an unknown block read in?
 static int gUnknownBlock = 0;
 static int gPerformUnknownBlockCheck = 1;
-static char gUnknownBlockName[100];
+static char gUnknownBlockName[MAX_PATH_AND_FILE];   // this length only because that name is global
 // What block ID should be used for any unknown blocks?
-#ifdef _DEBUG
 // Make it bedrock, so we see it's not translated
 static int gUnknownBlockID = 7;
-#else
-// Make unknown blocks air (0) by default
-static int gUnknownBlockID = 0;
-#endif
 
 static wchar_t gSeparator[3];
 
@@ -721,9 +716,9 @@ const char* RetrieveBlockSubname(int type, int dataVal) // , WorldBlock* block),
             break;
         case 0: // dead bush
             // left for backward compatibility, I think it was called this long ago
-            // (in Bedrock it's "Fern", though) https://minecraft.fandom.com/wiki/Grass#Block_states
+            // (in Bedrock it's "Fern", though) https://minecraft.wiki/w/Grass#Block_states
             return "Dead Bush";
-        case 1:	// tall grass - really, the default name Grass
+        case 1:	// tall grass - really, the default name is Grass, but now Short Grass as of 1.20.3
             break; // return "TALL_GRASS";
         case 2:	// fern
             return "Fern";
@@ -952,7 +947,7 @@ const char* RetrieveBlockSubname(int type, int dataVal) // , WorldBlock* block),
         case 1:	// lilac
             return "Lilac";
         case 2:	// tall grass
-            return "Double Tallgrass";
+            return "Tall Grass";
         case 3:	// large fern
             return "Large Fern";
         case 4:	// rose bush
@@ -1613,6 +1608,15 @@ const char* RetrieveBlockSubname(int type, int dataVal) // , WorldBlock* block),
         case BIT_16 | 3:
             strcat_s(gConcatString, 100, "Deepslate Tile Slab");
             break;
+        case BIT_16 | 4:
+            strcat_s(gConcatString, 100, "Tuff Slab");
+            break;
+        case BIT_16 | 5:
+            strcat_s(gConcatString, 100, "Polished Tuff Slab");
+            break;
+        case BIT_16 | 6:
+            strcat_s(gConcatString, 100, "Tuff Brick Slab");
+            break;
         }
         return gConcatString;
 
@@ -1694,6 +1698,12 @@ const char* RetrieveBlockSubname(int type, int dataVal) // , WorldBlock* block),
             return "Deepslate Tile Wall";
         case 21:
             return "Mud Brick Wall";
+        case 22:
+            return "Tuff Slab";
+        case 23:
+            return "Polished Tuff Slab";
+        case 24:
+            return"Tuff Brick Slab";
         }
         break;
 
@@ -2064,6 +2074,9 @@ const char* RetrieveBlockSubname(int type, int dataVal) // , WorldBlock* block),
         case 5 << 4:
             sprintf_s(gConcatString, 100, "Dragon %sHead", (dataVal & 0x80) ? "" : "Wall ");
             break;
+        case 6 << 4:
+            sprintf_s(gConcatString, 100, "Piglin %sHead", (dataVal & 0x80) ? "" : "Wall ");
+            break;
         }
         return gConcatString;
 
@@ -2200,6 +2213,30 @@ const char* RetrieveBlockSubname(int type, int dataVal) // , WorldBlock* block),
             return "Packed Mud";
         case 47:
             return "Sculk";
+        case 48:
+            return "Polished Tuff";
+        case 49:
+            return "Chiseled Copper";
+        case 50:
+            return "Exposed Chiseled Copper";
+        case 51:
+            return "Weathered Chiseled Copper";
+        case 52:
+            return "Oxidized Chiseled Copper";
+        case 53:
+            return "Waxed Chiseled Copper";
+        case 54:
+            return "Waxed Exposed Chiseled Copper";
+        case 55:
+            return "Waxed Weathered Chiseled Copper";
+        case 56:
+            return "Waxed Oxidized Chiseled Copper";
+        case 57:
+            return "Tuff Bricks";
+        case 58:	// chiseled_tuff
+            return "Chiseled Tuff";
+        case 59:	// chiseled_tuff_bricks
+            return "Chiseled Tuff Bricks";
         }
         break;
 
@@ -2335,6 +2372,52 @@ const char* RetrieveBlockSubname(int type, int dataVal) // , WorldBlock* block),
         if (dataVal & BIT_16)
         {
             return "Cherry Hanging Sign";
+        }
+        break;
+    case BLOCK_COPPER_BULB:
+        switch (dataVal & 0x7) {
+        default:
+            assert(0);
+            break;
+        case 0:
+            break;
+        case 1:
+            return "Exposed Copper Bulb";
+        case 2:
+            return "Weathered Copper Bulb";
+        case 3:
+            return "Oxidized Copper Bulb";
+        case 4:
+            return "Waxed Copper Bulb";
+        case 5:
+            return "Waxed Exposed Copper Bulb";
+        case 6:
+            return "Waxed Weathered Copper Bulb";
+        case 7:
+            return "Waxed Oxidized Copper Bulb";
+        }
+        break;
+    case BLOCK_COPPER_GRATE:
+        switch (dataVal & 0x7) {
+        default:
+            assert(0);
+            break;
+        case 0:
+            break;
+        case 1:
+            return "Exposed Copper Grate";
+        case 2:
+            return "Weathered Copper Grate";
+        case 3:
+            return "Oxidized Copper Grate";
+        case 4:
+            return "Waxed Copper Grate";
+        case 5:
+            return "Waxed Exposed Copper Grate";
+        case 6:
+            return "Waxed Weathered Copper Grate";
+        case 7:
+            return "Waxed Oxidized Copper Grate";
         }
         break;
     }
@@ -3103,7 +3186,7 @@ static unsigned int checkSpecialBlockColor(WorldBlock* block, unsigned int voxel
                 // the stored value is used to affect only the output color, not the map color.
                 // This oak leaf color (and jungle, below) makes the trees easier to pick out.
 
-                // jungle/mangrove and oak - this is pretty arbitrary on my part, should all be same: https://minecraft.fandom.com/wiki/Leaves#Color
+                // jungle/mangrove and oak - this is pretty arbitrary on my part, should all be same: https://minecraft.wiki/w/Leaves#Color
                 color = dataVal ? 0x46AD19 : 0x3A7F1B;
             }
             else
@@ -3113,7 +3196,7 @@ static unsigned int checkSpecialBlockColor(WorldBlock* block, unsigned int voxel
             }
             affectedByBiome = 2;
             break;
-        // Not affected by biome. Color from https://minecraft.fandom.com/wiki/Leaves#Color
+        // Not affected by biome. Color from https://minecraft.wiki/w/Leaves#Color
         case 1:	// spruce
             color = 0x3D623D;
             break;
@@ -3399,6 +3482,18 @@ static unsigned int checkSpecialBlockColor(WorldBlock* block, unsigned int voxel
             break;
         case BIT_16 | 3: // Deepslate Tile Slab
             color = 0x39393A;
+            break;
+        case BIT_16 | 4:
+            // Tuff Slab
+            color = 0x6F6F69;
+            break;
+        case BIT_16 | 5:
+            // Polished Tuff Slab
+            color = 0x636965;
+            break;
+        case BIT_16 | 6:
+            // Tuff Brick Slab
+            color = 0x656962;
             break;
         }
         break;
@@ -3922,6 +4017,15 @@ static unsigned int checkSpecialBlockColor(WorldBlock* block, unsigned int voxel
         case 21: // Mud brick wall
             color = 0x8B6950;
             break;
+        case 22: // Tuff wall
+            color = 0x6F6F69;
+            break;
+        case 23: // Polished Tuff wall
+            color = 0x636965;
+            break;
+        case 24: // Tuff Brick wall
+            color = 0x656962;
+            break;
         }
         break;
 
@@ -4266,6 +4370,43 @@ static unsigned int checkSpecialBlockColor(WorldBlock* block, unsigned int voxel
         case 47: // Sculk
             color = 0x0E2025;
             break;
+        case 48: // Polished Tuff
+            color = 0x636965;
+            break;
+        case 49:
+        case 53:
+            // Chiseled Copper
+            // Waxed Chiseled Copper
+            color = 0xBA674D;
+            break;
+        case 50:
+        case 54:
+            // Exposed Chiseled Copper
+            // Waxed Exposed Chiseled Copper
+            color = 0x9E7866;
+            break;
+        case 51:
+        case 55:
+            // Weathered Chiseled Copper
+            // Waxed Weathered Chiseled Copper
+            color = 0x6A9A73;
+            break;
+        case 52:
+        case 56:
+            // Oxidized Chiseled Copper
+            // Waxed Oxidized Chiseled Copper
+            color = 0x55A587;
+            break;
+        case 57:
+            // Tuff Bricks
+            color = 0x656962;
+            break;
+        case 58:	// chiseled_tuff_top
+            color = 0x61655E;
+            break;
+        case 59:	// chiseled_tuff_bricks_top
+            color = 0x71736C;
+            break;
         }
         break;
 
@@ -4439,6 +4580,153 @@ static unsigned int checkSpecialBlockColor(WorldBlock* block, unsigned int voxel
         if (dataVal & BIT_32)
         {
             color = 0x745632;   // mangrove
+        }
+        break;
+
+    case BLOCK_TRIAL_SPAWNER:
+        dataVal = block->data[voxel];
+        // low 2 bits are trial_spawner_state
+        // next 1 bit is ominous
+        switch (dataVal & 0x7)
+        {
+        default:
+            assert(0);
+        case 0:
+            lightComputed = true;
+            color = gBlockColors[type * 16 + light];
+            break;
+        case 1:	// active, 10,64
+        case 2: // waiting_for_player 10,64
+            color = 0x545863;
+            break;
+        case 3:	// ejecting, 12,64
+            color = 0x4E484F;
+            break;
+        case 4:	// ominous inactive, 15,64
+            color = 0x355161;
+            break;
+        case 5:	// ominous active, 11,64
+        case 6:	// ominous waiting_for_player, 11,64
+            color = 0x365E6C;
+            break;
+        case 7:	// ominous ejecting, 13,64
+            color = 0x2B505A;
+            break;
+        }
+        break;
+
+    case BLOCK_VAULT:
+        dataVal = block->data[voxel];
+        // bit 0x4 is ominous, higher 2 bits are vault state
+        switch (dataVal & 0x1C)
+        {
+        default:
+            assert(0);
+        case 0:     // inactive 13,65
+        case 0x8:	// active, 13,65
+        case 0x10:	// unlocking, 13,65
+            lightComputed = true;
+            color = gBlockColors[type * 16 + light];
+            break;
+        case 4:	    // ominous inactive, 14,65
+        case 0xC:	// ominous active, 14,65
+        case 0x14:	// ominous unlocking, 14,65
+            color = 0x3B4245;
+            break;
+        case 0x18:	// ejecting, 15,65
+            color = 0x3C403F;
+            break;
+        case 0x1C:	// ominous ejecting, 0,66
+            color = 0x4A4E4B;
+            break;
+        }
+        break;
+    case BLOCK_COPPER_BULB:
+        dataVal = block->data[voxel];
+        switch (dataVal & 0xf) {
+        default:
+            assert(0);
+        case 0:
+        case 4:
+            // Waxed Copper Bulb
+            lightComputed = true;
+            color = gBlockColors[type * 16 + light];
+            break;
+        case 1:
+        case 5:
+            // Exposed Copper Bulb
+            // Waxed Exposed Copper Bulb
+            color = 0x8E6E5D;
+            break;
+        case 2:
+        case 6:
+            // Weathered Copper Bulb
+            // Waxed Weathered Copper Bulb
+            color = 0x5F8467;
+            break;
+        case 3:
+        case 7:
+            // Oxidized Copper Bulb
+            // Waxed Oxidized Copper Bulb
+            color = 0x498B73;
+            break;
+
+        // lit; we don't bothered with powered (lit and unlit), as it changes just one texel
+        case 0x8 | 0:
+        case 0x8 | 4:
+            // Waxed Copper Bulb
+            color = 0xDCA478;
+            break;
+        case 0x8 | 1:
+        case 0x8 | 5:
+            // Exposed Copper Bulb
+            // Waxed Exposed Copper Bulb
+            color = 0xC9976C;
+            break;
+        case 0x8 | 2:
+        case 0x8 | 6:
+            // Weathered Copper Bulb
+            // Waxed Weathered Copper Bulb
+            color = 0xABA067;
+            break;
+        case 0x8 | 3:
+        case 0x8 | 7:
+            // Oxidized Copper Bulb
+            // Waxed Oxidized Copper Bulb
+            color = 0x989E70;
+            break;
+        }
+        break;
+
+    case BLOCK_COPPER_GRATE:
+        dataVal = block->data[voxel];
+        switch (dataVal & 0x7) {
+        default:
+            assert(0);
+        case 0:
+        case 4:
+            // Waxed Copper Grate
+            lightComputed = true;
+            color = gBlockColors[type * 16 + light];
+            break;
+        case 1:
+        case 5:
+            // Exposed Copper Grate
+            // Waxed Exposed Copper Grate
+            color = 0xA47F6A;
+            break;
+        case 2:
+        case 6:
+            // Weathered Copper Grate
+            // Waxed Weathered Copper Grate
+            color = 0x54A486;
+            break;
+        case 3:
+        case 7:
+            // Oxidized Copper Grate
+            // Waxed Oxidized Copper Grate
+            color = 0x6B9B72;
+            break;
         }
         break;
 
@@ -4872,6 +5160,11 @@ static unsigned char* draw(WorldGuide* pWorldGuide, int bx, int bz, int heightAl
                 int num = prevy + 50 - (256 - heightAlloc) / 5;
                 int denom = heightAlloc + 50 - (256 - heightAlloc) / 5;
 
+                // avoid division by 0
+                if (denom <= 0) {
+                    num = 1;
+                    denom = 1;
+                }
                 r = (unsigned char)(r * num / denom);
                 g = (unsigned char)(g * num / denom);
                 b = (unsigned char)(b * num / denom);
@@ -5271,8 +5564,8 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
         }
         break;
     case BLOCK_HEAD:
-        // uses 2-5
-        if (dataVal >= 2 && dataVal <= 5)
+        // uses 0-6
+        if (dataVal <= 6)
         {
             addBlock = 1;
         }
@@ -5328,7 +5621,7 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
     case BLOCK_GRASS:
         // uses 1-5 - dead bush is a separate block, type==32
         // type 31 dataVal 0 was once dead bush, I think it was called this long ago
-        // (in Bedrock it's "Fern", though) https://minecraft.fandom.com/wiki/Grass#Block_states
+        // (in Bedrock it's "Fern", though) https://minecraft.wiki/w/Grass#Block_states
         if (dataVal > 0 && dataVal < 6)
         {
             addBlock = 1;
@@ -5386,7 +5679,7 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
             bi = BLOCK_INDEX(4 + (type % 2) * 8, y + 1, 4 + (dataVal % 2) * 8);
             block->grid[bi] = BLOCK_DOUBLE_FLOWER;
             // not entirely sure about this number, but 10 seems to be the norm,
-            // but https://minecraft.fandom.com/wiki/Flower#Data_values says to use 8
+            // but https://minecraft.wiki/w/Flower#Data_values says to use 8
             // Note that the top half is made to be the dataVal, too, which is the modern
             // way that nbt.cpp reads in this data. 1.12 and earlier would not have this set,
             // but this artificial map is considered modern.
@@ -5470,6 +5763,11 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
     case BLOCK_WOODEN_DOUBLE_SLAB:
     case BLOCK_CUT_COPPER_DOUBLE_SLAB:
     case BLOCK_SUSPICIOUS_GRAVEL:
+    case BLOCK_TRIAL_SPAWNER:
+    case BLOCK_COPPER_GRATE:
+    case BLOCK_TUFF_STAIRS:
+    case BLOCK_POLISHED_TUFF_STAIRS:
+    case BLOCK_TUFF_BRICK_STAIRS:
         // uses 0-7 - TODO we could someday add more blocks to neighbor the others, in order to show the stairs' "step block trim" feature of week 39
         if (dataVal < 8)
         {
@@ -5652,15 +5950,16 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
         block->grid[neighborIndex] = (unsigned char)type;
         block->data[neighborIndex] = (unsigned char)finalDataVal | BIT_16 | HIGH_BIT;
 
-        if (dataVal < 15) { // 15+32 == 47, 0-46 blocks
-            neighborIndex = BLOCK_INDEX(6 + (type % 2) * 8, y, 6 + (dataVal % 2) * 8);
+        neighborIndex = BLOCK_INDEX(6 + (type % 2) * 8, y, 6 + (dataVal % 2) * 8);
+        block->grid[neighborIndex] = (unsigned char)type;
+        block->data[neighborIndex] = (unsigned char)finalDataVal | BIT_32 | HIGH_BIT;
+
+        if (dataVal < 12) { // 12+48 == 60, 0-59 blocks
+            neighborIndex = BLOCK_INDEX(7 + (type % 2) * 8, y, 7 + (dataVal % 2) * 8);
             block->grid[neighborIndex] = (unsigned char)type;
-            block->data[neighborIndex] = (unsigned char)finalDataVal | BIT_32 | HIGH_BIT;
+            block->data[neighborIndex] = (unsigned char)finalDataVal | BIT_32 | BIT_16 | HIGH_BIT;
         }
 
-        //neighborIndex = BLOCK_INDEX(7 + (type % 2) * 8, y, 7 + (dataVal % 2) * 8);
-        //block->grid[neighborIndex] = (unsigned char)type;
-        //block->data[neighborIndex] = (unsigned char)finalDataVal | BIT_32 | BIT_16 | HIGH_BIT;
         break;
     case BLOCK_BONE_BLOCK:
         // uses 0,1,2,3 for low bits in 0x3 - note, leaves out infested deepslate, which is a repeat of deepslate anyway
@@ -5782,7 +6081,7 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
 
     case BLOCK_CUT_COPPER_SLAB:
         addBlock = 1;
-        if (dataVal < 4) {
+        if (dataVal < 7) {
             // add new style diagonally SE of original
             neighborIndex = BLOCK_INDEX(5 + (type % 2) * 8, y, 5 + (dataVal % 2) * 8);
             block->grid[neighborIndex] = (unsigned char)type;
@@ -5811,6 +6110,7 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
         break;
     case BLOCK_COLORED_CANDLE:
     case BLOCK_LIT_COLORED_CANDLE:
+    case BLOCK_VAULT:
         // uses all bits, 0-15, with variations to show other styles
         // This is for when adding content with the HIGH_BIT set
         addBlock = 1;
@@ -6130,6 +6430,7 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
     case BLOCK_WALL_SIGN:
     case BLOCK_MANGROVE_WALL_SIGN:
         // there are now 8 materials for wall signs and 3 for mangrove wall signs. Rather than going absolutely nuts, we change the dataVal for each.
+        // directions are 2-5, so allow those and 10-13
         if ((dataVal & 0x7) >= 2 && (dataVal & 0x7) <= 5)
         {
             addBlock = 1;
@@ -6254,6 +6555,14 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
     case BLOCK_MANGROVE_DOOR:
     case BLOCK_CHERRY_DOOR:
     case BLOCK_BAMBOO_DOOR:
+    case BLOCK_COPPER_DOOR:
+    case BLOCK_EXPOSED_COPPER_DOOR:
+    case BLOCK_WEATHERED_COPPER_DOOR:
+    case BLOCK_OXIDIZED_COPPER_DOOR:
+    case BLOCK_WAXED_COPPER_DOOR:
+    case BLOCK_WAXED_EXPOSED_COPPER_DOOR:
+    case BLOCK_WAXED_WEATHERED_COPPER_DOOR:
+    case BLOCK_WAXED_OXIDIZED_COPPER_DOOR:
         bi = BLOCK_INDEX(4 + (type % 2) * 8, y, 4 + (dataVal % 2) * 8);
         block->grid[bi] = (unsigned char)type;
         block->data[bi] = (unsigned char)((dataVal & 0x7) | typeHighBit);
@@ -6361,6 +6670,14 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
     case BLOCK_MANGROVE_TRAPDOOR:
     case BLOCK_CHERRY_TRAPDOOR:
     case BLOCK_BAMBOO_TRAPDOOR:
+    case BLOCK_COPPER_TRAPDOOR:
+    case BLOCK_EXPOSED_COPPER_TRAPDOOR:
+    case BLOCK_WEATHERED_COPPER_TRAPDOOR:
+    case BLOCK_OXIDIZED_COPPER_TRAPDOOR:
+    case BLOCK_WAXED_COPPER_TRAPDOOR:
+    case BLOCK_WAXED_EXPOSED_COPPER_TRAPDOOR:
+    case BLOCK_WAXED_WEATHERED_COPPER_TRAPDOOR:
+    case BLOCK_WAXED_OXIDIZED_COPPER_TRAPDOOR:
         // use all 0-15
         addBlock = 1;
 
@@ -6642,8 +6959,8 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
         neighborIndex = BLOCK_INDEX(7 + (type % 2) * 8, y, 6 + (dataVal % 2) * 8);
         block->grid[neighborIndex] = (unsigned char)type;
         block->data[neighborIndex] = (unsigned char)(dataVal | typeHighBit);
-        if (dataVal < 5) {
-            // 16 through 20, just a post
+        if (dataVal < 9) {
+            // 16 through 24, just a post
             neighborIndex = BLOCK_INDEX(7 + (type % 2) * 8, y, 7 + (dataVal % 2) * 8);
             block->grid[neighborIndex] = (unsigned char)type;
             block->data[neighborIndex] = (unsigned char)(dataVal | BIT_16 | typeHighBit);
@@ -6855,6 +7172,7 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
         }
         break;
     case BLOCK_CONDUIT:
+    case BLOCK_HEAVY_CORE:
         // also with waterlogged
         if (dataVal < 2)
         {
@@ -7072,6 +7390,36 @@ void testBlock(WorldBlock* block, int origType, int y, int dataVal)
                 block->grid[neighborIndex2 + 256] = BLOCK_STONE;
                 block->grid[neighborIndex3 + 256] = BLOCK_FENCE;
             }
+        }
+        break;
+    case BLOCK_CRAFTER:
+        // uses bits 0-11, with variations to show other styles
+        // This is for when adding content with the HIGH_BIT set
+        if (dataVal < 12) {
+            addBlock = 1;
+
+            // add new style diagonally SE of original
+            neighborIndex = BLOCK_INDEX(5 + (type % 2) * 8, y, 5 + (dataVal % 2) * 8);
+            block->grid[neighborIndex] = (unsigned char)type;
+            block->data[neighborIndex] = (unsigned char)finalDataVal | BIT_16 | HIGH_BIT;
+
+            neighborIndex = BLOCK_INDEX(6 + (type % 2) * 8, y, 6 + (dataVal % 2) * 8);
+            block->grid[neighborIndex] = (unsigned char)type;
+            block->data[neighborIndex] = (unsigned char)finalDataVal | BIT_32 | HIGH_BIT;
+
+            neighborIndex = BLOCK_INDEX(7 + (type % 2) * 8, y, 7 + (dataVal % 2) * 8);
+            block->grid[neighborIndex] = (unsigned char)type;
+            block->data[neighborIndex] = (unsigned char)finalDataVal | BIT_32 | BIT_16 | HIGH_BIT;
+        }
+        break;
+    case BLOCK_COPPER_BULB:
+        // 0-32, to catch two top bits
+        {
+            addBlock = 1;
+
+            neighborIndex = BLOCK_INDEX(5 + (type % 2) * 8, y, 5 + (dataVal % 2) * 8);
+            block->grid[neighborIndex] = (unsigned char)type;
+            block->data[neighborIndex] = (unsigned char)finalDataVal | BIT_16 | HIGH_BIT;
         }
         break;
 
@@ -7659,7 +8007,7 @@ int GetFileVersion(const wchar_t* world, int* version, wchar_t* fileOpened, rsiz
     return retcode;
 }
 // 0 succeed, 1+ windows file open fail, -1 or less is some other read error from nbt
-//  The NBT data version, which tells the MC release. See https://minecraft.gamepedia.com/Data_version
+//  The NBT data version, which tells the MC release. See https://minecraft.wiki/w/Data_version
 // 1444 is 1.13, 1901 is 1.14
 int GetFileVersionId(const wchar_t* world, int* versionId)
 {
@@ -7722,8 +8070,9 @@ int GetLevelName(const wchar_t* world, char* levelName, int stringLength)
 //
 //}
 // 0 succeed, 1+ windows file open fail, -1 or less is some other read error from nbt
-int GetPlayer(const wchar_t* world, int* px, int* py, int* pz)
+int GetPlayer(const wchar_t* world, int* px, int* py, int* pz, int* dimension)
 {
+    *px = *py = *pz = *dimension = 0;   // just to be safe, in case some call below fails and initialization isn't done there
     bfFile bf;
     wchar_t filename[300];
     wcsncpy_s(filename, 300, world, wcslen(world) + 1);
@@ -7734,6 +8083,12 @@ int GetPlayer(const wchar_t* world, int* px, int* py, int* pz)
     if (bf.gz == 0x0) return err;
     int retval = nbtGetPlayer(&bf, px, py, pz);
     nbtClose(&bf);
+
+    bf = newNBT(filename, &err);
+    if (bf.gz == 0x0) return err;
+    retval = nbtGetDimension(&bf, dimension);
+    nbtClose(&bf);
+
     return retval;
 }
 
@@ -7865,6 +8220,12 @@ static void initColors()
 char* MapUnknownBlockName()
 {
     return gUnknownBlockName;
+}
+
+// reset error field for bad block names
+void ClearUnknownBlockNameString()
+{
+    gUnknownBlockName[0] = NULL;
 }
 
 void SetUnknownBlockID(int val)
